@@ -3,22 +3,255 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Personal Website</title>
-    <style>
-        body { 
-            font-family: Arial, sans-serif; 
-            display: grid;
-            place-items: center;
-            min-height: 80vh;
-            background-color: #f4f4f4;
+    <title>Evelyn Reed - PhD Candidate</title> <style>
+        /* --- Body & Background --- */
+        body {
+            background-size: cover;
+            background-position: center center;
+            background-attachment: fixed;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 20px;
         }
-        h1 { 
-            color: #333; 
+        
+        /* --- Main Content Box --- */
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 30px;
+            background-color: rgba(255, 255, 255, 0.97);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        /* --- Header --- */
+        .main-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        /* --- Column 1: Profile Pic & Info --- */
+        .profile-left {
+            display: flex;
+            align-items: center;
+        }
+        .profile-pic {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 20px;
+            border: 3px solid #eee;
+        }
+        .contact-info h1 {
+            margin: 0;
+            color: #222;
+        }
+        .contact-info p {
+            margin: 5px 0;
+            color: #555;
+            font-size: 1.1em;
+        }
+
+        /* --- Column 2: Navigation --- */
+        .nav-right {
+            text-align: right;
+        }
+        .nav-right a {
+            display: block;
+            text-decoration: none;
+            color: #007bff;
+            font-weight: 500;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+        }
+        .nav-right a:hover {
+            text-decoration: underline;
+        }
+
+        /* --- Main Content Sections --- */
+        section {
+            margin-bottom: 30px;
+            scroll-margin-top: 20px; 
+        }
+        h2 {
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+            color: #333;
+        }
+        
+        /* --- Publication & Project Styling --- */
+        ul {
+            padding-left: 20px;
+        }
+        li {
+            margin-bottom: 10px;
+        }
+        .item-entry {
+            margin-bottom: 15px;
+        }
+        .item-entry .title {
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        .item-entry .authors, .item-entry .tech {
+            font-style: italic;
+            color: #555;
+        }
+        .item-entry .venue, .item-entry .links {
+            color: #444;
+        }
+
+        /* --- Footer --- */
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            font-size: 0.9em;
+            color: #777;
         }
     </style>
 </head>
+
 <body>
-    <h1>Welcome to My Website!</h1>
-    <p>This site is under construction.</p>
+
+    <div class="container">
+        
+        <header class="main-header">
+            
+            <div class="profile-left">
+                
+                <img src="image/profile.jpg" alt="Your Name" class="profile-pic">
+                
+                <div class="contact-info">
+                    <h1>Evelyn Reed</h1>
+                    <p>PhD Candidate, Computer Science</p>
+                    <p>Metropolis University</p>
+                    <p><strong>Email:</strong> evelyn.reed@metropolis.edu</p>
+                    <p><strong>Phone:</strong> +1 (555) 123-4567</p> </div>
+            </div>
+
+            <nav class="nav-right">
+                <a href="#about">About Me</a>
+                <a href="#research">Research</a>
+                <a href="#projects">Projects</a>
+                <a href="#publications">Publications</a>
+                <a href="resume.pdf" target="_blank">Download CV</a>
+            </nav>
+
+        </header>
+
+        
+        <main>
+            
+            <section id="about">
+                <h2>About Me</h2>
+                <p>
+                    I am a PhD student at <strong>Metropolis University</strong>, advised by <strong>Professor Jian Yang</strong>. 
+                    My research focuses on <strong>reinforcement learning and multi-agent systems, specifically in developing robust AI for complex, real-world coordination tasks.</strong> 
+                    Previously, I received my M.S. from <strong>State Tech University</strong>.
+                    When I'm not in the lab, I enjoy hiking and photography.
+                </p>
+            </section>
+
+            <section id="research">
+                <h2>Research Interests</h2>
+                <ul>
+                    <li>Reinforcement Learning</li>
+                    <li>Multi-Agent Systems</li>
+                    <li>AI Safety and Ethics</li>
+                    <li>Robotics</li>
+                </ul>
+            </section>
+            
+            <section id="projects">
+                <h2>Projects</h2>
+
+                <div class="item-entry">
+                    <p class="title">Multi-Agent Traffic Control Simulator</p>
+                    <p class="tech">Technologies Used: Python, PyTorch, SUMO</p>
+                    <p>
+                        Developed a decentralized deep reinforcement learning model to optimize urban traffic flow, reducing average wait times by 20% in simulation.
+                    </p>
+                    <p class="links">
+                        [ <a href="https://github.com/your-username/your-project" target="_blank">GitHub Repo</a> ] 
+                        [ <a href="#" target="_blank">Live Demo</a> ]
+                    </p>
+                </div>
+
+                <div class="item-entry">
+                    <p class="title">Neural Network Pruning Analysis</p>
+                    <p class="tech">Technologies Used: C++, MATLAB</p>
+                    <p>
+                        An analysis of weight-pruning techniques in convolutional neural networks to optimize models for edge-device deployment.
+                    </p>
+                    <p class="links">
+                        [ <a href="#" target="_blank">GitHub Repo</a> ]
+                    </p>
+                </div>
+            </section>
+
+
+            <section id="publications">
+                <h2>Publications</h2>
+                
+                <div class="item-entry">
+                    <p class="title">Robust Coordination Strategies for Autonomous Drones</p>
+                    <p class="authors"><strong>Evelyn Reed</strong>, Michael Chen, Prof. Jian Yang</p>
+                    <p class="venue">
+                        In *International Conference on Autonomous Agents (AAMAS 2024)*.
+                        [ <a href="#">PDF</a> ] 
+                        [ <a href="#">Code</a> ]
+                    </p>
+                </div>
+
+                <div class="item-entry">
+                    <p class="title">Ethical Frameworks for Multi-Agent Decision Making</p>
+                    <p class="authors">David Lee, <strong>Evelyn Reed</strong>, Prof. Sarah Jenkins</p>
+                    <p class="venue">
+                        In *Journal of Artificial Intelligence Research (JAIR), 2023*.
+                        [ <a href="#">PDF</a> ]
+                    </p>
+                </div>
+            </section>
+
+        </main>
+
+        <footer>
+            <p>
+                <a href="#" target="_blank">Google Scholar</a> | 
+                <a href="#" target="_blank">LinkedIn</a> | 
+                <a href="https://github.com/evelynreed" target="_blank">GitHub</a>
+            </p>
+            <p>&copy; 2025 Evelyn Reed</p>
+        </footer>
+
+    </div>
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            
+            // --- EDIT THIS LIST ---
+            // Add all your uploaded background image filenames here
+            const backgroundImages = [
+                'image/bg1.jpg',
+                'image/bg2.jpg',
+                'image/bg3.jpg'
+                // e.g., 'my-photo.png'
+            ];
+            // ---------------------
+
+            const randomImage = backgroundImages[Math.floor(Math.random() * backgroundImages.length)];
+            document.body.style.backgroundImage = `url('${randomImage}')`;
+        });
+    </script>
+
 </body>
 </html>
