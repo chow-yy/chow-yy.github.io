@@ -117,6 +117,21 @@
             font-size: 0.9em;
             color: #777;
         }
+
+        /* * NEW: This makes links inside the "About Me" section 
+         * match the color of the text around them.
+        */
+        #about a {
+            color: inherit; /* This tells the link to use the same color as its parent */
+            text-decoration: none; /* This removes the underline */
+        }
+
+        /* * Optional but recommended: This adds the underline back 
+         * ONLY when someone hovers over the link.
+        */
+        #about a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 
