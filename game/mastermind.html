@@ -16,9 +16,8 @@
         box-sizing: border-box;
     }
 
-    /* "Back" link */
     .back-link {
-        align-self: flex-start; /* Aligns to the left */
+        align-self: flex-start;
         margin-bottom: 15px;
         color: #333333;
         text-decoration: none;
@@ -64,10 +63,11 @@
         grid-column: 1 / -1;
     }
 
+    /* This is now the main board container */
     .mastermind-board {
         display: flex;
         flex-direction: column;
-        gap: 10px;
+        /* Gap removed, rows will add their own */
         width: 100%;
         max-width: 600px;
     }
@@ -82,11 +82,12 @@
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     }
     
-    /* NEW: Header row styling */
+    /* Static header row */
     .mastermind-row.header {
         background-color: #333;
         color: #fff;
         font-weight: bold;
+        margin-bottom: 10px; /* Gap between header and first guess */
     }
 
     .try-box {
@@ -104,7 +105,6 @@
         flex-shrink: 0;
     }
     
-    /* NEW: Header box styling */
     .header .try-box, .header .result-box {
         background-color: transparent;
         border: none;
@@ -130,13 +130,13 @@
         display: flex;
         flex-wrap: wrap;
         gap: 8px;
-        flex-grow: 1;
+        /* FIXED: flex-grow: 1; is removed */
     }
     
-    /* NEW: Header "Guess" text */
     .header .guess-container {
         justify-content: center;
         font-size: 1.1rem;
+        flex-grow: 1; /* Keep flex-grow for the header text to center it */
     }
 
     .result-box {
@@ -150,8 +150,15 @@
         justify-content: center;
         align-items: center;
         font-weight: bold;
-        margin-left: auto;
+        margin-left: auto; /* This pushes it to the right */
         flex-shrink: 0;
+    }
+    
+    /* NEW: This is the container for all the guess rows */
+    #history-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px; /* Gap between guess rows */
     }
 
     input[type="number"], input[type="text"], button {
@@ -193,14 +200,25 @@
     <button onclick="submitGuess()" class="start-button">Submit</button>
 </div>
 
-<div class="mastermind-board" id="board"></div>
+<div class="mastermind-board" id="board-container" style="display: none;">
+    <div class="mastermind-row header">
+        <div class="try-box">Try</div>
+        <div class="guess-container">Guess</div>
+        <div class="result-box">A / B</div>
+    </div>
+
+    <div id="history-list"></div> 
+</div>
 
 <script>
 // --- Define elements ---
 const nLengthInput = document.getElementById('nLengthInput');
 const nRangeInput = document.getElementById('nRangeInput');
 const guessInput = document.getElementById('guessInput');
-const board = document.getElementById('board');
+
+// NEW: Get the new elements
+const boardContainer = document.getElementById('board-container');
+const historyList = document.getElementById('history-list');
 
 let R = []; // The secret code [n]
 let n = 0;  // The code length
@@ -242,8 +260,8 @@ function startGame() {
     console.log("Secret:", R);
     
     tryCount = 0;
-    board.innerHTML = ''; // Clear board
-    renderHeaderRow(); // NEW: Add the header row
+    historyList.innerHTML = ''; // Clear only the history list
+    boardContainer.style.display = 'flex'; // Show the whole board
     
     let placeholder = [...Array(n)].map((_, i) => i + 1).join(' ');
     guessInput.setAttribute('placeholder', `e.g. ${placeholder}`);
@@ -258,6 +276,7 @@ function submitGuess() {
     }
 
     const input = guessInput.value.trim();
+    // Allow split by comma, space, or multiple spaces
     const T = input.split(/[\s,]+/).map(x => parseInt(x.trim()));
 
     if (T.length !== n || T.some(isNaN)) {
@@ -275,14 +294,14 @@ function submitGuess() {
     
     tryCount++;
     const { A, B } = calculateAB(T);
-    renderRow(T, A, B, tryCount);
+    renderRow(T, A, B, tryCount); // Call renderRow
 
     if (A === n) {
         alert(`🎉 Congratulations! You guessed it in ${tryCount} tries!`);
-        R = [];
+        R = []; // End game
     }
 
-    guessInput.value = '';
+    guessInput.value = ''; // Clear input
 }
 
 function calculateAB(guess) {
@@ -310,31 +329,7 @@ function calculateAB(guess) {
     return { A, B };
 }
 
-// NEW: Function to render the header
-function renderHeaderRow() {
-    const row = document.createElement('div');
-    row.className = 'mastermind-row header'; // Add header class
-
-    // 1. Try Box
-    const tryBox = document.createElement('div');
-    tryBox.className = 'try-box';
-    tryBox.textContent = 'Try';
-    row.appendChild(tryBox);
-    
-    // 2. Guess Container
-    const guessContainer = document.createElement('div');
-    guessContainer.className = 'guess-container';
-    guessContainer.textContent = 'Guess'; // Simple text
-    row.appendChild(guessContainer);
-
-    // 3. Result Box
-    const result = document.createElement('div');
-    result.className = 'result-box';
-    result.textContent = 'A / B';
-    row.appendChild(result);
-    
-    board.appendChild(row); // Add header to the top
-}
+// renderHeaderRow function is no longer needed
 
 function renderRow(T, A, B, count) {
     const row = document.createElement('div');
@@ -360,7 +355,8 @@ function renderRow(T, A, B, count) {
     result.textContent = `${A}A ${B}B`;
     row.appendChild(result);
     
-    board.prepend(row);
+    // Prepend to the history-list, not the whole board
+    historyList.prepend(row);
 }
 </script>
 
