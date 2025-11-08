@@ -63,11 +63,9 @@
         grid-column: 1 / -1;
     }
 
-    /* This is now the main board container */
     .mastermind-board {
         display: flex;
         flex-direction: column;
-        /* Gap removed, rows will add their own */
         width: 100%;
         max-width: 600px;
     }
@@ -82,12 +80,11 @@
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     }
     
-    /* Static header row */
     .mastermind-row.header {
         background-color: #333;
         color: #fff;
         font-weight: bold;
-        margin-bottom: 10px; /* Gap between header and first guess */
+        margin-bottom: 10px;
     }
 
     .try-box {
@@ -130,13 +127,13 @@
         display: flex;
         flex-wrap: wrap;
         gap: 8px;
-        /* FIXED: flex-grow: 1; is removed */
+        /* flex-grow: 1; is removed */
     }
     
     .header .guess-container {
         justify-content: center;
         font-size: 1.1rem;
-        flex-grow: 1; /* Keep flex-grow for the header text to center it */
+        /* FIXED: flex-grow: 1; is removed */
     }
 
     .result-box {
@@ -150,15 +147,14 @@
         justify-content: center;
         align-items: center;
         font-weight: bold;
-        margin-left: auto; /* This pushes it to the right */
+        /* FIXED: margin-left: auto; is removed */
         flex-shrink: 0;
     }
     
-    /* NEW: This is the container for all the guess rows */
     #history-list {
         display: flex;
         flex-direction: column;
-        gap: 10px; /* Gap between guess rows */
+        gap: 10px;
     }
 
     input[type="number"], input[type="text"], button {
@@ -215,8 +211,6 @@
 const nLengthInput = document.getElementById('nLengthInput');
 const nRangeInput = document.getElementById('nRangeInput');
 const guessInput = document.getElementById('guessInput');
-
-// NEW: Get the new elements
 const boardContainer = document.getElementById('board-container');
 const historyList = document.getElementById('history-list');
 
@@ -260,8 +254,8 @@ function startGame() {
     console.log("Secret:", R);
     
     tryCount = 0;
-    historyList.innerHTML = ''; // Clear only the history list
-    boardContainer.style.display = 'flex'; // Show the whole board
+    historyList.innerHTML = '';
+    boardContainer.style.display = 'flex';
     
     let placeholder = [...Array(n)].map((_, i) => i + 1).join(' ');
     guessInput.setAttribute('placeholder', `e.g. ${placeholder}`);
@@ -276,7 +270,6 @@ function submitGuess() {
     }
 
     const input = guessInput.value.trim();
-    // Allow split by comma, space, or multiple spaces
     const T = input.split(/[\s,]+/).map(x => parseInt(x.trim()));
 
     if (T.length !== n || T.some(isNaN)) {
@@ -294,14 +287,14 @@ function submitGuess() {
     
     tryCount++;
     const { A, B } = calculateAB(T);
-    renderRow(T, A, B, tryCount); // Call renderRow
+    renderRow(T, A, B, tryCount);
 
     if (A === n) {
         alert(`🎉 Congratulations! You guessed it in ${tryCount} tries!`);
-        R = []; // End game
+        R = [];
     }
 
-    guessInput.value = ''; // Clear input
+    guessInput.value = '';
 }
 
 function calculateAB(guess) {
@@ -329,8 +322,6 @@ function calculateAB(guess) {
     return { A, B };
 }
 
-// renderHeaderRow function is no longer needed
-
 function renderRow(T, A, B, count) {
     const row = document.createElement('div');
     row.className = 'mastermind-row';
@@ -355,7 +346,6 @@ function renderRow(T, A, B, count) {
     result.textContent = `${A}A ${B}B`;
     row.appendChild(result);
     
-    // Prepend to the history-list, not the whole board
     historyList.prepend(row);
 }
 </script>
