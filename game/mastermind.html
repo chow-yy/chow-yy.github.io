@@ -10,7 +10,7 @@
         font-family: 'Segoe UI', sans-serif;
         display: flex;
         flex-direction: column;
-        align-items: center;
+        align-items: center; /* Center the game-container */
         min-height: 100vh;
         padding: 20px;
         box-sizing: border-box;
@@ -34,20 +34,13 @@
         text-align: center;
     }
     
-    .page-wrapper {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: flex-start;
-        justify-content: center;
-        width: 100%;
-        max-width: 900px;
-        gap: 30px;
-    }
+    /* REMOVED: .page-wrapper is gone */
 
+    /* UPDATED: This is now the main centered column */
     .game-container {
-        flex-grow: 1;
-        flex-basis: 450px;
-        min-width: 320px;
+        width: 100%;
+        max-width: 600px; /* Set a max width for the game */
+        margin: 0 auto; /* Center it */
     }
 
     .controls {
@@ -93,6 +86,9 @@
         padding: 8px;
         border-radius: 8px;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        /* FIXED: Add horizontal scrolling for wide rows */
+        overflow-x: auto;
+        padding-bottom: 10px; /* Space for scrollbar */
     }
     
     .mastermind-row.header {
@@ -140,7 +136,8 @@
 
     .guess-container {
         display: flex;
-        flex-wrap: wrap;
+        /* FIXED: Do not wrap boxes */
+        flex-wrap: nowrap; 
         gap: 8px;
         flex-grow: 1;
     }
@@ -171,9 +168,12 @@
         gap: 10px;
     }
     
+    /* UPDATED: High score board is now fixed to the window */
     #highscore-container {
-        flex-basis: 300px;
-        flex-shrink: 0;
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        width: 300px; /* Fixed width */
         padding: 20px;
         background-color: #fff;
         border-radius: 8px;
@@ -198,6 +198,19 @@
         font-weight: bold;
         display: inline;
     }
+    
+    /* NEW: Media query for small screens */
+    @media (max-width: 950px) {
+        #highscore-container {
+            position: static; /* Un-fix it */
+            width: 100%;
+            max-width: 500px; /* Match controls width */
+            margin-top: 30px; /* Add space above */
+        }
+        .game-container {
+            max-width: 600px;
+        }
+    }
 
     input[type="number"], input[type="text"], button {
         padding: 8px;
@@ -219,43 +232,40 @@
 </head>
 <body>
 
-<div class="page-wrapper">
+<a href="../game.html" class="back-link">&larr; Back to 🥨</a>
 
-    <div class="game-container">
-        <a href="../game.html" class="back-link">&larr; Back to 🥨</a>
-        <h1>Mastermind Mini Game</h1>
+<div class="game-container">
+    <h1>Mastermind Mini Game</h1>
+    
+    <div class="controls">
+        <label>Code Length (n):</label>
+        <input type="number" id="nLengthInput" min="4" max="10" value="4">
+
+        <label>Max Number (N):</label>
+        <input type="number" id="nRangeInput" min="4" max="20" value="8">
+
+        <button onclick="startGame()" class="start-button">Start Game</button>
         
-        <div class="controls">
-            <label>Code Length (n):</label>
-            <input type="number" id="nLengthInput" min="4" max="10" value="4">
-
-            <label>Max Number (N):</label>
-            <input type="number" id="nRangeInput" min="4" max="20" value="8">
-
-            <button onclick="startGame()" class="start-button">Start Game</button>
-            
-            <label>Your Guess:</label>
-            <input type="text" id="guessInput" placeholder="e.g. 1 2 3 4" />
-            
-            <button onclick="submitGuess()" class="start-button">Submit</button>
-        </div>
-
-        <div class="mastermind-board" id="board-container" style="display: none;">
-            <div class="mastermind-row header">
-                <div class="try-box">Try</div>
-                <div class="guess-container">Guess</div>
-                <div class="result-box">A / B</div>
-            </div>
-            <div id="history-list"></div> 
-        </div>
+        <label>Your Guess:</label>
+        <input type="text" id="guessInput" placeholder="e.g. 1 2 3 4" />
+        
+        <button onclick="submitGuess()" class="start-button">Submit</button>
     </div>
 
-    <div id="highscore-container">
-        <h3>🏆 Best Records</h3>
-        <div id="highscore-display">
-            </div>
+    <div class="mastermind-board" id="board-container" style="display: none;">
+        <div class="mastermind-row header">
+            <div class="try-box">Try</div>
+            <div class="guess-container">Guess</div>
+            <div class="result-box">A / B</div>
+        </div>
+        <div id="history-list"></div> 
     </div>
+</div>
 
+<div id="highscore-container">
+    <h3>🏆 Best Records</h3>
+    <div id="highscore-display">
+        </div>
 </div>
 
 <script>
@@ -290,10 +300,9 @@ function loadHighScore() {
         if (key.startsWith(prefix)) {
             try {
                 const scoreData = JSON.parse(localStorage.getItem(key));
-                
                 const parts = key.substring(prefix.length).split('_');
-                const nVal = parseInt(parts[0].substring(1)); // Convert to number for sorting
-                const NVal = parseInt(parts[1].substring(1)); // Convert to number for sorting
+                const nVal = parseInt(parts[0].substring(1));
+                const NVal = parseInt(parts[1].substring(1));
                 
                 allScores.push({
                     n: nVal,
@@ -306,14 +315,11 @@ function loadHighScore() {
         }
     }
     
-    // --- NEW SORTING LOGIC ---
-    // 1. Sort by 'n' (Code Length)
-    // 2. If 'n' is the same, sort by 'N' (Max Number)
     allScores.sort((a, b) => {
         if (a.n !== b.n) {
-            return a.n - b.n; // Sort by n
+            return a.n - b.n;
         } else {
-            return a.N - b.N; // If n is same, sort by N
+            return a.N - b.N;
         }
     });
     
@@ -344,7 +350,7 @@ function checkAndSaveHighScore(finalTryCount) {
         const newHighScore = { tries: finalTryCount };
         localStorage.setItem(key, JSON.stringify(newHighScore));
         
-        loadHighScore(); // RELOAD the entire board
+        loadHighScore();
         
         alert(`🎉 New Record! You guessed it in ${finalTryCount} tries!`);
     } else {
