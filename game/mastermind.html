@@ -16,7 +16,7 @@
         box-sizing: border-box;
     }
 
-    /* NEW: Style for the "Back" link */
+    /* "Back" link */
     .back-link {
         align-self: flex-start; /* Aligns to the left */
         margin-bottom: 15px;
@@ -82,6 +82,13 @@
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     }
     
+    /* NEW: Header row styling */
+    .mastermind-row.header {
+        background-color: #333;
+        color: #fff;
+        font-weight: bold;
+    }
+
     .try-box {
         width: 40px;
         height: 40px;
@@ -95,6 +102,13 @@
         font-weight: bold;
         font-size: 1.1rem;
         flex-shrink: 0;
+    }
+    
+    /* NEW: Header box styling */
+    .header .try-box, .header .result-box {
+        background-color: transparent;
+        border: none;
+        color: inherit;
     }
 
     .guess-box {
@@ -117,6 +131,12 @@
         flex-wrap: wrap;
         gap: 8px;
         flex-grow: 1;
+    }
+    
+    /* NEW: Header "Guess" text */
+    .header .guess-container {
+        justify-content: center;
+        font-size: 1.1rem;
     }
 
     .result-box {
@@ -176,14 +196,27 @@
 <div class="mastermind-board" id="board"></div>
 
 <script>
+// --- Define elements ---
+const nLengthInput = document.getElementById('nLengthInput');
+const nRangeInput = document.getElementById('nRangeInput');
+const guessInput = document.getElementById('guessInput');
+const board = document.getElementById('board');
+
 let R = []; // The secret code [n]
 let n = 0;  // The code length
 let N = 0;  // The max number
 let tryCount = 0;
 
+// --- Add "Enter" key listener ---
+guessInput.addEventListener('keyup', (e) => {
+    if (e.key === 'Enter') {
+        submitGuess();
+    }
+});
+
 function startGame() {
-    n = parseInt(document.getElementById('nLengthInput').value);
-    N = parseInt(document.getElementById('nRangeInput').value);
+    n = parseInt(nLengthInput.value);
+    N = parseInt(nRangeInput.value);
     
     if (isNaN(n) || n < 4 || n > 10) {
         alert('Code Length (n) must be between 4 and 10.');
@@ -209,10 +242,11 @@ function startGame() {
     console.log("Secret:", R);
     
     tryCount = 0;
-    document.getElementById('board').innerHTML = '';
+    board.innerHTML = ''; // Clear board
+    renderHeaderRow(); // NEW: Add the header row
     
     let placeholder = [...Array(n)].map((_, i) => i + 1).join(' ');
-    document.getElementById('guessInput').setAttribute('placeholder', `e.g. ${placeholder}`);
+    guessInput.setAttribute('placeholder', `e.g. ${placeholder}`);
     
     alert(`Game started! Guess ${n} unique numbers from 1 to ${N}.`);
 }
@@ -223,7 +257,7 @@ function submitGuess() {
         return;
     }
 
-    const input = document.getElementById('guessInput').value.trim();
+    const input = guessInput.value.trim();
     const T = input.split(/[\s,]+/).map(x => parseInt(x.trim()));
 
     if (T.length !== n || T.some(isNaN)) {
@@ -248,7 +282,7 @@ function submitGuess() {
         R = [];
     }
 
-    document.getElementById('guessInput').value = '';
+    guessInput.value = '';
 }
 
 function calculateAB(guess) {
@@ -276,8 +310,33 @@ function calculateAB(guess) {
     return { A, B };
 }
 
+// NEW: Function to render the header
+function renderHeaderRow() {
+    const row = document.createElement('div');
+    row.className = 'mastermind-row header'; // Add header class
+
+    // 1. Try Box
+    const tryBox = document.createElement('div');
+    tryBox.className = 'try-box';
+    tryBox.textContent = 'Try';
+    row.appendChild(tryBox);
+    
+    // 2. Guess Container
+    const guessContainer = document.createElement('div');
+    guessContainer.className = 'guess-container';
+    guessContainer.textContent = 'Guess'; // Simple text
+    row.appendChild(guessContainer);
+
+    // 3. Result Box
+    const result = document.createElement('div');
+    result.className = 'result-box';
+    result.textContent = 'A / B';
+    row.appendChild(result);
+    
+    board.appendChild(row); // Add header to the top
+}
+
 function renderRow(T, A, B, count) {
-    const board = document.getElementById('board');
     const row = document.createElement('div');
     row.className = 'mastermind-row';
     
