@@ -142,7 +142,7 @@
         display: flex;
         flex-wrap: wrap;
         gap: 8px;
-        flex-grow: 1; /* <-- FIXED: Tells this column to grow */
+        flex-grow: 1;
     }
     
     .header .guess-container {
@@ -161,7 +161,7 @@
         justify-content: center;
         align-items: center;
         font-weight: bold;
-        margin-left: auto; /* <-- FIXED: Pushes A/B column to the right */
+        margin-left: auto;
         flex-shrink: 0;
     }
     
@@ -191,11 +191,12 @@
         line-height: 1.5;
         margin: 5px 0;
     }
+    
     #highscore-display .score {
-        font-size: 1.5em;
+        font-size: 1.2em;
         color: #007bff;
         font-weight: bold;
-        display: block;
+        display: inline;
     }
 
     input[type="number"], input[type="text"], button {
@@ -229,7 +230,7 @@
             <input type="number" id="nLengthInput" min="4" max="10" value="4">
 
             <label>Max Number (N):</label>
-            <input type="number" id="nRangeInput" min="6" max="20" value="8">
+            <input type="number" id="nRangeInput" min="4" max="20" value="8">
 
             <button onclick="startGame()" class="start-button">Start Game</button>
             
@@ -250,7 +251,7 @@
     </div>
 
     <div id="highscore-container">
-        <h3>🏆 Best Record</h3>
+        <h3>🏆 Best Records</h3>
         <div id="highscore-display">
             </div>
     </div>
@@ -277,24 +278,60 @@ guessInput.addEventListener('keyup', (e) => {
         submitGuess();
     }
 });
-nLengthInput.addEventListener('change', loadHighScore);
-nRangeInput.addEventListener('change', loadHighScore);
 
 // --- High Score Logic ---
 function loadHighScore() {
-    const nVal = nLengthInput.value;
-    const NVal = nRangeInput.value;
-    const key = `mastermindHighScore_n${nVal}_N${NVal}`;
-    const score = JSON.parse(localStorage.getItem(key)) || { tries: 999 };
-    updateHighScoreDisplay(nVal, NVal, score);
+    let allScores = [];
+    const prefix = 'mastermindHighScore_';
+    
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        
+        if (key.startsWith(prefix)) {
+            try {
+                const scoreData = JSON.parse(localStorage.getItem(key));
+                
+                const parts = key.substring(prefix.length).split('_');
+                const nVal = parseInt(parts[0].substring(1)); // Convert to number for sorting
+                const NVal = parseInt(parts[1].substring(1)); // Convert to number for sorting
+                
+                allScores.push({
+                    n: nVal,
+                    N: NVal,
+                    tries: scoreData.tries
+                });
+            } catch (e) {
+                console.error("Could not parse high score key:", key);
+            }
+        }
+    }
+    
+    // --- NEW SORTING LOGIC ---
+    // 1. Sort by 'n' (Code Length)
+    // 2. If 'n' is the same, sort by 'N' (Max Number)
+    allScores.sort((a, b) => {
+        if (a.n !== b.n) {
+            return a.n - b.n; // Sort by n
+        } else {
+            return a.N - b.N; // If n is same, sort by N
+        }
+    });
+    
+    updateHighScoreDisplay(allScores);
 }
 
-function updateHighScoreDisplay(n, N, score) {
-    let content = `<p style="font-weight: 500;">Best Score (n=${n}, N=${N})</p>`;
-    if (score.tries === 999) {
-        content += `<p>No record yet. Be the first!</p>`;
-    } else {
-        content += `<span class="score">${score.tries} tries</span>`;
+function updateHighScoreDisplay(scores) {
+    if (scores.length === 0) {
+        highScoreDisplay.innerHTML = `<p>No record yet. Be the first!</p>`;
+        return;
+    }
+    
+    let content = '';
+    for (const score of scores) {
+        content += `<p style="font-weight: 500;">
+                       (n=${score.n}, N=${score.N}): 
+                       <span class="score">${score.tries} tries</span>
+                   </p>`;
     }
     highScoreDisplay.innerHTML = content;
 }
@@ -306,7 +343,9 @@ function checkAndSaveHighScore(finalTryCount) {
     if (finalTryCount < currentHighScore.tries) {
         const newHighScore = { tries: finalTryCount };
         localStorage.setItem(key, JSON.stringify(newHighScore));
-        updateHighScoreDisplay(n, N, newHighScore);
+        
+        loadHighScore(); // RELOAD the entire board
+        
         alert(`🎉 New Record! You guessed it in ${finalTryCount} tries!`);
     } else {
         alert(`🎉 Congratulations! You guessed it in ${finalTryCount} tries!`);
@@ -318,7 +357,6 @@ function startGame() {
     n = parseInt(nLengthInput.value);
     N = parseInt(nRangeInput.value);
     
-    // Updated validation
     if (isNaN(n) || n < 4 || n > 10) {
         alert('Code Length (n) must be between 4 and 10.');
         return;
@@ -327,6 +365,9 @@ function startGame() {
         alert(`Max Number (N) must be between ${n} (your n) and 20.`);
         return;
     }
+    
+    localStorage.setItem('mastermind_last_n', n);
+    localStorage.setItem('mastermind_last_N', N);
     
     let pool = Array.from({length: N}, (_, i) => i + 1);
     
@@ -345,7 +386,6 @@ function startGame() {
     let placeholder = [...Array(n)].map((_, i) => i + 1).join(' ');
     guessInput.setAttribute('placeholder', `e.g. ${placeholder}`);
     
-    loadHighScore();
     alert(`Game started! Guess ${n} unique numbers from 1 to ${N}.`);
 }
 
@@ -436,7 +476,15 @@ function renderRow(T, A, B, count) {
 }
 
 // --- Initial Load ---
-loadHighScore(); // Load high score for the default (4, 8) on page load
+const last_n = localStorage.getItem('mastermind_last_n');
+const last_N = localStorage.getItem('mastermind_last_N');
+
+if (last_n && last_N) {
+    nLengthInput.value = last_n;
+    nRangeInput.value = last_N;
+}
+
+loadHighScore();
 
 </script>
 
