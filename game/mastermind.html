@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale: 1.0" />
 <title>Mastermind Mini Game</title>
 <style>
     body {
@@ -10,7 +10,7 @@
         font-family: 'Segoe UI', sans-serif;
         display: flex;
         flex-direction: column;
-        align-items: center; /* Center the game-container */
+        align-items: center; /* Center the page-wrapper */
         min-height: 100vh;
         padding: 20px;
         box-sizing: border-box;
@@ -23,9 +23,9 @@
         text-decoration: none;
         font-weight: 600;
         font-size: 1.1rem;
-    }
-    .back-link:hover {
-        text-decoration: underline;
+        /* Position it relative to the page-wrapper */
+        width: 100%;
+        max-width: 930px; /* Match the wrapper */
     }
 
     h1 {
@@ -34,13 +34,23 @@
         text-align: center;
     }
     
-    /* REMOVED: .page-wrapper is gone */
-
-    /* UPDATED: This is now the main centered column */
-    .game-container {
+    /* UPDATED: This wrapper handles the side-by-side layout */
+    .page-wrapper {
+        display: flex;
+        flex-wrap: wrap-reverse; /* Stacks score-board on bottom on narrow screens */
+        align-items: flex-start;
+        justify-content: center;
         width: 100%;
-        max-width: 600px; /* Set a max width for the game */
-        margin: 0 auto; /* Center it */
+        max-width: 930px; /* 600px game + 300px score + 30px gap */
+        gap: 30px;
+    }
+
+    /* UPDATED: Game container is now a flex item */
+    .game-container {
+        flex-grow: 1;    /* Allows it to grow */
+        flex-basis: 500px; /* Base width */
+        max-width: 600px;  /* Max width */
+        min-width: 320px;
     }
 
     .controls {
@@ -86,9 +96,8 @@
         padding: 8px;
         border-radius: 8px;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        /* FIXED: Add horizontal scrolling for wide rows */
         overflow-x: auto;
-        padding-bottom: 10px; /* Space for scrollbar */
+        padding-bottom: 10px;
     }
     
     .mastermind-row.header {
@@ -136,7 +145,6 @@
 
     .guess-container {
         display: flex;
-        /* FIXED: Do not wrap boxes */
         flex-wrap: nowrap; 
         gap: 8px;
         flex-grow: 1;
@@ -168,16 +176,19 @@
         gap: 10px;
     }
     
-    /* UPDATED: High score board is now fixed to the window */
+    /* UPDATED: This is now a sticky sidebar */
     #highscore-container {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        width: 300px; /* Fixed width */
+        flex-basis: 300px; /* Set its base width */
+        flex-shrink: 0;   /* Don't let it shrink */
+        width: 300px;
         padding: 20px;
         background-color: #fff;
         border-radius: 8px;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        
+        /* This makes it stick to the top as you scroll */
+        position: sticky;
+        top: 20px; 
     }
     #highscore-container h3 {
         text-align: center;
@@ -199,18 +210,7 @@
         display: inline;
     }
     
-    /* NEW: Media query for small screens */
-    @media (max-width: 950px) {
-        #highscore-container {
-            position: static; /* Un-fix it */
-            width: 100%;
-            max-width: 500px; /* Match controls width */
-            margin-top: 30px; /* Add space above */
-        }
-        .game-container {
-            max-width: 600px;
-        }
-    }
+    /* REMOVED the media query that used position: static */
 
     input[type="number"], input[type="text"], button {
         padding: 8px;
@@ -234,38 +234,41 @@
 
 <a href="../game.html" class="back-link">&larr; Back to 🥨</a>
 
-<div class="game-container">
-    <h1>Mastermind Mini Game</h1>
-    
-    <div class="controls">
-        <label>Code Length (n):</label>
-        <input type="number" id="nLengthInput" min="4" max="10" value="4">
+<div class="page-wrapper">
 
-        <label>Max Number (N):</label>
-        <input type="number" id="nRangeInput" min="4" max="20" value="8">
+    <div class="game-container">
+        <h1>Mastermind Mini Game</h1>
+        
+        <div class="controls">
+            <label>Code Length (n):</label>
+            <input type="number" id="nLengthInput" min="4" max="10" value="4">
 
-        <button onclick="startGame()" class="start-button">Start Game</button>
-        
-        <label>Your Guess:</label>
-        <input type="text" id="guessInput" placeholder="e.g. 1 2 3 4" />
-        
-        <button onclick="submitGuess()" class="start-button">Submit</button>
+            <label>Max Number (N):</label>
+            <input type="number" id="nRangeInput" min="4" max="20" value="8">
+
+            <button onclick="startGame()" class="start-button">Start Game</button>
+            
+            <label>Your Guess:</label>
+            <input type="text" id="guessInput" placeholder="e.g. 1 2 3 4" />
+            
+            <button onclick="submitGuess()" class="start-button">Submit</button>
+        </div>
+
+        <div class="mastermind-board" id="board-container" style="display: none;">
+            <div class="mastermind-row header">
+                <div class="try-box">Try</div>
+                <div class="guess-container">Guess</div>
+                <div class="result-box">A / B</div>
+            </div>
+            <div id="history-list"></div> 
+        </div>
     </div>
 
-    <div class="mastermind-board" id="board-container" style="display: none;">
-        <div class="mastermind-row header">
-            <div class="try-box">Try</div>
-            <div class="guess-container">Guess</div>
-            <div class="result-box">A / B</div>
-        </div>
-        <div id="history-list"></div> 
+    <div id="highscore-container">
+        <h3>🏆 Best Records</h3>
+        <div id="highscore-display">
+            </div>
     </div>
-</div>
-
-<div id="highscore-container">
-    <h3>🏆 Best Records</h3>
-    <div id="highscore-display">
-        </div>
 </div>
 
 <script>
