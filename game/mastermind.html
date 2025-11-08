@@ -33,6 +33,24 @@
         color: #333333;
         text-align: center;
     }
+    
+    /* NEW: Wrapper for 2-column layout */
+    .page-wrapper {
+        display: flex;
+        flex-wrap: wrap; /* Allows stacking on small screens */
+        align-items: flex-start;
+        justify-content: center;
+        width: 100%;
+        max-width: 900px; /* Max width for both columns */
+        gap: 30px;
+    }
+
+    /* Main game area */
+    .game-container {
+        flex-grow: 1; /* Takes up available space */
+        flex-basis: 450px; /* Base width */
+        min-width: 320px; /* Min width before stacking */
+    }
 
     .controls {
         background-color: #fff;
@@ -45,7 +63,7 @@
         align-items: center;
         margin-bottom: 20px;
         width: 100%;
-        max-width: 500px;
+        box-sizing: border-box; /* Include padding in width */
     }
     
     .controls label {
@@ -67,7 +85,6 @@
         display: flex;
         flex-direction: column;
         width: 100%;
-        max-width: 600px;
     }
 
     .mastermind-row {
@@ -127,13 +144,12 @@
         display: flex;
         flex-wrap: wrap;
         gap: 8px;
-        /* flex-grow: 1; is removed */
     }
     
     .header .guess-container {
         justify-content: center;
         font-size: 1.1rem;
-        /* FIXED: flex-grow: 1; is removed */
+        flex-grow: 1; /* Center header text */
     }
 
     .result-box {
@@ -147,7 +163,7 @@
         justify-content: center;
         align-items: center;
         font-weight: bold;
-        /* FIXED: margin-left: auto; is removed */
+        margin-left: auto;
         flex-shrink: 0;
     }
     
@@ -155,6 +171,34 @@
         display: flex;
         flex-direction: column;
         gap: 10px;
+    }
+    
+    /* NEW: High score board */
+    #highscore-container {
+        flex-basis: 300px; /* Fixed width */
+        flex-shrink: 0;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    #highscore-container h3 {
+        text-align: center;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 10px;
+        margin-top: 0;
+    }
+    #highscore-display p {
+        font-size: 1.1em;
+        text-align: center;
+        line-height: 1.5;
+        margin: 5px 0;
+    }
+    #highscore-display .score {
+        font-size: 1.5em;
+        color: #007bff;
+        font-weight: bold;
+        display: block;
     }
 
     input[type="number"], input[type="text"], button {
@@ -177,55 +221,98 @@
 </head>
 <body>
 
-<a href="../game.html" class="back-link">&larr; Back to 🥨</a>
+<div class="page-wrapper">
 
-<h1>Mastermind Mini Game</h1>
+    <div class="game-container">
+        <a href="../game.html" class="back-link">&larr; Back to 🥨</a>
+        <h1>Mastermind Mini Game</h1>
+        
+        <div class="controls">
+            <label>Code Length (n):</label>
+            <input type="number" id="nLengthInput" min="4" max="10" value="4">
 
-<div class="controls">
-    <label>Code Length (n):</label>
-    <input type="number" id="nLengthInput" min="4" max="10" value="4">
+            <label>Max Number (N):</label>
+            <input type="number" id="nRangeInput" min="6" max="20" value="8">
 
-    <label>Max Number (N):</label>
-    <input type="number" id="nRangeInput" min="6" max="20" value="8">
+            <button onclick="startGame()" class="start-button">Start Game</button>
+            
+            <label>Your Guess:</label>
+            <input type="text" id="guessInput" placeholder="e.g. 1 2 3 4" />
+            
+            <button onclick="submitGuess()" class="start-button">Submit</button>
+        </div>
 
-    <button onclick="startGame()" class="start-button">Start Game</button>
-    
-    <label>Your Guess:</label>
-    <input type="text" id="guessInput" placeholder="e.g. 1 2 3 4" />
-    
-    <button onclick="submitGuess()" class="start-button">Submit</button>
-</div>
-
-<div class="mastermind-board" id="board-container" style="display: none;">
-    <div class="mastermind-row header">
-        <div class="try-box">Try</div>
-        <div class="guess-container">Guess</div>
-        <div class="result-box">A / B</div>
+        <div class="mastermind-board" id="board-container" style="display: none;">
+            <div class="mastermind-row header">
+                <div class="try-box">Try</div>
+                <div class="guess-container">Guess</div>
+                <div class="result-box">A / B</div>
+            </div>
+            <div id="history-list"></div> 
+        </div>
+    </div> <div id="highscore-container">
+        <h3>🏆 Best Record</h3>
+        <div id="highscore-display">
+            </div>
     </div>
 
-    <div id="history-list"></div> 
-</div>
-
-<script>
+</div> <script>
 // --- Define elements ---
 const nLengthInput = document.getElementById('nLengthInput');
 const nRangeInput = document.getElementById('nRangeInput');
 const guessInput = document.getElementById('guessInput');
 const boardContainer = document.getElementById('board-container');
 const historyList = document.getElementById('history-list');
+const highScoreDisplay = document.getElementById('highscore-display'); // NEW
 
 let R = []; // The secret code [n]
 let n = 0;  // The code length
 let N = 0;  // The max number
 let tryCount = 0;
 
-// --- Add "Enter" key listener ---
+// --- Event Listeners ---
 guessInput.addEventListener('keyup', (e) => {
     if (e.key === 'Enter') {
         submitGuess();
     }
 });
+nLengthInput.addEventListener('change', loadHighScore); // NEW
+nRangeInput.addEventListener('change', loadHighScore);  // NEW
 
+// --- High Score Logic ---
+function loadHighScore() {
+    const nVal = nLengthInput.value;
+    const NVal = nRangeInput.value;
+    const key = `mastermindHighScore_n${nVal}_N${NVal}`;
+    const score = JSON.parse(localStorage.getItem(key)) || { tries: 999 };
+    updateHighScoreDisplay(nVal, NVal, score);
+}
+
+function updateHighScoreDisplay(n, N, score) {
+    let content = `<p style="font-weight: 500;">Best Score (n=${n}, N=${N})</p>`;
+    if (score.tries === 999) {
+        content += `<p>No record yet. Be the first!</p>`;
+    } else {
+        content += `<span class="score">${score.tries} tries</span>`;
+    }
+    highScoreDisplay.innerHTML = content;
+}
+
+function checkAndSaveHighScore(finalTryCount) {
+    const key = `mastermindHighScore_n${n}_N${N}`; // Use game variables
+    const currentHighScore = JSON.parse(localStorage.getItem(key)) || { tries: 999 };
+    
+    if (finalTryCount < currentHighScore.tries) {
+        const newHighScore = { tries: finalTryCount };
+        localStorage.setItem(key, JSON.stringify(newHighScore));
+        updateHighScoreDisplay(n, N, newHighScore);
+        alert(`🎉 New Record! You guessed it in ${finalTryCount} tries!`);
+    } else {
+        alert(`🎉 Congratulations! You guessed it in ${finalTryCount} tries!`);
+    }
+}
+
+// --- Game Logic ---
 function startGame() {
     n = parseInt(nLengthInput.value);
     N = parseInt(nRangeInput.value);
@@ -234,8 +321,8 @@ function startGame() {
         alert('Code Length (n) must be between 4 and 10.');
         return;
     }
-    if (isNaN(N) || N < 6 || N > 20) {
-        alert('Max Number (N) must be between 6 and 20.');
+    if (isNaN(N) || N < n || N > 20) {
+        alert('Max Number (N) must be between (n) and 20.');
         return;
     }
     if (n > N) {
@@ -260,6 +347,7 @@ function startGame() {
     let placeholder = [...Array(n)].map((_, i) => i + 1).join(' ');
     guessInput.setAttribute('placeholder', `e.g. ${placeholder}`);
     
+    loadHighScore(); // Load score for this game
     alert(`Game started! Guess ${n} unique numbers from 1 to ${N}.`);
 }
 
@@ -290,8 +378,8 @@ function submitGuess() {
     renderRow(T, A, B, tryCount);
 
     if (A === n) {
-        alert(`🎉 Congratulations! You guessed it in ${tryCount} tries!`);
-        R = [];
+        checkAndSaveHighScore(tryCount); // NEW: Check record
+        R = []; // End game
     }
 
     guessInput.value = '';
@@ -348,6 +436,10 @@ function renderRow(T, A, B, count) {
     
     historyList.prepend(row);
 }
+
+// --- Initial Load ---
+loadHighScore(); // Load high score for the default (4, 8) on page load
+
 </script>
 
 </body>
