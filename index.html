@@ -191,14 +191,22 @@
                 <div class="item-entry">
                     <p class="title">Differentially-Private Synthetic Data for Machine Learning</p>
                     <p class="tech">Key Concepts: Differential Privacy, Machine Learning, Synthetic Data</p>
-                    <p>
-                        This research investigates the trade-offs between privacy and utility when training ML models on differentially-private (DP) synthetic data. We developed novel upper and lower bounds on the excess empirical risk for linear models and showed that models trained on DP synthetic data can achieve high accuracy (e.g., <1% accuracy drop) while providing strong privacy guarantees.
-                    </p>
-                    <p class="links">
-                        [ <a href="#icml2024">See Publication (ICML 2024)</a> ] 
-                        [ <a href="https://github.com/DPML-syn/MarginalPreserving_DP_SyntheticData" target="_blank">GitHub Repo</a> ]
-                    </p>
+                    <div style="display: flex; align-items: flex-start; gap: 20px;">
+                        <div style="flex: 1;">
+                            <p>
+                                This research investigates the trade-offs between privacy and utility when training Machine Learning models on differentially-private (DP) synthetic data. We developed novel upper and lower bounds on the excess empirical risk for linear models. Our experimental results on various datasets demonstrate that models trained on DP synthetic data can achieve high accuracy (e.g., observing less than a 1% accuracy drop) while simultaneously providing strong privacy guarantees.
+                            </p>
+                            <p class="links">
+                                [ <a href="#icml2024">See Publication (ICML 2024)</a> ] 
+                                [ <a href="https://github.com/DPML-syn/MarginalPreserving_DP_SyntheticData" target="_blank">GitHub Repo</a> ]
+                            </p>
+                        </div>
+                        <div style="flex: 0 0 auto;">
+                            <img src="image/dp_synthetic_data_concept.png" alt="Conceptual Diagram: Private Data to Public ML Model with DP Synthetic Data" style="max-width: 250px; height: auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                        </div>
+                    </div>
                 </div>
+
                 <div class="item-entry">
                     <p class="title">Multi-Agent Traffic Control Simulator</p>
                     <p class="tech">Technologies Used: Python, PyTorch, SUMO</p>
