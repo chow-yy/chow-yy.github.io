@@ -1,4 +1,3 @@
-<!-- polished by ChatGPT -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,173 +5,303 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Mastermind Mini Game</title>
 <style>
-  body {
-    background-color: #f6f1e7;
-    font-family: 'Segoe UI', sans-serif;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-height: 100vh;
-    padding-top: 40px;
-  }
+    body {
+        background-color: #f6f1e7;
+        font-family: 'Segoe UI', sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+        padding: 20px;
+        box-sizing: border-box;
+    }
 
-  h1 {
-    margin-bottom: 20px;
-    color: #333333;
-  }
+    /* NEW: Style for the "Back" link */
+    .back-link {
+        align-self: flex-start; /* Aligns to the left */
+        margin-bottom: 15px;
+        color: #333333;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+    .back-link:hover {
+        text-decoration: underline;
+    }
 
-  .controls {
-    margin-bottom: 20px;
-  }
+    h1 {
+        margin-bottom: 20px;
+        color: #333333;
+        text-align: center;
+    }
 
-  .mastermind-board {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
+    .controls {
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        display: grid;
+        grid-template-columns: auto auto;
+        gap: 15px;
+        align-items: center;
+        margin-bottom: 20px;
+        width: 100%;
+        max-width: 500px;
+    }
+    
+    .controls label {
+        font-weight: 600;
+        text-align: right;
+    }
 
-  .mastermind-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
+    .controls input[type="number"],
+    .controls input[type="text"] {
+        width: 100%;
+        box-sizing: border-box;
+    }
 
-  .guess-box {
-    width: 40px;
-    height: 40px;
-    background-color: #ffffff;
-    border: 2px solid #333333;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-weight: bold;
-    font-size: 1.2rem;
-  }
+    .controls .start-button {
+        grid-column: 1 / -1;
+    }
 
-  .result-box {
-    min-width: 80px;
-    height: 40px;
-    background-color: #fff6cc;
-    border: 2px solid #333333;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-weight: bold;
-  }
+    .mastermind-board {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        width: 100%;
+        max-width: 600px;
+    }
 
-  input[type="number"], button {
-    padding: 8px;
-    border-radius: 6px;
-    border: 1px solid #999;
-    font-size: 1rem;
-  }
+    .mastermind-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background-color: #fff;
+        padding: 8px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+    
+    .try-box {
+        width: 40px;
+        height: 40px;
+        background-color: #f0f0f0;
+        border: 2px solid #ccc;
+        color: #333;
+        border-radius: 8px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-weight: bold;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+    }
 
-  button {
-    background-color: #333333;
-    color: #fff;
-    cursor: pointer;
-  }
+    .guess-box {
+        width: 40px;
+        height: 40px;
+        background-color: #ffffff;
+        border: 2px solid #333333;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-weight: bold;
+        font-size: 1.2rem;
+        flex-shrink: 0;
+    }
 
-  button:hover {
-    background-color: #555555;
-  }
+    .guess-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        flex-grow: 1;
+    }
+
+    .result-box {
+        min-width: 80px;
+        height: 40px;
+        background-color: #fff6cc;
+        border: 2px solid #333333;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-weight: bold;
+        margin-left: auto;
+        flex-shrink: 0;
+    }
+
+    input[type="number"], input[type="text"], button {
+        padding: 8px;
+        border-radius: 6px;
+        border: 1px solid #999;
+        font-size: 1rem;
+    }
+
+    button {
+        background-color: #333333;
+        color: #fff;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background-color: #555555;
+    }
 </style>
 </head>
 <body>
 
+<a href="../game.html" class="back-link">&larr; Back to Snack Break</a>
+
 <h1>Mastermind Mini Game</h1>
 
 <div class="controls">
-  <label>Enter N (6–20): </label>
-  <input type="number" id="numInput" min="6" max="20" value="6">
-  <button onclick="startGame()">Start Game</button>
-</div>
+    <label>Code Length (n):</label>
+    <input type="number" id="nLengthInput" min="4" max="10" value="4">
 
-<div class="controls">
-  <label>Your Guess (comma-separated): </label>
-  <input type="text" id="guessInput" placeholder="e.g. 1,2,3,4,5,6" />
-  <button onclick="submitGuess()">Submit</button>
+    <label>Max Number (N):</label>
+    <input type="number" id="nRangeInput" min="6" max="20" value="8">
+
+    <button onclick="startGame()" class="start-button">Start Game</button>
+    
+    <label>Your Guess:</label>
+    <input type="text" id="guessInput" placeholder="e.g. 1 2 3 4" />
+    
+    <button onclick="submitGuess()" class="start-button">Submit</button>
 </div>
 
 <div class="mastermind-board" id="board"></div>
 
 <script>
-let R = [];
-let N = 0;
+let R = []; // The secret code [n]
+let n = 0;  // The code length
+let N = 0;  // The max number
+let tryCount = 0;
 
 function startGame() {
-  N = parseInt(document.getElementById('numInput').value);
-  if (isNaN(N) || N < 6 || N > 20) {
-    alert('Please enter an integer between 6 and 20.');
-    return;
-  }
-
-  // Generate and shuffle [1..N]
-  R = Array.from({length: N}, (_, i) => i + 1);
-  for (let i = R.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [R[i], R[j]] = [R[j], R[i]];
-  }
-
-  document.getElementById('board').innerHTML = '';
-  alert(`Game started with ${N} numbers! Try to guess.`);
+    n = parseInt(document.getElementById('nLengthInput').value);
+    N = parseInt(document.getElementById('nRangeInput').value);
+    
+    if (isNaN(n) || n < 4 || n > 10) {
+        alert('Code Length (n) must be between 4 and 10.');
+        return;
+    }
+    if (isNaN(N) || N < 6 || N > 20) {
+        alert('Max Number (N) must be between 6 and 20.');
+        return;
+    }
+    if (n > N) {
+        alert('Code Length (n) cannot be larger than Max Number (N).');
+        return;
+    }
+    
+    let pool = Array.from({length: N}, (_, i) => i + 1);
+    
+    for (let i = pool.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [pool[i], pool[j]] = [pool[j], pool[i]];
+    }
+    
+    R = pool.slice(0, n);
+    console.log("Secret:", R);
+    
+    tryCount = 0;
+    document.getElementById('board').innerHTML = '';
+    
+    let placeholder = [...Array(n)].map((_, i) => i + 1).join(' ');
+    document.getElementById('guessInput').setAttribute('placeholder', `e.g. ${placeholder}`);
+    
+    alert(`Game started! Guess ${n} unique numbers from 1 to ${N}.`);
 }
 
 function submitGuess() {
-  if (R.length === 0) {
-    alert('Start the game first!');
-    return;
-  }
+    if (R.length === 0) {
+        alert('Start the game first!');
+        return;
+    }
 
-  const input = document.getElementById('guessInput').value.trim();
-  const T = input.split(',').map(x => parseInt(x.trim()));
+    const input = document.getElementById('guessInput').value.trim();
+    const T = input.split(/[\s,]+/).map(x => parseInt(x.trim()));
 
-  if (T.length !== N || T.some(isNaN)) {
-    alert(`Please enter exactly ${N} integers separated by commas.`);
-    return;
-  }
+    if (T.length !== n || T.some(isNaN)) {
+        alert(`Please enter exactly ${n} numbers, separated by a space or comma.`);
+        return;
+    }
+    if (new Set(T).size !== T.length) {
+        alert("Your guess must not contain duplicate numbers.");
+        return;
+    }
+    if (T.some(num => num < 1 || num > N)) {
+        alert(`All numbers must be between 1 and ${N}.`);
+        return;
+    }
+    
+    tryCount++;
+    const { A, B } = calculateAB(T);
+    renderRow(T, A, B, tryCount);
 
-  // Compute A and B
-  let A = 0, B = 0;
-  for (let i = 0; i < N; i++) {
-    if (T[i] === R[i]) A++;
-  }
-  for (let i = 0; i < N; i++) {
-    if (R.includes(T[i])) B++;
-  }
-  B -= A;
+    if (A === n) {
+        alert(`🎉 Congratulations! You guessed it in ${tryCount} tries!`);
+        R = [];
+    }
 
-  renderRow(T, A, B);
-
-  if (A === N) {
-    alert('🎉 Congratulations! You guessed all numbers correctly!');
-  }
-
-  document.getElementById('guessInput').value = '';
+    document.getElementById('guessInput').value = '';
 }
 
-function renderRow(T, A, B) {
-  const board = document.getElementById('board');
-  const row = document.createElement('div');
-  row.className = 'mastermind-row';
+function calculateAB(guess) {
+    let A = 0;
+    let B = 0;
+    let secretUnmatched = [];
+    let guessUnmatched = [];
+    
+    for (let i = 0; i < n; i++) {
+        if (guess[i] === R[i]) {
+            A++;
+        } else {
+            secretUnmatched.push(R[i]);
+            guessUnmatched.push(guess[i]);
+        }
+    }
+    
+    for (const guessNum of guessUnmatched) {
+        const matchIndex = secretUnmatched.indexOf(guessNum);
+        if (matchIndex !== -1) {
+            B++;
+            secretUnmatched.splice(matchIndex, 1); 
+        }
+    }
+    return { A, B };
+}
 
-  T.forEach(num => {
-    const box = document.createElement('div');
-    box.className = 'guess-box';
-    box.textContent = num;
-    row.appendChild(box);
-  });
+function renderRow(T, A, B, count) {
+    const board = document.getElementById('board');
+    const row = document.createElement('div');
+    row.className = 'mastermind-row';
+    
+    const tryBox = document.createElement('div');
+    tryBox.className = 'try-box';
+    tryBox.textContent = `#${count}`;
+    row.appendChild(tryBox);
+    
+    const guessContainer = document.createElement('div');
+    guessContainer.className = 'guess-container';
+    T.forEach(num => {
+        const box = document.createElement('div');
+        box.className = 'guess-box';
+        box.textContent = num;
+        guessContainer.appendChild(box);
+    });
+    row.appendChild(guessContainer);
 
-  const result = document.createElement('div');
-  result.className = 'result-box';
-  result.textContent = `${A}A ${B}B`;
-  row.appendChild(result);
-
-  board.appendChild(row);
+    const result = document.createElement('div');
+    result.className = 'result-box';
+    result.textContent = `${A}A ${B}B`;
+    row.appendChild(result);
+    
+    board.prepend(row);
 }
 </script>
 
