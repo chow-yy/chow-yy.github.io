@@ -34,22 +34,20 @@
         text-align: center;
     }
     
-    /* NEW: Wrapper for 2-column layout */
     .page-wrapper {
         display: flex;
-        flex-wrap: wrap; /* Allows stacking on small screens */
+        flex-wrap: wrap;
         align-items: flex-start;
         justify-content: center;
         width: 100%;
-        max-width: 900px; /* Max width for both columns */
+        max-width: 900px;
         gap: 30px;
     }
 
-    /* Main game area */
     .game-container {
-        flex-grow: 1; /* Takes up available space */
-        flex-basis: 450px; /* Base width */
-        min-width: 320px; /* Min width before stacking */
+        flex-grow: 1;
+        flex-basis: 450px;
+        min-width: 320px;
     }
 
     .controls {
@@ -63,7 +61,7 @@
         align-items: center;
         margin-bottom: 20px;
         width: 100%;
-        box-sizing: border-box; /* Include padding in width */
+        box-sizing: border-box;
     }
     
     .controls label {
@@ -144,12 +142,12 @@
         display: flex;
         flex-wrap: wrap;
         gap: 8px;
+        flex-grow: 1; /* <-- FIXED: Tells this column to grow */
     }
     
     .header .guess-container {
         justify-content: center;
         font-size: 1.1rem;
-        flex-grow: 1; /* Center header text */
     }
 
     .result-box {
@@ -163,7 +161,7 @@
         justify-content: center;
         align-items: center;
         font-weight: bold;
-        margin-left: auto;
+        margin-left: auto; /* <-- FIXED: Pushes A/B column to the right */
         flex-shrink: 0;
     }
     
@@ -173,9 +171,8 @@
         gap: 10px;
     }
     
-    /* NEW: High score board */
     #highscore-container {
-        flex-basis: 300px; /* Fixed width */
+        flex-basis: 300px;
         flex-shrink: 0;
         padding: 20px;
         background-color: #fff;
@@ -250,24 +247,28 @@
             </div>
             <div id="history-list"></div> 
         </div>
-    </div> <div id="highscore-container">
+    </div>
+
+    <div id="highscore-container">
         <h3>🏆 Best Record</h3>
         <div id="highscore-display">
             </div>
     </div>
 
-</div> <script>
+</div>
+
+<script>
 // --- Define elements ---
 const nLengthInput = document.getElementById('nLengthInput');
 const nRangeInput = document.getElementById('nRangeInput');
 const guessInput = document.getElementById('guessInput');
 const boardContainer = document.getElementById('board-container');
 const historyList = document.getElementById('history-list');
-const highScoreDisplay = document.getElementById('highscore-display'); // NEW
+const highScoreDisplay = document.getElementById('highscore-display');
 
-let R = []; // The secret code [n]
-let n = 0;  // The code length
-let N = 0;  // The max number
+let R = [];
+let n = 0;
+let N = 0;
 let tryCount = 0;
 
 // --- Event Listeners ---
@@ -276,8 +277,8 @@ guessInput.addEventListener('keyup', (e) => {
         submitGuess();
     }
 });
-nLengthInput.addEventListener('change', loadHighScore); // NEW
-nRangeInput.addEventListener('change', loadHighScore);  // NEW
+nLengthInput.addEventListener('change', loadHighScore);
+nRangeInput.addEventListener('change', loadHighScore);
 
 // --- High Score Logic ---
 function loadHighScore() {
@@ -299,7 +300,7 @@ function updateHighScoreDisplay(n, N, score) {
 }
 
 function checkAndSaveHighScore(finalTryCount) {
-    const key = `mastermindHighScore_n${n}_N${N}`; // Use game variables
+    const key = `mastermindHighScore_n${n}_N${N}`;
     const currentHighScore = JSON.parse(localStorage.getItem(key)) || { tries: 999 };
     
     if (finalTryCount < currentHighScore.tries) {
@@ -317,16 +318,13 @@ function startGame() {
     n = parseInt(nLengthInput.value);
     N = parseInt(nRangeInput.value);
     
+    // Updated validation
     if (isNaN(n) || n < 4 || n > 10) {
         alert('Code Length (n) must be between 4 and 10.');
         return;
     }
     if (isNaN(N) || N < n || N > 20) {
-        alert('Max Number (N) must be between (n) and 20.');
-        return;
-    }
-    if (n > N) {
-        alert('Code Length (n) cannot be larger than Max Number (N).');
+        alert(`Max Number (N) must be between ${n} (your n) and 20.`);
         return;
     }
     
@@ -347,7 +345,7 @@ function startGame() {
     let placeholder = [...Array(n)].map((_, i) => i + 1).join(' ');
     guessInput.setAttribute('placeholder', `e.g. ${placeholder}`);
     
-    loadHighScore(); // Load score for this game
+    loadHighScore();
     alert(`Game started! Guess ${n} unique numbers from 1 to ${N}.`);
 }
 
@@ -378,8 +376,8 @@ function submitGuess() {
     renderRow(T, A, B, tryCount);
 
     if (A === n) {
-        checkAndSaveHighScore(tryCount); // NEW: Check record
-        R = []; // End game
+        checkAndSaveHighScore(tryCount);
+        R = [];
     }
 
     guessInput.value = '';
