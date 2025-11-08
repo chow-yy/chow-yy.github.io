@@ -8,26 +8,20 @@
     body {
         background-color: #f6f1e7;
         font-family: 'Segoe UI', sans-serif;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
+        /* UPDATED: Create a 320px "gutter" on the right for the scoreboard */
+        padding-right: 320px;
         min-height: 100vh;
         padding: 20px;
         box-sizing: border-box;
     }
 
     .back-link {
-        align-self: flex-start;
         margin-bottom: 15px;
         color: #333333;
         text-decoration: none;
         font-weight: 600;
         font-size: 1.1rem;
-        max-width: 600px;
-        width: 100%;
-        margin: 0 auto 15px auto;
-        padding-left: 10px;
-        box-sizing: border-box;
+        /* Now part of the centered game-container */
     }
 
     h1 {
@@ -36,11 +30,11 @@
         text-align: center;
     }
     
+    /* UPDATED: This container is now centered in the padded body */
     .game-container {
         width: 100%;
         max-width: 600px;
-        margin: 0 auto; 
-        margin-right: 320px; 
+        margin: 0 auto; /* This centers it in the available space */
     }
 
     .controls {
@@ -80,13 +74,12 @@
 
     .mastermind-row {
         display: flex;
-        align-items: center;
+        align-items: center; /* Vertically center for wrapped rows */
         gap: 8px;
         background-color: #fff;
         padding: 8px;
         border-radius: 8px;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        /* UPDATED: Remove overflow from the row itself */
     }
     
     .mastermind-row.header {
@@ -134,19 +127,14 @@
 
     .guess-container {
         display: flex;
-        flex-wrap: nowrap; /* Do not wrap boxes */
+        flex-wrap: wrap; /* Allows wrapping */
         gap: 8px;
         flex-grow: 1; /* Grow to fill space */
-        
-        /* UPDATED: This container scrolls, not the row */
-        overflow-x: auto;
-        padding-bottom: 10px; /* Make space for scrollbar */
     }
     
     .header .guess-container {
         justify-content: center;
         font-size: 1.1rem;
-        padding-bottom: 0; /* No scrollbar on header */
     }
 
     .result-box {
@@ -160,7 +148,7 @@
         justify-content: center;
         align-items: center;
         font-weight: bold;
-        margin-left: auto; /* Push to the right */
+        margin-left: auto;
         flex-shrink: 0;
     }
     
@@ -200,15 +188,19 @@
         display: inline;
     }
     
-    @media (max-width: 950px) {
+    /* UPDATED: Breakpoint moves scoreboard to bottom */
+    @media (max-width: 950px) { /* 600px game + 320px score/gap */
+        body {
+            padding-right: 20px; /* Remove the gutter */
+        }
         .game-container {
-            margin: 0 auto; 
+            margin: 0 auto; /* Re-center in the full window */
         }
         .back-link {
              max-width: 600px;
         }
         #highscore-container {
-            position: static;
+            position: static; /* Un-fix it */
             width: 100%;
             max-width: 500px;
             margin-top: 30px;
@@ -235,9 +227,8 @@
 </head>
 <body>
 
-<a href="../game.html" class="back-link">&larr; Back to 🥨</a>
-
 <div class="game-container">
+    <a href="../game.html" class="back-link">&larr; Back to 🥨</a>
     <h1>Mastermind Mini Game</h1>
     
     <div class="controls">
