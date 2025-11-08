@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Arcade</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 30px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        h1 {
+            text-align: center;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 15px;
+        }
+        
+        /* This is the new layout for each game entry */
+        .game-entry {
+            display: flex;
+            align-items: center;
+            gap: 20px; /* Space between image, text, and button */
+        }
+        
+        .game-image {
+            width: 150px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 8px;
+            flex-shrink: 0; /* Prevents image from shrinking */
+        }
+        
+        .game-info {
+            flex-grow: 1; /* Allows the info section to take up available space */
+        }
+        .game-info h3 {
+            margin: 0 0 5px 0;
+            color: #222;
+        }
+        .game-info p {
+            margin: 0;
+            color: #555;
+        }
+        
+        .game-button {
+            text-decoration: none;
+            font-weight: 500;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border-radius: 5px;
+            white-space: nowrap; /* Prevents "Start" from wrapping */
+        }
+        .game-button:hover {
+            background-color: #0056b3;
+        }
+        
+        /* This is the separator line you asked for */
+        hr {
+            border: 0;
+            height: 1px;
+            background-color: #ddd;
+            margin: 30px 0; /* Space above and below the line */
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #007bff;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <a href="index.html" class="back-link">&larr; Back to Portfolio</a>
+        
+        <h1>Game Arcade</h1>
+
+        <div class="game-entry">
+            
+            <img src="game/tic-tac-toe-preview.jpg" alt="Tic-Tac-Toe Game" class="game-image">
+            
+            <div class="game-info">
+                <h3>Tic-Tac-Toe</h3>
+                <p>The classic game of X's and O's. Try to get three in a row against a friend!</p>
+            </div>
+            
+            <a href="tic-tac-toe.html" class="game-button">Start</a>
+            
+        </div>
+        
+        <hr>
+
+        <div class="game-entry">
+            
+            <img src="game/game-placeholder.jpg" alt="A future game" class="game-image">
+            
+            <div class="game-info">
+                <h3>Future Game</h3>
+                <p>A description for your next awesome game will go here.</p>
+            </div>
+            
+            <a href="#" class="game-button" style="background-color: #6c757d; cursor: not-allowed;">Coming Soon</a>
+            
+        </div>
+
+        </div>
+
+</body>
+</html>
