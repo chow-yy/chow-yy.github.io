@@ -23,11 +23,10 @@
         text-decoration: none;
         font-weight: 600;
         font-size: 1.1rem;
-        /* Position it relative to the game container */
         max-width: 600px;
         width: 100%;
-        margin: 0 auto 15px auto; /* Center it with game */
-        padding-left: 10px; /* Align with game padding */
+        margin: 0 auto 15px auto;
+        padding-left: 10px;
         box-sizing: border-box;
     }
 
@@ -37,15 +36,10 @@
         text-align: center;
     }
     
-    /* REMOVED .page-wrapper */
-
-    /* UPDATED: This is the smart-centering container */
     .game-container {
         width: 100%;
         max-width: 600px;
-        /* Center it in the available space */
         margin: 0 auto; 
-        /* Save 320px of space on the right for the fixed scoreboard */
         margin-right: 320px; 
     }
 
@@ -92,7 +86,7 @@
         padding: 8px;
         border-radius: 8px;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        overflow-x: auto; /* Allows row to scroll if n=10 */
+        overflow-x: auto;
         padding-bottom: 10px;
     }
     
@@ -141,9 +135,9 @@
 
     .guess-container {
         display: flex;
-        flex-wrap: nowrap; /* Never wrap boxes to a new line */
+        flex-wrap: nowrap;
         gap: 8px;
-        flex-grow: 1; /* Grow to fill space */
+        flex-grow: 1;
     }
     
     .header .guess-container {
@@ -162,7 +156,7 @@
         justify-content: center;
         align-items: center;
         font-weight: bold;
-        margin-left: auto; /* Push to the right */
+        margin-left: auto;
         flex-shrink: 0;
     }
     
@@ -172,7 +166,6 @@
         gap: 10px;
     }
     
-    /* UPDATED: Fixed position to window */
     #highscore-container {
         position: fixed;
         top: 20px;
@@ -203,19 +196,17 @@
         display: inline;
     }
     
-    /* UPDATED: Breakpoint moves scoreboard to bottom */
-    @media (max-width: 950px) { /* 600px game + 320px score/gap */
+    @media (max-width: 950px) {
         .game-container {
-            /* On small screens, go back to full center */
             margin: 0 auto; 
         }
         .back-link {
-             max-width: 600px; /* Match game container */
+             max-width: 600px;
         }
         #highscore-container {
-            position: static; /* Un-fix it */
+            position: static;
             width: 100%;
-            max-width: 500px; /* Match controls width */
+            max-width: 500px;
             margin-top: 30px;
         }
     }
@@ -412,11 +403,13 @@ function submitGuess() {
     const input = guessInput.value.trim();
     const T = input.split(/[\s,]+/).map(x => parseInt(x.trim()));
 
+    // --- THIS IS THE FIXED BLOCK ---
     if (T.length !== n || T.some(isNaN)) {
         alert(`Please enter exactly ${n} numbers, separated by a space or comma.`);
-        return;
-    Failure to complete the task.
+        return; // <-- THE BUG IS FIXED
     }
+    // -----------------------------
+
     if (new Set(T).size !== T.length) {
         alert("Your guess must not contain duplicate numbers.");
         return;
