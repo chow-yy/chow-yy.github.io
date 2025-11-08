@@ -189,23 +189,38 @@
                 <h2>Projects</h2>
 
                 <div class="item-entry">
-                    <p class="title">Differentially-Private Synthetic Data for Machine Learning</p>
+                    <p class="title">DP-ML Training on DP Synthetic Data</p>
                     <p class="tech">Key Concepts: Differential Privacy, Machine Learning, Synthetic Data</p>
                     <div style="display: flex; align-items: flex-start; gap: 20px;">
                         <div style="flex: 1;">
-                            <p>
-                                This research investigates the trade-offs between privacy and utility when training Machine Learning models on differentially-private (DP) synthetic data. We developed novel upper and lower bounds on the excess empirical risk for linear models. Our experimental results on various datasets demonstrate that models trained on DP synthetic data can achieve high accuracy (e.g., observing less than a 1% accuracy drop) while simultaneously providing strong privacy guarantees.
-                            </p>
+                        <p>
+                            This project develops a preprocessing-based framework for <b>Differentially Private Machine Learning (Pre-DPML)</b>,
+                            where models are trained on <b>synthetic data</b> that safely replicates key statistical properties of sensitive datasets. 
+                            Instead of adding noise during model training, we adopt a <i>select–measure–generate</i> workflow: 
+                            (1) select attribute sets as marginal queries, (2) privately measure their statistics by adding Gaussian noise 
+                            under <i>(ε, δ)</i>-DP, and (3) generate synthetic data that matches these noisy marginals.
+                        </p>
+                        <p>
+                            The resulting DP synthetic data enables training of any ML model with <b>privacy guarantees by design</b>, 
+                            without modifying the learning algorithm. We theoretically bound the excess empirical risk 
+                            between models trained on real and DP synthetic data (≤O(1/(d–1)) for logistic regression) 
+                            and empirically show less than 1% accuracy loss on multiple public datasets. 
+                            This approach offers strong privacy protection, reusable synthetic data, and high model utility— 
+                            a practical alternative to traditional training-based DP methods such as DP-SGD and PATE.
+                        </p>
                             <p class="links">
                                 [ <a href="#icml2024">See Publication (ICML 2024)</a> ] 
                                 [ <a href="https://github.com/DPML-syn/MarginalPreserving_DP_SyntheticData" target="_blank">GitHub Repo</a> ]
                             </p>
                         </div>
                         <div style="flex: 0 0 auto;">
-                            <img src="image/dp_synthetic_data_concept.png" alt="Conceptual Diagram: Private Data to Public ML Model with DP Synthetic Data" style="max-width: 250px; height: auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                            <img src="image/dp_synthetic_data_concept.png" 
+                                 alt="Conceptual Diagram: Private Data to Public ML Model with DP Synthetic Data" 
+                                 style="max-width: 250px; height: auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
                         </div>
                     </div>
                 </div>
+
 
                 <div class="item-entry">
                     <p class="title">Multi-Agent Traffic Control Simulator</p>
