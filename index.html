@@ -121,7 +121,7 @@
 
         /* * NEW: This makes links inside the "About Me" section 
          * match the color of the text around them.
-        */
+         */
         #about a {
             color: inherit; /* This tells the link to use the same color as its parent */
             text-decoration: none; /* This removes the underline */
@@ -129,7 +129,7 @@
 
         /* * Optional but recommended: This adds the underline back 
          * ONLY when someone hovers over the link.
-        */
+         */
         #about a:hover {
             text-decoration: underline;
         }
@@ -152,8 +152,7 @@
                     <p>PhD Student, Computer Science</p>
                     <p>University of Maryland</p>
                     <p><strong>Email:</strong> skyzhou@umd.edu</p>
-                    <!-- <p><strong>Phone:</strong> +1 (301) 326-7877</p> -->
-                </div> 
+                    </div> 
             </div>
 
             <nav class="nav-right">
@@ -190,6 +189,17 @@
                 <h2>Projects</h2>
 
                 <div class="item-entry">
+                    <p class="title">Differentially-Private Synthetic Data for Machine Learning</p>
+                    <p class="tech">Key Concepts: Differential Privacy, Machine Learning, Synthetic Data</p>
+                    <p>
+                        This research investigates the trade-offs between privacy and utility when training ML models on differentially-private (DP) synthetic data. We developed novel upper and lower bounds on the excess empirical risk for linear models and showed that models trained on DP synthetic data can achieve high accuracy (e.g., <1% accuracy drop) while providing strong privacy guarantees.
+                    </p>
+                    <p class="links">
+                        [ <a href="#icml2024">See Publication (ICML 2024)</a> ] 
+                        [ <a href="https://github.com/DPML-syn/MarginalPreserving_DP_SyntheticData" target="_blank">GitHub Repo</a> ]
+                    </p>
+                </div>
+                <div class="item-entry">
                     <p class="title">Multi-Agent Traffic Control Simulator</p>
                     <p class="tech">Technologies Used: Python, PyTorch, SUMO</p>
                     <p>
@@ -217,27 +227,19 @@
             <section id="publications">
                 <h2>Publications</h2>
                 
-                <div class="item-entry">
+                <div class="item-entry" id="icml2024">
                     <p class="title">Bounding the Excess Risk for Linear Models Trained on Marginal-Preserving, Differentially-Private, Synthetic Data</p>
                     <p class="authors">
-                        <strong>Yvonne Zhou</strong>, Mingyu Liang, Ivan Brugere, Dana Dachman-Soled, Danial Dervovic, Antigoni Polychroniadou, Min Wu
+                        <strong>Yvonne Zhou</strong>, Mingyu Liang, Ivan Brugere, Danial Dervovic, Antigoni Polychroniadou, Min Wu, Dana Dachman-Soled
                     </p>
                     <p class="venue">
-                        *arXiv preprint arXiv:2402.04375, 2024*
+                        In *Proceedings of the 41st International Conference on Machine Learning (ICML), 2024*.
+                        [ <a href="papers/icml2024_dp_synthetic_data.pdf" target="_blank">PDF</a> ]
                         [ <a href="https://arxiv.org/abs/2402.04375" target="_blank">arXiv</a> ] 
                         [ <a href="https://github.com/DPML-syn/MarginalPreserving_DP_SyntheticData" target="_blank">Code</a> ]
                     </p>
                 </div>
-<!-- 
-                <div class="item-entry">
-                    <p class="title">Ethical Frameworks for Multi-Agent Decision Making</p>
-                    <p class="authors">David Lee, <strong>Yvonne Zhou</strong>, Prof. Sarah Jenkins</p>
-                    <p class="venue">
-                        In *Journal of Artificial Intelligence Research (JAIR), 2023*.
-                        [ <a href="#">PDF</a> ]
-                    </p>
-                </div> -->
-            </section>
+                </section>
 
         </main>
 
