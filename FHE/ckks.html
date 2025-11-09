@@ -37,7 +37,7 @@
   </style>
 </head>
 <body>
-  <a href="../fhe.html" class="back-link">&larr; Back to FHE Intro</a>
+  <a href="fhe.html" class="back-link">&larr; Back to FHE Intro</a>
   
   <div class="container">
     <header>
@@ -88,14 +88,14 @@
 
     <section class="card" id="encoding">
       <h2>3. Encoding Real Numbers</h2>
-      <p>CKKS encodes real numbers as scaled integers using a scale factor $\Delta$:</p>
+      <p>CKKS encodes real numbers as scaled integers using a scale factor \(\Delta\):</p>
       <p>\[ \text{Encode}(x) = \lfloor x \cdot \Delta \rceil \in \mathbb{Z}_q \]</p>
-      <p>For example, $x=3.14$ and $\Delta=2^{40}$ produces a high-precision integer. This integer is encrypted; the "noise" is now part of the approximation.</p>
+      <p>For example, \(x=3.14\) and \(\Delta=2^{40}\) produces a high-precision integer. This integer is encrypted; the "noise" is now part of the approximation.</p>
     </section>
 
     <section class="card" id="rescaling">
       <h2>4. Rescaling & Noise Management</h2>
-      <p>Multiplication grows the scale and noise. CKKS uses <strong>rescaling</strong> to divide the ciphertext by $\Delta$ and keep noise manageable:</p>
+      <p>Multiplication grows the scale and noise. CKKS uses <strong>rescaling</strong> to divide the ciphertext by \(\Delta\) and keep noise manageable:</p>
       <p>\[ c' \xrightarrow{\text{rescale}} c'' \approx \frac{c'}{\Delta} \]</p>
     </section>
     
@@ -108,16 +108,16 @@
 
     <section class="card" id="example">
       <h2>6. Concrete Example</h2>
-      <p>Encoding $x=1.5$, $y=2.25$ with scale $\Delta=1000$:</p>
+      <p>Encoding \(x=1.5\), \(y=2.25\) with scale \(\Delta=1000\):</p>
       <ul>
-        <li>Encode: $\tilde{x}=1500$, $\tilde{y}=2250$</li>
-        <li>Encrypt to get $Enc(\tilde{x}), Enc(\tilde{y})$</li>
+        <li>Encode: \(\tilde{x}=1500\), \(\tilde{y}=2250\)</li>
+        <li>Encrypt to get \(Enc(\tilde{x})\), \(Enc(\tilde{y})\)</li>
         <li>Homomorphic Addition:
-          <br>$C_{add} = Enc(\tilde{x}) + Enc(\tilde{y})$
-          <br>Decrypt/Decode $\approx 3.75$</li>
+          <br>\(C_{add} = Enc(\tilde{x}) + Enc(\tilde{y})\)
+          <br>Decrypt/Decode \(\approx 3.75\)</li>
         <li>Homomorphic Multiplication:
-          <br>$C_{mult} = Enc(\tilde{x}) \cdot Enc(\tilde{y})$
-          <br>Rescale, then decrypt/decode $\approx 3.375$</li>
+          <br>\(C_{mult} = Enc(\tilde{x}) \cdot Enc(\tilde{y})\)
+          <br>Rescale, then decrypt/decode \(\approx 3.375\)</li>
       </ul>
     </section>
 
