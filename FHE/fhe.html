@@ -59,8 +59,10 @@
       <h2>Contents</h2>
       <ol>
         <li><a href="#what-is-lwe">What is LWE (and Interactive Playground)</a></li>
-        <li><a href="#fhe-scheme-diagram">Diagram / timeline of FHE schemes (BFV and CKKS emphasis)</a></li>
-        <li><a href="#ckks">CKKS scheme</a></li>
+        <li><a href="#fhe-scheme-diagram">FHE Scheme Timeline</a></li>
+        <li><a href="#bgv">BGV Scheme</a></li>
+        <li><a href="#ckks">CKKS Scheme</a></li>
+        <li><a href="#tfhe">TFHE Scheme</a></li>
       </ol>
     </section>
 
@@ -195,20 +197,54 @@
       </section>
 
     <section class="card" id="fhe-scheme-diagram">
-      <h2>FHE Scheme Timeline / Diagram</h2>
-      <p>Conceptual timeline of popular FHE schemes (simplified):</p>
+      <h2>2. FHE Scheme Timeline</h2>
+      
+      <p>The concept of computing on encrypted data—once a theoretical dream from the 1970s known as "privacy homomorphisms"—took decades to become a practical reality. This timeline charts the pivotal moments in that journey.</p>
+      
+      <p>It begins with early <strong>partially homomorphic</strong> schemes (like RSA, which could only perform multiplication) and moves to the watershed 2009 breakthrough by Craig Gentry, which finally proved FHE was possible. From there, it follows the rapid innovation that gave us today's powerful and specialized schemes, paving the way for secure cloud computing and machine learning.</p>
+      
+      <img src="FHE/fhe_timeline.png" alt="A timeline of FHE development from 1977 to 2016" style="width:100%; max-width: 800px; margin: 16px auto; display: block; border-radius: 8px;">
+      
+      <h3 style="margin-top: 24px;">Key Milestones in FHE History</h3>
+      
       <ul>
-        <li>Early LWE-based schemes</li>
-        <li>BFV (efficient integer arithmetic, supports exact addition/multiplication)</li>
-        <li>CKKS (approximate arithmetic for real numbers)</li>
+        <li><strong>1977 (RSA):</strong> This foundational public-key cryptosystem was the first major scheme to exhibit a <strong>partial</strong> homomorphic property. It allows for the multiplication of ciphertexts (e.g., <code>Enc(m1) * Enc(m2) = Enc(m1 * m2)</code>), proving that computation on encrypted data was possible, even if limited to a single operation.</li>
+        
+        <li><strong>2009 (Gentry's Breakthrough):</strong> Craig Gentry's doctoral thesis provided the first plausible construction for a <strong>Fully</strong> Homomorphic Encryption scheme. It solved the critical problem of noise accumulation by introducing "bootstrapping," a revolutionary technique to refresh a ciphertext, theoretically allowing for an unlimited number of computations.</li>
+        
+        <li><strong>2011-2012 (BGV / BFV):</strong> These "second-generation" schemes (named for Brakerski, Gentry, Vaikuntanathan, and Fan-Vercauteren) made FHE more practical. Based on the Ring-LWE problem, they introduced new noise-management techniques (like modulus switching) and are optimized for <strong>exact integer arithmetic</strong>—ideal for private database queries and financial applications.</li>
+        
+        <li><strong>2016 (CKKS):</strong> A revolutionary scheme (from Cheon, Kim, Kim, Song) designed for <strong>approximate arithmetic</strong>. By treating the noise as part of the calculation, CKKS can efficiently perform computations on encrypted real or complex numbers. This breakthrough unlocked the use of FHE for data science and privacy-preserving machine learning.</li>
+        
+        <li><strong>2016 (TFHE):</strong> This scheme (Fast Fully Homomorphic Encryption over the Torus) takes a different approach by operating on individual bits. It excels at evaluating <strong>boolean circuits</strong> (logic gates like AND, OR, NOT) and is notable for its incredibly fast and efficient bootstrapping, allowing for complex programs to be run on encrypted data.</li>
       </ul>
-      <p><em>Diagram placeholder — insert time-map graphic here</em></p>
+    </section>
+
+    <section class="card" id="bgv">
+      <h2>BGV Scheme</h2>
+      <p>The BGV scheme (named for its authors: Brakerski, Gentry, and Vaikuntanathan) is a foundational "second-generation" FHE scheme, often grouped with BFV. It is based on the Ring-LWE problem and is designed for efficient and exact arithmetic on integers.</p>
+      <p>Its primary innovation was a new <strong>modulus switching</strong> technique, which effectively "shrinks" the ciphertext and its noise in a controlled way after each multiplication. This allows for deeper computational circuits before bootstrapping is required.</p>
+      <p style="margin-top: 16px;">
+        <a href="FHE/bgv.html" style="font-weight: 500;">Learn more about the BGV Scheme &rarr;</a>
+      </p>
     </section>
 
     <section class="card" id="ckks">
       <h2>CKKS Scheme</h2>
-      <p>CKKS is an approximate FHE scheme optimized for real-number arithmetic. Unlike BFV, it encodes numbers as scaled integers and manages approximation errors via rescaling.</p>
-      <p>CKKS supports homomorphic addition, multiplication, and batching for efficient vectorized computations.</p>
+      <p>The CKKS scheme (named for its authors: Cheon, Kim, Kim, and Song) is a breakthrough FHE scheme optimized for <strong>approximate arithmetic</strong>. Unlike BFV or BGV which handle exact integers, CKKS works on encrypted real or complex numbers.</p>
+      <p>It achieves this by treating the "noise" as part of the approximation error, similar to floating-point arithmetic. It uses a special <strong>rescaling</strong> procedure to manage the magnitude of the encrypted values, making it the standard for privacy-preserving machine learning and data analysis.</p>
+      <p style="margin-top: 16px;">
+        <a href="FHE/ckks.html" style="font-weight: 500;">Learn more about the CKKS Scheme &rarr;</a>
+      </p>
+    </section>
+
+    <section class="card" id="tfhe">
+      <h2>TFHE Scheme</h2>
+      <p>TFHE (Fast Fully Homomorphic Encryption over the Torus) is a unique FHE scheme that operates at the bit level. Instead of encrypting large numbers, it is optimized for encrypting individual bits and performing <strong>boolean operations</strong> (like AND, OR, NOT).</p>
+      <p>Its most famous feature is its extremely fast <strong>bootstrapping</strong>, which can "refresh" an encrypted bit in milliseconds. This allows for the evaluation of any arbitrary circuit or function, including running complex conditional logic (like "if" statements) on encrypted data.</p>
+      <p style="margin-top: 16px;">
+        <a href="FHE/tfhe.html" style="font-weight: 500;">Learn more about the TFHE Scheme &rarr;</a>
+      </p>
     </section>
 
     <footer>
