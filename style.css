@@ -15,6 +15,31 @@ body {
       border-radius: 12px;
       box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
     }
+/* ========== back link styles ========== */
+.back-link {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--accent-color, #004080);
+  text-decoration: none;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(4px);
+  padding: 6px 10px;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  transition: color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
+  z-index: 1000;
+}
+
+.back-link:hover {
+  color: var(--accent-hover, #002b5c);
+  text-decoration: underline;
+  background-color: rgba(255, 255, 255, 0.95);
+  transform: translateY(-1px);
+}
+
 
 /* --- global style for standalone links with class="links" --- */
       a.links {
