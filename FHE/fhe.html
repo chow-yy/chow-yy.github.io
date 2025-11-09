@@ -203,7 +203,7 @@
       
       <p>It begins with early <strong>partially homomorphic</strong> schemes (like RSA, which could only perform multiplication) and moves to the watershed 2009 breakthrough by Craig Gentry, which finally proved FHE was possible. From there, it follows the rapid innovation that gave us today's powerful and specialized schemes, paving the way for secure cloud computing and machine learning.</p>
       
-      <img src="FHE/fhe_timeline.png" alt="A timeline of FHE development from 1977 to 2016" style="width:100%; max-width: 800px; margin: 16px auto; display: block; border-radius: 8px;">
+      <img src="fhe_timeline.png" alt="A timeline of FHE development from 1977 to 2016" style="width:100%; max-width: 800px; margin: 16px auto; display: block; border-radius: 8px;">
       
       <h3 style="margin-top: 24px;">Key Milestones in FHE History</h3>
       
@@ -225,7 +225,7 @@
       <p>The BGV scheme (named for its authors: Brakerski, Gentry, and Vaikuntanathan) is a foundational "second-generation" FHE scheme, often grouped with BFV. It is based on the Ring-LWE problem and is designed for efficient and exact arithmetic on integers.</p>
       <p>Its primary innovation was a new <strong>modulus switching</strong> technique, which effectively "shrinks" the ciphertext and its noise in a controlled way after each multiplication. This allows for deeper computational circuits before bootstrapping is required.</p>
       <p style="margin-top: 16px;">
-        <a href="FHE/bgv.html" style="font-weight: 500;">Learn more about the BGV Scheme &rarr;</a>
+        <a href="bgv.html" style="font-weight: 500;">Learn more about the BGV Scheme &rarr;</a>
       </p>
     </section>
 
@@ -234,7 +234,7 @@
       <p>The CKKS scheme (named for its authors: Cheon, Kim, Kim, and Song) is a breakthrough FHE scheme optimized for <strong>approximate arithmetic</strong>. Unlike BFV or BGV which handle exact integers, CKKS works on encrypted real or complex numbers.</p>
       <p>It achieves this by treating the "noise" as part of the approximation error, similar to floating-point arithmetic. It uses a special <strong>rescaling</strong> procedure to manage the magnitude of the encrypted values, making it the standard for privacy-preserving machine learning and data analysis.</p>
       <p style="margin-top: 16px;">
-        <a href="FHE/ckks.html" style="font-weight: 500;">Learn more about the CKKS Scheme &rarr;</a>
+        <a href="ckks.html" style="font-weight: 500;">Learn more about the CKKS Scheme &rarr;</a>
       </p>
     </section>
 
@@ -243,7 +243,7 @@
       <p>TFHE (Fast Fully Homomorphic Encryption over the Torus) is a unique FHE scheme that operates at the bit level. Instead of encrypting large numbers, it is optimized for encrypting individual bits and performing <strong>boolean operations</strong> (like AND, OR, NOT).</p>
       <p>Its most famous feature is its extremely fast <strong>bootstrapping</strong>, which can "refresh" an encrypted bit in milliseconds. This allows for the evaluation of any arbitrary circuit or function, including running complex conditional logic (like "if" statements) on encrypted data.</p>
       <p style="margin-top: 16px;">
-        <a href="FHE/tfhe.html" style="font-weight: 500;">Learn more about the TFHE Scheme &rarr;</a>
+        <a href="tfhe.html" style="font-weight: 500;">Learn more about the TFHE Scheme &rarr;</a>
       </p>
     </section>
 
