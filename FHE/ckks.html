@@ -74,36 +74,29 @@
     <section class="card" id="lwe-intuition">
       <h2>2. Toy LWE Intuition</h2>
       <p>Before CKKS, consider a simple LWE-style encryption (integers with noise) to build intuition:</p>
-      <p>We define small parameters:</p>
       <p>\[ q = 97, \quad s = 17, \quad e = \text{small noise term (e.g., ±1)} \]</p>
-      <p>To encrypt a message \( m \) with key \( s \):</p>
-      <p>\[ a \text{ — random number in the same domain as } m \]</p>
-      <p>\[ Enc(m) = (a, b = (a \cdot s + m + e) \bmod q) \]</p>
-      <p>To decrypt:</p>
-      <p>\[ Dec(a, b) = (b - a \cdot s) \bmod q \approx m \]</p>
-      <p>Homomorphic addition works naturally:</p>
-      <p>\[ Enc(m_1) + Enc(m_2) = (a_1 + a_2, b_1 + b_2) \rightarrow m_1 + m_2 + (e_1 + e_2) \]</p>
-      <p>Noise accumulates with operations, motivating schemes like BFV and CKKS that manage noise carefully.</p>
+      <p>Encryption: \[ Enc(m) = (a, b = (a \cdot s + m + e) \bmod q) \]</p>
+      <p>Decryption: \[ Dec(a,b) = (b - a\cdot s) \bmod q \approx m \]</p>
+      <p>Noise grows with operations; CKKS handles this carefully for real numbers.</p>
     </section>
 
     <section class="card" id="encoding">
       <h2>3. Encoding Real Numbers</h2>
       <p>CKKS encodes real numbers as scaled integers using a scale factor \(\Delta\):</p>
-      <p>\[ \text{Encode}(x) = \lfloor x \cdot \Delta \rceil \in \mathbb{Z}_q \]</p>
-      <p>For example, \(x=3.14\) and \(\Delta=2^{40}\) produces a high-precision integer. This integer is encrypted; the "noise" is now part of the approximation.</p>
+      <p>\[ \text{Encode}(x) = \lfloor x \cdot \Delta \rceil \]</p>
+      <p>This integer is then encrypted; the “noise” becomes part of the approximation.</p>
     </section>
 
     <section class="card" id="rescaling">
       <h2>4. Rescaling & Noise Management</h2>
-      <p>Multiplication grows the scale and noise. CKKS uses <strong>rescaling</strong> to divide the ciphertext by \(\Delta\) and keep noise manageable:</p>
+      <p>Multiplication grows both the scale and the noise. CKKS uses <strong>rescaling</strong> to divide the ciphertext by \(\Delta\) and keep results in a manageable range:</p>
       <p>\[ c' \xrightarrow{\text{rescale}} c'' \approx \frac{c'}{\Delta} \]</p>
     </section>
     
     <section class="card" id="batching">
         <h2>5. Batching (SIMD)</h2>
-        <p>CKKS allows packing thousands of numbers into a single ciphertext. Operations on ciphertexts then apply to all packed numbers simultaneously:</p>
+        <p>CKKS allows packing thousands of numbers into one ciphertext. Operations on ciphertexts apply to all packed numbers simultaneously:</p>
         <p>\[ C_{vec} = \text{Encrypt}([x_1, x_2, \dots, x_N]) \]</p>
-        <p>Adding two ciphertexts applies addition to each element in parallel.</p>
     </section>
 
     <section class="card" id="example">
@@ -111,24 +104,20 @@
       <p>Encoding \(x=1.5\), \(y=2.25\) with scale \(\Delta=1000\):</p>
       <ul>
         <li>Encode: \(\tilde{x}=1500\), \(\tilde{y}=2250\)</li>
-        <li>Encrypt to get \(Enc(\tilde{x})\), \(Enc(\tilde{y})\)</li>
-        <li>Homomorphic Addition:
-          <br>\(C_{add} = Enc(\tilde{x}) + Enc(\tilde{y})\)
-          <br>Decrypt/Decode \(\approx 3.75\)</li>
-        <li>Homomorphic Multiplication:
-          <br>\(C_{mult} = Enc(\tilde{x}) \cdot Enc(\tilde{y})\)
-          <br>Rescale, then decrypt/decode \(\approx 3.375\)</li>
+        <li>Encrypt → \(Enc(\tilde{x})\), \(Enc(\tilde{y})\)</li>
+        <li>Add: decrypt/decode → 3.75</li>
+        <li>Multiply, rescale → decrypt/decode → 3.375</li>
       </ul>
     </section>
 
     <section class="card" id="interactive-playground">
       <h2>7. Interactive Playground</h2>
-      <p>Try encrypting small integers, perform homomorphic operations, and see how noise behaves:</p>
+      <p>Try encrypting real numbers using CKKS-like approximate arithmetic:</p>
 
       <div style="display:flex;gap:12px;flex-wrap:wrap">
         <div style="flex:1;min-width:280px">
-          <label>Modulus q</label>
-          <input id="q" value="97" />
+          <label>Scale Δ</label>
+          <input id="delta" value="1000" />
         </div>
         <div style="width:160px">
           <label>Secret key s</label>
@@ -143,15 +132,11 @@
       <div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap">
         <div style="flex:1;min-width:260px">
           <label>Message A</label>
-          <input id="m1" value="12" />
+          <input id="m1" value="12.3" />
         </div>
         <div style="flex:1;min-width:260px">
           <label>Message B</label>
-          <input id="m2" value="7" />
-        </div>
-        <div style="width:160px">
-          <label>Noise stddev</label>
-          <input id="noise" value="2" />
+          <input id="m2" value="7.8" />
         </div>
       </div>
 
@@ -159,7 +144,7 @@
         <button id="encA">Encrypt A</button>
         <button id="encB">Encrypt B</button>
         <button id="add">Add (A+B)</button>
-        <button id="mulScalar">Multiply by 3</button>
+        <button id="mulScalar">Multiply A by 3</button>
         <button id="decrypt">Decrypt last result</button>
       </div>
 
@@ -179,8 +164,8 @@
         <details>
           <summary>Notes about this toy demo</summary>
           <ul>
-            <li>Noise accumulates; repeated operations may corrupt decrypted values.</li>
-            <li>Real FHE schemes use techniques like relinearization, modulus switching, and bootstrapping to manage noise.</li>
+            <li>Real numbers are scaled and rounded; the result is approximate.</li>
+            <li>Repeated operations increase approximation error.</li>
           </ul>
         </details>
       </div>
@@ -214,20 +199,73 @@
   </div>
 
   <script>
-    // Simple JS for toy interactive playground
-    let key;
+    // CKKS-like toy interactive playground
+    let key, lastCipherA, lastCipherB, lastResult;
+
+    const deltaInput = () => parseFloat(document.getElementById('delta').value) || 1000;
+
     document.getElementById('genKey').onclick = () => {
-      const s = Math.floor(Math.random()*97);
-      key = s;
-      document.getElementById('s').value = s;
+      key = Math.random(); // toy secret key
+      document.getElementById('s').value = key.toFixed(3);
     };
-    function encrypt(m){const a=Math.floor(Math.random()*97);const e=parseInt(document.getElementById('noise').value);return {a,b:(a*key+m+e)%97};}
-    let lastResult;
-    document.getElementById('encA').onclick = ()=>{const m=parseInt(document.getElementById('m1').value);lastResult=encrypt(m);document.getElementById('cipherA').innerText="Cipher A: "+JSON.stringify(lastResult);};
-    document.getElementById('encB').onclick = ()=>{const m=parseInt(document.getElementById('m2').value);lastResult=encrypt(m);document.getElementById('cipherB').innerText="Cipher B: "+JSON.stringify(lastResult);};
-    document.getElementById('add').onclick = ()=>{const m1=encrypt(parseInt(document.getElementById('m1').value));const m2=encrypt(parseInt(document.getElementById('m2').value));lastResult={a:(m1.a+m2.a)%97,b:(m1.b+m2.b)%97};document.getElementById('result').innerText="Result: "+JSON.stringify(lastResult);};
-    document.getElementById('mulScalar').onclick = ()=>{const m=parseInt(document.getElementById('m1').value);lastResult={a:(m*3)%97,b:(encrypt(m).b*3)%97};document.getElementById('result').innerText="Result: "+JSON.stringify(lastResult);};
-    document.getElementById('decrypt').onclick = ()=>{if(!lastResult) return;const val=(lastResult.b-lastResult.a*key)%97;document.getElementById('result').innerText+="\nDecrypted ≈ "+val;};
+
+    function encode(x) { return Math.round(x*deltaInput()); }
+    function decode(x) { return x/deltaInput(); }
+
+    function encryptCKKS(m) {
+      const a = encode(Math.random()); 
+      const b = a*key + encode(m); 
+      return {a,b};
+    }
+
+    function addCKKS(c1,c2) {
+      return {a:c1.a+c2.a, b:c1.b+c2.b};
+    }
+
+    function mulCKKSScalar(c, scalar) {
+    let a = c.a * scalar;
+    let b = c.b * scalar; 
+    return {a, b};
+    }
+
+
+    function decryptCKKS(c) {
+      return decode(c.b - c.a*key);
+    }
+
+    document.getElementById('encA').onclick = () => {
+      const m = parseFloat(document.getElementById('m1').value);
+      lastCipherA = encryptCKKS(m);
+      document.getElementById('cipherA').innerText = "Cipher A: "+JSON.stringify(lastCipherA);
+      lastResult = lastCipherA;
+      document.getElementById('result').innerText = "Result: —";
+    };
+
+    document.getElementById('encB').onclick = () => {
+      const m = parseFloat(document.getElementById('m2').value);
+      lastCipherB = encryptCKKS(m);
+      document.getElementById('cipherB').innerText = "Cipher B: "+JSON.stringify(lastCipherB);
+      lastResult = lastCipherB;
+      document.getElementById('result').innerText = "Result: —";
+    };
+
+    document.getElementById('add').onclick = () => {
+      if(!lastCipherA || !lastCipherB) return alert("Encrypt both A and B first.");
+      lastResult = addCKKS(lastCipherA,lastCipherB);
+      document.getElementById('result').innerText = "Result (ciphertext): "+JSON.stringify(lastResult);
+    };
+
+    document.getElementById('mulScalar').onclick = () => {
+      if(!lastCipherA) return alert("Encrypt A first.");
+      lastResult = mulCKKSScalar(lastCipherA,3);
+      document.getElementById('result').innerText = "Result (ciphertext): "+JSON.stringify(lastResult);
+    };
+
+    document.getElementById('decrypt').onclick = () => {
+      if(!lastResult) return;
+      const val = decryptCKKS(lastResult);
+      document.getElementById('result').innerText += "\nDecrypted ≈ "+val.toFixed(4);
+    };
   </script>
 </body>
 </html>
