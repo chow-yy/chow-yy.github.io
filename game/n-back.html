@@ -7,14 +7,30 @@
 <style>
   body {
     font-family: Arial, sans-serif;
-    text-align: center;
-    margin-top: 20px;
+    margin: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
+
+  #game-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  #grid-container {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+  }
+
   #grid {
     display: grid;
-    margin: 20px auto;
     gap: 5px;
   }
+
   .cell {
     width: 50px;
     height: 50px;
@@ -27,19 +43,34 @@
     user-select: none;
     transition: background-color 0.3s;
   }
+
   .active {
     background-color: blue;
     color: white;
   }
+
   .matched {
     background-color: green !important;
     color: white;
   }
+
   button {
     margin-top: 20px;
     font-size: 16px;
     padding: 10px 20px;
   }
+
+  #instruction {
+    position: absolute;
+    top: 0;
+    right: 0;
+    max-width: 250px;
+    background-color: #f0f0f0;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 14px;
+  }
+
   label {
     margin: 0 10px;
   }
@@ -49,24 +80,33 @@
 
 <h1>N-back Brain Training</h1>
 
-<label>Grid size (L): <input type="number" id="gridSize" value="3" min="2" max="6"></label>
-<label>N-back (N): <input type="number" id="nBack" value="2" min="1"></label>
-<button onclick="startGame()">Start Game</button>
+<div id="game-container">
+    <div id="instruction">
+        Watch the sequence of blue squares. Click "Match" if the current square matches the one <strong>N steps back</strong>. Find 5 matches to finish.
+    </div>
 
-<div>
-  <label>Speed (ms): <span id="speedDisplay">1500</span></label>
-  <input type="range" id="speedSlider" min="500" max="3000" step="100" value="1500" oninput="updateSpeed(this.value)">
+    <div>
+        <label>Grid size (L): <input type="number" id="gridSize" value="3" min="2" max="6"></label>
+        <label>N-back (N): <input type="number" id="nBack" value="2" min="1"></label>
+        <button onclick="startGame()">Start Game</button>
+    </div>
+
+    <div>
+        <label>Speed (ms): <span id="speedDisplay">1500</span></label>
+        <input type="range" id="speedSlider" min="500" max="3000" step="100" value="1500" oninput="updateSpeed(this.value)">
+    </div>
+
+    <div id="grid-container">
+        <div id="grid"></div>
+    </div>
+
+    <button id="matchBtn" disabled onclick="matchClicked()">Match</button>
+    <h2 id="result"></h2>
 </div>
 
-<div id="grid"></div>
-<button id="matchBtn" disabled onclick="matchClicked()">Match</button>
-
-<h2 id="result"></h2>
-
 <script>
-// === CONFIGURATION VARIABLES ===
-let DISPLAY_INTERVAL = 1500;  // initial milliseconds between each cell highlight
-let TOTAL_MATCHES = 5;        // number of N-back matches before stopping
+let DISPLAY_INTERVAL = 1500;
+let TOTAL_MATCHES = 5;
 
 let L, N;
 let sequence = [];
@@ -79,7 +119,6 @@ function updateSpeed(value) {
     DISPLAY_INTERVAL = parseInt(value);
     document.getElementById('speedDisplay').textContent = DISPLAY_INTERVAL;
 
-    // If the game is running, restart interval with new speed
     if(interval) {
         clearInterval(interval);
         interval = setInterval(showNext, DISPLAY_INTERVAL);
@@ -97,7 +136,6 @@ function startGame() {
     document.getElementById('result').textContent = '';
     document.getElementById('matchBtn').disabled = false;
 
-    // Start highlighting sequence at the current interval
     interval = setInterval(showNext, DISPLAY_INTERVAL);
 }
 
@@ -110,11 +148,26 @@ function generateSequence() {
         let rand = Math.floor(Math.random() * (L*L));
         sequence.push(rand);
 
-        // Check if current position is an N-back match
         if(sequence.length > N && sequence[sequence.length-1] === sequence[sequence.length-N-1]) {
             count++;
             matchPositions.push(sequence.length-1);
         }
+    }
+
+    // Limit sequence length
+    const maxLength = TOTAL_MATCHES * N * 5;
+    while(sequence.length > maxLength) {
+        // Remove a random element outside match sequences
+        let removable = [];
+        for(let i=0; i<sequence.length; i++) {
+            if(!matchPositions.includes(i) && (i < N || i > sequence.length-N)) removable.push(i);
+        }
+        if(removable.length === 0) break;
+        let removeIndex = removable[Math.floor(Math.random()*removable.length)];
+        sequence.splice(removeIndex,1);
+
+        // Update match positions
+        matchPositions = matchPositions.map(p => p > removeIndex ? p-1 : p);
     }
 
     console.log("Sequence:", sequence);
@@ -158,12 +211,24 @@ function matchClicked() {
 }
 
 function calculateAccuracy() {
-    let correct = 0;
+    let correctClicks = 0;
+
+    // Count correct clicks only if it matches an actual N-back position
     for(let pos of userMatches) {
-        if(matchPositions.includes(pos)) correct++;
+        if(matchPositions.includes(pos)) correctClicks++;
     }
+
+    // Count missed matches
     let missed = matchPositions.filter(p => !userMatches.includes(p)).length;
-    document.getElementById('result').textContent = `Correct: ${correct}, Missed: ${missed}, Accuracy: ${((correct/matchPositions.length)*100).toFixed(2)}%`;
+
+    // Count false positives
+    let falsePositives = userMatches.filter(p => !matchPositions.includes(p)).length;
+
+    // Accuracy = correct / total clicks
+    let accuracy = userMatches.length > 0 ? (correctClicks / userMatches.length) * 100 : 0;
+
+    document.getElementById('result').textContent =
+        `Correct clicks: ${correctClicks}, Missed: ${missed}, Wrong clicks: ${falsePositives}, Accuracy: ${accuracy.toFixed(2)}%`;
 
     // Highlight actual matched positions
     matchPositions.forEach(pos => {
@@ -171,7 +236,6 @@ function calculateAccuracy() {
         cell.classList.add('matched');
     });
 
-    // Remove highlight after 2 seconds
     setTimeout(() => {
         matchPositions.forEach(pos => {
             const cell = document.getElementById('cell-' + sequence[pos]);
@@ -179,6 +243,7 @@ function calculateAccuracy() {
         });
     }, 2000);
 }
+
 </script>
 
 </body>
