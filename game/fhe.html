@@ -4,17 +4,20 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Intro to FHE — Interactive Tutorial</title>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
   <style>
     :root{--bg:#f9fafb;--card:#ffffff;--muted:#4b5563;--accent:#0284c7}
     body{font-family:Inter,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:linear-gradient(180deg,#f0f9ff 0%,#ffffff 100%);color:#111827;margin:0;padding:32px}
     .container{max-width:980px;margin:0 auto}
     header{display:flex;align-items:center;gap:16px}
     h1{margin:0;font-size:28px}
+    h2,h3,h4{scroll-margin-top:80px}
+    a{color:var(--accent);text-decoration:none}
+    a:hover{text-decoration:underline}
     p.lead{color:var(--muted);margin-top:8px}
     .card{background:var(--card);border-radius:12px;padding:18px;margin-top:18px;box-shadow:0 6px 24px rgba(0,0,0,0.05)}
     pre{background:#f1f5f9;padding:12px;border-radius:8px;overflow:auto}
     .grid{display:grid;grid-template-columns:1fr 360px;gap:16px}
-    .controls{display:flex;flex-direction:column;gap:8px}
     label{font-size:13px;color:var(--muted)}
     input,button,select,textarea{padding:8px;border-radius:8px;border:1px solid rgba(0,0,0,0.1);background:#f9fafb;color:inherit}
     button{cursor:pointer;background:var(--accent);color:white;border:none}
@@ -22,10 +25,10 @@
     .monospace{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
     .status{font-size:13px;color:var(--muted)}
     .row{display:flex;gap:8px}
-    .output{background:#f1f5f9;padding:12px;border-radius:8px}
-    footer{margin-top:28px;color:var(--muted);font-size:13px}
+    .output{background:#f1f5f9;padding:12px;border-radius:8px;overflow-x:auto}
+    footer{margin-top:28px;color:var(--muted);font-size:13px;text-align:center}
     .note{background:#e0f2fe;padding:10px;border-radius:8px;color:#0369a1}
-    .kbd{background:#e5e7eb;padding:2px 6px;border-radius:6px;border:1px solid rgba(0,0,0,0.1)}
+    .cite-note{margin-top:8px;font-size:11px;color:#6b7280}
   </style>
 </head>
 <body>
@@ -41,237 +44,199 @@
       </div>
     </header>
 
-        <section class="card">
+    <section class="card" id="what-is-fhe">
       <h2>What is FHE (in one sentence)?</h2>
       <p>Fully Homomorphic Encryption (FHE) lets you compute on encrypted data and obtain an encrypted result which, when decrypted, matches the result of performing the same computation on the plaintexts. In practice, FHE schemes are complex — this page shows a simplified <em>toy</em> LWE-style construction to build intuition.</p>
     </section>
 
-    <div class="grid">
-      <main>
-        <section class="card">
-          <h3>Core concepts</h3>
+    <section class="card">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#what-is-lwe">What is LWE</a></li>
+        <li><a href="#interactive-playground">Interactive playground (using LWE)</a></li>
+        <li><a href="#fhe-scheme-diagram">Diagram / timeline of FHE schemes (BFV and CKKS emphasis)</a></li>
+        <li><a href="#ckks">CKKS scheme</a></li>
+      </ol>
+    </section>
+
+    <section class="card" id="what-is-lwe">
+      <h2>1. What is LWE</h2>
+      <p>The Learning With Errors (LWE) problem is the mathematical foundation of many lattice-based cryptographic schemes, including modern FHE. It is believed to be hard even for quantum computers.</p>
+      <p>In LWE, we assume there exists a secret vector \( s \), and we observe many samples of the form \( (a, b = \langle a, s \rangle + e \mod q) \), where \( a \) is random, and \( e \) is a small noise term. The challenge is to recover \( s \) from these noisy linear equations — a problem known to be computationally hard.</p>
+      <p>Most FHE schemes build on variants of LWE, such as Ring-LWE (RLWE), where operations take place in polynomial rings for efficiency.</p>
+
+      <h3>Toy scheme (LWE-style) — mathematics (short)</h3>
+      <p>We define small parameters to illustrate encryption:</p>
+      <p>\[ q = 97, \quad s = 17, \quad e = \text{small noise term (e.g., ±1)} \]</p>
+      <p>To encrypt a message \( m \):</p>
+      <p>\[ Enc(m) = (a, b = a \cdot s + m + e \mod q) \]</p>
+      <p>To decrypt:</p>
+      <p>\[ Dec(a, b) = (b - a \cdot s) \mod q \approx m + e \]</p>
+      <p>Homomorphic addition works naturally:</p>
+      <p>\[ Enc(m_1) + Enc(m_2) = (a_1 + a_2, b_1 + b_2) \rightarrow m_1 + m_2 + (e_1 + e_2) \]</p>
+      <p>Noise accumulates with operations — a key limitation and motivation for advanced schemes like BFV and CKKS.</p>
+    </section>
+
+    <section class="card" id="interactive-playground">
+      <h2>2. Interactive playground (using LWE)</h2>
+      <p>Try encrypting two small integers, add them homomorphically, and decrypt to see how noise behaves.</p>
+
+      <h3>Interactive playground</h3>
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <div style="flex:1;min-width:280px">
+          <label>Modulus q (use large to avoid wraparound)</label>
+          <input id="q" value="65537" />
+        </div>
+        <div style="width:160px">
+          <label>Secret key s</label>
+          <input id="s" readonly class="monospace" />
+        </div>
+        <div style="width:160px">
+          <label>&nbsp;</label>
+          <button id="genKey">Generate key</button>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap">
+        <div style="flex:1;min-width:260px">
+          <label>Message A (small integer)</label>
+          <input id="m1" value="12" />
+        </div>
+        <div style="flex:1;min-width:260px">
+          <label>Message B (small integer)</label>
+          <input id="m2" value="7" />
+        </div>
+        <div style="width:160px">
+          <label>Noise stddev</label>
+          <input id="noise" value="2" />
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:10px">
+        <button id="encA">Encrypt A</button>
+        <button id="encB">Encrypt B</button>
+        <button id="add">Homomorphic Add (A+B)</button>
+        <button id="mulScalar">Scalar Multiply (A * 3)</button>
+        <button id="decrypt">Decrypt last result</button>
+        <button id="download">Download demo HTML</button>
+      </div>
+
+      <div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap">
+        <div style="flex:1;min-width:260px">
+          <div class="output" id="cipherA">Cipher A: —</div>
+        </div>
+        <div style="flex:1;min-width:260px">
+          <div class="output" id="cipherB">Cipher B: —</div>
+        </div>
+        <div style="flex:1;min-width:260px">
+          <div class="output" id="result">Result: —</div>
+        </div>
+      </div>
+
+      <div style="margin-top:12px">
+        <details>
+          <summary>Notes about this toy demo</summary>
           <ul>
-            <li><strong>Secret key:</strong> kept private by the decryptor.</li>
-            <li><strong>Encryption:</strong> hides the message but allows algebraic operations to be performed on ciphertexts.</li>
-            <li><strong>Noise:</strong> small random error introduced at encryption — noise grows with operations and limits how many operations you can do.</li>
-            <li><strong>Homomorphic addition (easy):</strong> add two ciphertexts to get ciphertext of sum.</li>
-            <li><strong>Homomorphic multiplication (hard):</strong> supported but increases noise fast; real schemes use relinearization/rescaling.</li>
+            <li>Because noise accumulates, if you repeatedly add or multiply ciphertexts the decrypted value will eventually be wrong.</li>
+            <li>Real FHE schemes include operations (relinearization, modulus switching, bootstrapping) to manage noise and permit deep circuits.</li>
           </ul>
-          <div class="note">
-            This tutorial uses a toy LWE-style scheme with ciphertexts represented as pairs (a, b). It demonstrates addition and scalar multiplication and visualizes noise growth.
-          </div>
-        </section>
+        </details>
+      </div>
 
-        <section class="card">
-          <h3>Toy scheme (LWE-style) — mathematics (short)</h3>
-          <p class="monospace">Keys: choose modulus <code>q</code> (large), secret key <code>s &lt; q</code> random.</p>
-          <p class="monospace">Encrypt message <code>m</code> (small integer): pick random <code>a</code> &lt;&lt; q and small noise <code>e</code>. Set</p>
-          <pre class="monospace">b = (a*s + m + e) mod q
-ciphertext = (a, b)</pre>
-          <p>Decrypt: compute <code>(b - a*s) mod q</code>. That equals <code>m + e</code> (mod q). If the noise <code>e</code> is small enough we can recover <code>m</code> by rounding to the nearest integer.</p>
+      <script>
+        function randNoise(std) { return Math.round((Math.random()*2-1)*std); }
+        let cipherA = null, cipherB = null, lastResult = null;
+        const sInput = document.getElementById('s');
 
-          <p><strong>Homomorphic addition:</strong> add components element-wise: <code>(a1+a2, b1+b2)</code>. The decrypted value becomes <code>(m1 + m2) + (e1 + e2)</code>, so noise adds.</p>
+        document.getElementById('genKey').onclick = () => {
+          const q = parseInt(document.getElementById('q').value);
+          const s = Math.floor(Math.random()*q);
+          sInput.value = s;
+        };
 
-          <p><strong>Scalar multiply:</strong> multiply both components by scalar <code>c</code>: ciphertext scales and noise scales by <code>c</code>.</p>
+        document.getElementById('encA').onclick = () => {
+          const q=parseInt(document.getElementById('q').value);
+          const s=parseInt(sInput.value);
+          const m=parseInt(document.getElementById('m1').value);
+          const e=randNoise(parseInt(document.getElementById('noise').value));
+          const a=Math.floor(Math.random()*q), b=(a*s + m + e)%q;
+          cipherA={a,b};
+          document.getElementById('cipherA').innerText=`Cipher A: (a=${a}, b=${b})`;
+        };
 
-          <p><strong>Note:</strong> Real FHE schemes support efficient multiplication, key switching and noise management; this page only demonstrates the intuition.</p>
-        </section>
+        document.getElementById('encB').onclick = () => {
+          const q=parseInt(document.getElementById('q').value);
+          const s=parseInt(sInput.value);
+          const m=parseInt(document.getElementById('m2').value);
+          const e=randNoise(parseInt(document.getElementById('noise').value));
+          const a=Math.floor(Math.random()*q), b=(a*s + m + e)%q;
+          cipherB={a,b};
+          document.getElementById('cipherB').innerText=`Cipher B: (a=${a}, b=${b})`;
+        };
 
-        <section class="card">
-          <h3>Interactive playground</h3>
-          <p>Try encrypting two small integers, add them homomorphically, and decrypt to see how noise behaves.</p>
+        document.getElementById('add').onclick = () => {
+          if(!cipherA||!cipherB){alert('Encrypt both A and B first'); return;}
+          const q=parseInt(document.getElementById('q').value);
+          const a=(cipherA.a+cipherB.a)%q;
+          const b=(cipherA.b+cipherB.b)%q;
+          lastResult={a,b};
+          document.getElementById('result').innerText=`Result: (a=${a}, b=${b})`;
+        };
 
-          <div style="display:flex;gap:12px;flex-wrap:wrap">
-            <div style="flex:1;min-width:280px">
-              <label>Modulus q (use large to avoid wraparound)</label>
-              <input id="q" value="65537" />
-            </div>
-            <div style="width:160px">
-              <label>Secret key s</label>
-              <input id="s" readonly class="monospace" />
-            </div>
-            <div style="width:160px">
-              <label>&nbsp;</label>
-              <button id="genKey">Generate key</button>
-            </div>
-          </div>
+        document.getElementById('mulScalar').onclick = () => {
+          if(!cipherA){alert('Encrypt A first'); return;}
+          const q=parseInt(document.getElementById('q').value);
+          const scalar=3;
+          const a=(cipherA.a*scalar)%q;
+          const b=(cipherA.b*scalar)%q;
+          lastResult={a,b};
+          document.getElementById('result').innerText=`Result: (a=${a}, b=${b})`;
+        };
 
-          <div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap">
-            <div style="flex:1;min-width:260px">
-              <label>Message A (small integer)</label>
-              <input id="m1" value="12" />
-            </div>
-            <div style="flex:1;min-width:260px">
-              <label>Message B (small integer)</label>
-              <input id="m2" value="7" />
-            </div>
-            <div style="width:160px">
-              <label>Noise stddev</label>
-              <input id="noise" value="2" />
-            </div>
-          </div>
+        document.getElementById('decrypt').onclick = () => {
+          if(!lastResult){alert('No result to decrypt'); return;}
+          const q=parseInt(document.getElementById('q').value);
+          const s=parseInt(sInput.value);
+          const m=(lastResult.b - lastResult.a*s)%q;
+          document.getElementById('result').innerText+=`\nDecrypted: ${m}`;
+        };
 
-          <div class="row" style="margin-top:10px">
-            <button id="encA">Encrypt A</button>
-            <button id="encB">Encrypt B</button>
-            <button id="add">Homomorphic Add (A+B)</button>
-            <button id="mulScalar">Scalar Multiply (A * 3)</button>
-            <button id="decrypt">Decrypt last result</button>
-            <button id="download">Download demo HTML</button>
-          </div>
+        document.getElementById('download').onclick = () => { alert('Download feature placeholder — implement if needed'); };
+      </script>
+    </section>
 
-          <div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap">
-            <div style="flex:1;min-width:260px">
-              <div class="output" id="cipherA">Cipher A: —</div>
-            </div>
-            <div style="flex:1;min-width:260px">
-              <div class="output" id="cipherB">Cipher B: —</div>
-            </div>
-            <div style="flex:1;min-width:260px">
-              <div class="output" id="result">Result: —</div>
-            </div>
-          </div>
+    <section class="card" id="fhe-scheme-diagram">
+      <h2>3. Diagram / timeline for different FHE schemes</h2>
+      <p>The following timeline illustrates the evolution of FHE schemes, emphasizing the BFV and CKKS models.</p>
+      <ul>
+        <li><strong>2009 — Gentry’s Scheme:</strong> First fully homomorphic encryption construction using ideal lattices and bootstrapping.</li>
+        <li><strong>2012 — BGV:</strong> Efficient leveled FHE using modulus switching.</li>
+        <li><strong>2014 — BFV:</strong> Integer arithmetic over rings, supports exact computations.</li>
+        <li><strong>2017 — CKKS:</strong> Approximate arithmetic for real numbers, ideal for machine learning and signal processing.</li>
+      </ul>
+      <img src="https://upload.wikimedia.org/wikipedia/commons/3/3b/FHE_schemes_timeline_example.png" alt="FHE timeline diagram" style="max-width:100%;border-radius:8px;margin-top:10px;" />
+      <p class="note">BFV is exact and integer-based, whereas CKKS is approximate and supports floating-point operations. Both are widely used in modern FHE libraries such as Microsoft SEAL and HEAAN.</p>
+    </section>
 
-          <div style="margin-top:12px">
-            <details>
-              <summary>Notes about this toy demo</summary>
-              <ul>
-                <li>Because noise accumulates, if you repeatedly add or multiply ciphertexts the decrypted value will eventually be wrong.</li>
-                <li>Real FHE schemes include operations (relinearization, modulus switching, bootstrapping) to manage noise and permit deep circuits.</li>
-              </ul>
-            </details>
-          </div>
-        </section>
-
-        <section class="card">
-          <h3>Further reading (recommended next steps)</h3>
-          <ol>
-            <li>Learn LWE/LWR and RLWE foundations — these are the hardness assumptions behind modern FHE.</li>
-            <li>Study concrete schemes: BFV (integer arithmetic), CKKS (approximate real arithmetic).</li>
-            <li>Explore libraries: Microsoft SEAL, PALISADE, HElib — they implement practical, well-tested FHE.</li>
-          </ol>
-        </section>
-
-      </main>
-
-      <aside>
-        <div class="card">
-          <h4>Live status</h4>
-          <div class="status">Secret key: <span id="status-s">(none)</span></div>
-          <div class="status">Last decrypt: <span id="status-decrypt">—</span></div>
-          <hr />
-          <h4>How to use</h4>
-          <ol>
-            <li>Generate a key or paste your own modulus &amp; secret key.</li>
-            <li>Enter two small integers &amp; noise level and encrypt them.</li>
-            <li>Try homomorphic addition and then decrypt to see the sum.</li>
-          </ol>
-          <hr />
-          <div class="note">
-            <strong>Important:</strong> This demo is educational only. It is <em>not</em> secure and should not be used for real data or production systems.
-          </div>
-        </div>
-
-        <div class="card" style="margin-top:12px">
-          <h4>Explainer — why noise matters</h4>
-          <p class="status">Each encryption adds a small random error. Operations on ciphertexts combine those errors; eventually the error can overwhelm the message and decryption fails. Bootstrapping resets noise but is expensive — a major technical achievement in FHE research.</p>
-        </div>
-      </aside>
-    </div>
+    <section class="card" id="ckks">
+      <h2>4. CKKS scheme</h2>
+      <p>The CKKS (Cheon–Kim–Kim–Song) scheme enables homomorphic operations on encrypted approximate real numbers. It achieves this through <em>rescaling</em> and <em>modulus switching</em> to manage noise and maintain precision.</p>
+      <ul>
+        <li>Encodes real numbers as complex plaintext polynomials.</li>
+        <li>Supports addition and multiplication with approximate results.</li>
+        <li>Ideal for machine learning inference and statistics on encrypted data.</li>
+        <li>Implements noise management techniques like <em>rescaling</em> to maintain stability.</li>
+      </ul>
+      <p>Mathematically, CKKS extends RLWE by representing plaintexts as floating-point values in the complex plane and using scaling factors to preserve precision.</p>
+    </section>
 
     <footer>
       <div class="card">
         <strong>Credits</strong>
-        <p class="status">Yvonne's personal notes for FHE</p>
+        <p class="status">Author: Yvonne Chow — Educational demo (MIT License).</p>
         <p class="cite-note">Generated with assistance from ChatGPT (GPT-5), OpenAI, November 2025.</p>
       </div>
     </footer>
-  </div>
-
-  <script>
-    // --- small BigInt helper functions ---
-    function toBigInt(n){ try { return BigInt(n); } catch(e){ return BigInt(parseInt(n,10) || 0); } }
-    function randBetween(max){ // 0..max-1
-      max = BigInt(max);
-      return BigInt(Math.floor(Math.random()*Number(max)));
-    }
-
-    // reduce to signed range [-q/2, q/2)
-    function signedMod(x, q){ x = ((x % q) + q) % q; const half = q/2n; if (x >= half) return x - q; return x; }
-
-    // generate small noise from gaussian-like approx (sum of uniforms)
-    function sampleNoise(stddev){ const n=6; let sum=0; for(let i=0;i<n;i++) sum += (Math.random()-0.5); return Math.round(sum * stddev * 2); }
-
-    // toy LWE-type scheme operations
-    let state = { q: 65537n, s: null, lastCipher: null };
-
-    function genKey(){ const q = toBigInt(document.getElementById('q').value || 65537); state.q = q; state.s = randBetween(q); document.getElementById('s').value = state.s.toString(); document.getElementById('status-s').textContent = state.s.toString(); }
-
-    function encryptMessage(m, noiseStd){ // returns {a:BigInt, b:BigInt, noise:Int}
-      const q = state.q; const a = randBetween(q); const e = BigInt(sampleNoise(noiseStd)); const b = (a * state.s + BigInt(m) + e) % q; return {a,b,noise:e}; }
-
-    function decryptCipher(ct){ const q = state.q; const a = ct.a; const b = ct.b; const plainWithNoise = signedMod(b - a * state.s, q); // this equals m + e in signed range
-      return {value: Number(plainWithNoise), noise: Number(signedMod(plainWithNoise - BigInt(ct.plain || 0), q))}; }
-
-    function addCipher(c1, c2){ return {a: (c1.a + c2.a) % state.q, b: (c1.b + c2.b) % state.q}; }
-
-    function scalarMul(c, scalar){ const sc = BigInt(scalar); return {a: (c.a * sc) % state.q, b: (c.b * sc) % state.q}; }
-
-    // UI wiring
-    document.getElementById('genKey').addEventListener('click', ()=>{ genKey(); });
-
-    document.getElementById('encA').addEventListener('click', ()=>{
-      if (!state.s){ genKey(); }
-      const m = parseInt(document.getElementById('m1').value || '0',10);
-      const noiseStd = parseFloat(document.getElementById('noise').value || '2');
-      const ct = encryptMessage(m, noiseStd); ct.plain = m; state.cipherA = ct; state.lastCipher = ct;
-      document.getElementById('cipherA').textContent = `a=${ct.a.toString()}\nb=${ct.b.toString()}\n(plaintext=${m}, noise≈${ct.noise})`;
-      document.getElementById('status-decrypt').textContent = 'Encrypted A';
-    });
-
-    document.getElementById('encB').addEventListener('click', ()=>{
-      if (!state.s){ genKey(); }
-      const m = parseInt(document.getElementById('m2').value || '0',10);
-      const noiseStd = parseFloat(document.getElementById('noise').value || '2');
-      const ct = encryptMessage(m, noiseStd); ct.plain = m; state.cipherB = ct; state.lastCipher = ct;
-      document.getElementById('cipherB').textContent = `a=${ct.a.toString()}\nb=${ct.b.toString()}\n(plaintext=${m}, noise≈${ct.noise})`;
-      document.getElementById('status-decrypt').textContent = 'Encrypted B';
-    });
-
-    document.getElementById('add').addEventListener('click', ()=>{
-      if (!state.cipherA || !state.cipherB){ alert('Encrypt both A and B first'); return; }
-      const res = addCipher(state.cipherA, state.cipherB); res.plain = (state.cipherA.plain + state.cipherB.plain);
-      state.lastCipher = res;
-      document.getElementById('result').textContent = `a=${res.a.toString()}\nb=${res.b.toString()}\n(plaintext sum=${res.plain}, noise≈(e1+e2) )`;
-      document.getElementById('status-decrypt').textContent = 'Added A + B (ciphertext)';
-    });
-
-    document.getElementById('mulScalar').addEventListener('click', ()=>{
-      if (!state.lastCipher){ alert('Encrypt something first'); return; }
-      const res = scalarMul(state.lastCipher, 3);
-      res.plain = state.lastCipher.plain * 3;
-      state.lastCipher = res;
-      document.getElementById('result').textContent = `a=${res.a.toString()}\nb=${res.b.toString()}\n(plaintext scaled=${res.plain}, noise scaled)`;
-      document.getElementById('status-decrypt').textContent = 'Scalar multiplied last ciphertext by 3';
-    });
-
-    document.getElementById('decrypt').addEventListener('click', ()=>{
-      if (!state.lastCipher){ alert('No ciphertext to decrypt'); return; }
-      const ct = state.lastCipher;
-      const dec = decryptCipher(ct);
-      document.getElementById('result').textContent = `Decrypted ≈ ${dec.value} (expected ${ct.plain})\nNoise presence means value may differ from exact plaintext when noise is large.`;
-      document.getElementById('status-decrypt').textContent = `Last decrypt: ${dec.value} (expected ${ct.plain})`;
-    });
-
-    // download the HTML file (self-contained)
-    document.getElementById('download').addEventListener('click', ()=>{
-      const blob = new Blob([document.documentElement.outerHTML], {type: 'text/html'});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a'); a.href = url; a.download = 'fhe_toy_demo.html'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
-    });
-    // initialize
-    genKey();
-  </script>
   </div>
 </body>
 </html>
