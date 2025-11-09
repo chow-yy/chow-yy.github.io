@@ -68,7 +68,7 @@
 
     <section class="card" id="what-is-lwe">
       <h2>1. What is LWE</h2>
-      <p>The Learning With Errors (LWE) problem is the mathematical foundation of many lattice-based cryptographic schemes, including modern FHE. It is believed to be hard even for quantum computers.</p>
+      <p>The Learning With Errors (LWE) problem is the mathematical foundation of many lattice-based cryptographic schemes, including modern FHE. It is believed to be hard even for quantum computers [1].</p>
       <p>In LWE, we assume there exists a secret vector \( s \), and we observe many samples of the form:</p>
       <p>\[ (a, b = \langle a, s \rangle + e \bmod q) \]</p>
       <p>where \( a \) is random, and \( e \) is a small noise term. The challenge is to recover \( s \) from these noisy linear equations — a problem known to be computationally hard.</p>
@@ -205,7 +205,7 @@
       
       <img src="fhe_timeline.png" alt="A timeline of FHE development from 1977 to 2016" style="width:100%; max-width: 800px; margin: 16px auto; display: block; border-radius: 8px;">
       
-      <p style="text-align: center; font-size: 13px; color: #4b5563;">Key milestones in FHE history, based on information from FHE.org [3].</p>
+      <p style="text-align: center; font-size: 13px; color: #4b5563;">Key milestones in FHE history, based on information from FHE.org [2].</p>
       
       <h3 style="margin-top: 24px;">Key Milestones in FHE History</h3>
       
@@ -252,9 +252,8 @@
     <footer>
       <p>Educational toy. Code adapted freely for learning purposes.</p>
       <p class="cite-note">Citations: <br>
-        [1] Gentry, C. (2009). A Fully Homomorphic Encryption Scheme. <br>
-        [2] Lyubashevsky, V., Peikert, C., & Regev, O. (2013). Lattice-based Cryptography. <br>
-        [3] FHE.org Community. (n.d.). History of FHE: A Timeline. Retrieved from https://fhe.org/history/
+        [1] Lyubashevsky, V., Peikert, C., & Regev, O. (2013). Lattice-based Cryptography. <br>
+        [2] FHE.org Community. (n.d.). History of FHE: A Timeline. Retrieved from https://fhe.org/history/
       </p>
     </footer>
 
