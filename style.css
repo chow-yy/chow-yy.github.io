@@ -8,6 +8,28 @@
   --font-body: "Inter", "Segoe UI", Roboto, sans-serif;
 }
 
+  /* ========== Navigation ========== */
+  .nav-right {
+    text-align: right;
+    min-width: 180px;
+  }
+
+  .nav-right a {
+    display: block;
+    color: #004080;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 1.05em;
+    margin: 6px 0;
+    transition: color 0.2s ease, transform 0.2s ease;
+  }
+
+  .nav-right a:hover {
+    color: #002b5c;
+    transform: translateX(3px);
+    text-decoration: underline;
+  }
+
 body {
   background-color: var(--bg);
   color: var(--text);
