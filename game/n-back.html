@@ -80,28 +80,32 @@
 
 <h1>N-back Brain Training</h1>
 
-<div id="game-container">
-    <div id="instruction">
-        Watch the sequence of blue squares. Click "Match" if the current square matches the one <strong>N steps back</strong>. Find 5 matches to finish.
+<div id="game-container" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 20px;">
+    <div id="instruction" style="max-width: 250px; background:#f0f0f0; padding:10px; border-radius:5px;">
+        Watch the sequence of blue squares.<br>
+        Click <strong>Match</strong> if it matches the one <span id="nDisplay">N</span> steps back.<br>
+        Find 5 matches to finish.
     </div>
 
-    <div>
-        <label>Grid size (L): <input type="number" id="gridSize" value="3" min="2" max="6"></label>
-        <label>N-back (N): <input type="number" id="nBack" value="2" min="1"></label>
-        <button onclick="startGame()">Start Game</button>
-    </div>
+    <div style="display:flex; flex-direction:column; align-items:center;">
+        <div>
+            <label>Grid size (L): <input type="number" id="gridSize" value="3" min="2" max="6"></label>
+            <label>N-back (N): <input type="number" id="nBack" value="2" min="1"></label>
+            <button onclick="startGame()">Start Game</button>
+        </div>
 
-    <div>
-        <label>Speed (ms): <span id="speedDisplay">1500</span></label>
-        <input type="range" id="speedSlider" min="500" max="3000" step="100" value="1500" oninput="updateSpeed(this.value)">
-    </div>
+        <div>
+            <label>Speed (ms): <span id="speedDisplay">1500</span></label>
+            <input type="range" id="speedSlider" min="500" max="3000" step="100" value="1500" oninput="updateSpeed(this.value)">
+        </div>
 
-    <div id="grid-container">
-        <div id="grid"></div>
-    </div>
+        <div id="grid-container">
+            <div id="grid"></div>
+        </div>
 
-    <button id="matchBtn" disabled onclick="matchClicked()">Match</button>
-    <h2 id="result"></h2>
+        <button id="matchBtn" disabled onclick="matchClicked()">Match</button>
+        <h2 id="result"></h2>
+    </div>
 </div>
 
 <script>
