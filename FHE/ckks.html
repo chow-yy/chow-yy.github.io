@@ -34,6 +34,51 @@
     table{border-collapse:collapse;margin-top:12px;width:100%}
     table, th, td{border:1px solid #ccc}
     th, td{padding:6px;text-align:center}
+    .flow-diagram {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.flow-diagram {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 20px;
+    }
+    .flow-step {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 12px 16px;
+      text-align: center;
+      width: 90%;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+    }
+    .flow-step-op {
+      display: flex;
+      justify-content: space-around;
+      width: 100%;
+      gap: 16px;
+      margin-top: 10px;
+    }
+    .flow-step-sub {
+      background: #fff;
+      border: 1px dashed #ccc;
+      padding: 8px;
+      border-radius: 6px;
+      flex: 1;
+    }
+    .flow-arrow {
+      font-size: 24px;
+      color: var(--accent);
+      margin: 8px 0;
+      font-weight: bold;
+    }
+    
+}
   </style>
 </head>
 <body>
@@ -99,15 +144,64 @@
         <p>\[ C_{vec} = \text{Encrypt}([x_1, x_2, \dots, x_N]) \]</p>
     </section>
 
-    <section class="card" id="example">
-      <h2>6. Concrete Example</h2>
+ <section class="card" id="example">
+      <h2>7. Concrete Example</h2>
       <p>Encoding \(x=1.5\), \(y=2.25\) with scale \(\Delta=1000\):</p>
       <ul>
         <li>Encode: \(\tilde{x}=1500\), \(\tilde{y}=2250\)</li>
-        <li>Encrypt → \(Enc(\tilde{x})\), \(Enc(\tilde{y})\)</li>
-        <li>Add: decrypt/decode → 3.75</li>
-        <li>Multiply, rescale → decrypt/decode → 3.375</li>
+        <li>Encrypt to get \(Enc(\tilde{x})\), \(Enc(\tilde{y})\)</li>
+        <li>Homomorphic Addition:
+          <br>\(C_{add} = Enc(\tilde{x}) + Enc(\tilde{y})\)
+          <br>Decrypt/Decode \(\approx 3.75\)</li>
+        <li>Homomorphic Multiplication:
+          <br>\(C_{mult} = Enc(\tilde{x}) \cdot Enc(\tilde{y})\)
+          <br>Rescale, then decrypt/decode \(\approx 3.375\)</li>
       </ul>
+
+      <h3>CKKS Data Flow</h3>
+      <p>This diagram shows the full lifecycle of data using the values from above.</p>
+      
+      <div class="flow-diagram">
+        <div class="flow-step">
+          <strong>1. Plaintext</strong><br>
+          Real number \(x\) (e.g., <strong>1.5</strong>)
+        </div>
+        <div class="flow-arrow">▼</div>
+        <div class="flow-step">
+          <strong>2. Encode & Scale</strong> (with \(\Delta = 1000\))<br>
+          \( x_{\text{scaled}} = \text{Round}(1.5 \cdot 1000) = \) <strong>1500</strong>
+        </div>
+        <div class="flow-arrow">▼</div>
+        <div class="flow-step">
+          <strong>3. Encrypt</strong> (LWE-style)<br>
+          \( Enc(1500) \)<br>
+          <span class="monospace" style="font-size: 13px;">\( (a, b = a \cdot s + 1500 + e \bmod q) \)</span>
+        </div>
+        <div class="flow-arrow">▼</div>
+        <div class="flow-step">
+          <strong>4. Homomorphic Operations</strong> (with \(y=2.25 \rightarrow \tilde{y}=2250\))<br>
+          <div class="flow-step-op">
+            <div class="flow-step-sub"><strong>Add \(Enc(2250)\)</strong><br> \(C_{\text{add}} = C_1 + C_2\)</div>
+            <div class="flow-step-sub"><strong>Multiply \(Enc(2250)\)</strong><br> \(C_{\text{mult}} = C_1 \cdot C_2\)</div>
+          </div>
+        </div>
+        <div class="flow-arrow">▼</div>
+        <div class="flow-step">
+          <strong>5. Rescale (after multiplication)</strong><br>
+          Divides result by \(\Delta = 1000\) to manage scale.
+        </div>
+        <div class="flow-arrow">▼</div>
+        <div class="flow-step">
+          <strong>6. Decrypt</strong> (e.g., rescaled mult. result)<br>
+          \( \text{Dec}(C'_{\text{mult}}) \approx 3375 \)
+        </div>
+        <div class="flow-arrow">▼</div>
+        <div class="flow-step">
+          <strong>7. Decode</strong><br>
+          Divide decrypted result by \(\Delta = 1000\).<br>
+          \( x \approx 3375 / 1000 = \) <strong>3.375</strong>
+        </div>
+      </div>
     </section>
 
     <section class="card" id="interactive-playground">
