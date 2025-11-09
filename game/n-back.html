@@ -13,11 +13,14 @@
     align-items: center;
   }
 
+  /* --- MODIFIED --- */
+  /* Moved inline styles here and set up the flex layout */
   #game-container {
-    position: relative;
     display: flex;
-    flex-direction: column;
-    align-items: center;
+    flex-wrap: wrap; /* Allows items to wrap on small screens */
+    justify-content: center;
+    gap: 20px;
+    width: 100%;
   }
 
   #grid-container {
@@ -60,15 +63,21 @@
     padding: 10px 20px;
   }
 
+  /* --- MODIFIED --- */
   #instruction {
-    position: absolute;
-    top: 0;
-    right: 0;
+    /* REMOVED: position: absolute; */
+    /* REMOVED: top: 0; */
+    /* REMOVED: right: 0; */
+    
+    /* Added styles from your inline HTML */
     max-width: 250px;
     background-color: #f0f0f0;
     padding: 10px;
     border-radius: 5px;
     font-size: 14px;
+    
+    /* Added this to stop it from stretching vertically */
+    height: fit-content; 
   }
 
   label {
@@ -80,8 +89,9 @@
 
 <h1>N-back Brain Training</h1>
 
-<div id="game-container" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 20px;">
-    <div id="instruction" style="max-width: 250px; background:#f0f0f0; padding:10px; border-radius:5px;">
+<div id="game-container">
+  
+    <div id="instruction">
         Watch the sequence of blue squares.<br>
         Click <strong>Match</strong> if it matches the one <span id="nDisplay">N</span> steps back.<br>
         Find 5 matches to finish.
@@ -133,6 +143,9 @@ function startGame() {
     L = parseInt(document.getElementById('gridSize').value);
     N = parseInt(document.getElementById('nBack').value);
 
+    // Update N display in instructions
+    document.getElementById('nDisplay').textContent = N;
+
     generateSequence();
     createGrid();
     currentIndex = 0;
@@ -140,38 +153,59 @@ function startGame() {
     document.getElementById('result').textContent = '';
     document.getElementById('matchBtn').disabled = false;
 
+    // Disable controls during game
+    document.getElementById('gridSize').disabled = true;
+    document.getElementById('nBack').disabled = true;
+    document.querySelector('button[onclick="startGame()"]').disabled = true;
+
     interval = setInterval(showNext, DISPLAY_INTERVAL);
 }
 
 function generateSequence() {
     sequence = [];
     matchPositions = [];
-    let count = 0;
+    let nonMatchCount = 0;
+    let totalAttempts = 0;
+    const maxAttempts = (L*L) * 10; // Safety break
+    const targetLength = Math.max(20, TOTAL_MATCHES * (N + 2)); // Ensure a reasonable sequence length
 
-    while(count < TOTAL_MATCHES) {
-        let rand = Math.floor(Math.random() * (L*L));
+    while (sequence.length < targetLength && totalAttempts < maxAttempts) {
+        let rand = Math.floor(Math.random() * (L * L));
         sequence.push(rand);
+        totalAttempts++;
 
-        if(sequence.length > N && sequence[sequence.length-1] === sequence[sequence.length-N-1]) {
-            count++;
-            matchPositions.push(sequence.length-1);
+        if (sequence.length > N) {
+            if (sequence[sequence.length - 1] === sequence[sequence.length - N - 1]) {
+                // This is a match
+                if (!matchPositions.includes(sequence.length - 1)) {
+                    matchPositions.push(sequence.length - 1);
+                }
+            } else {
+                nonMatchCount++;
+            }
         }
     }
-
-    // Limit sequence length
-    const maxLength = TOTAL_MATCHES * N * 5;
-    while(sequence.length > maxLength) {
-        // Remove a random element outside match sequences
-        let removable = [];
-        for(let i=0; i<sequence.length; i++) {
-            if(!matchPositions.includes(i) && (i < N || i > sequence.length-N)) removable.push(i);
+    
+    // If not enough matches, add them
+    while (matchPositions.length < TOTAL_MATCHES && sequence.length < maxAttempts) {
+        let prevIndex = sequence.length - N;
+        if (prevIndex >= 0) {
+             sequence.push(sequence[prevIndex]); // Force a match
+             matchPositions.push(sequence.length - 1);
+        } else {
+            // Need more items before a match is possible
+             sequence.push(Math.floor(Math.random() * (L * L)));
         }
-        if(removable.length === 0) break;
-        let removeIndex = removable[Math.floor(Math.random()*removable.length)];
-        sequence.splice(removeIndex,1);
-
-        // Update match positions
-        matchPositions = matchPositions.map(p => p > removeIndex ? p-1 : p);
+        
+        // Add some non-matches
+        for(let i=0; i<N; i++) {
+            let rand;
+            let prev = sequence[sequence.length-N];
+            do {
+                 rand = Math.floor(Math.random() * (L * L));
+            } while (rand === prev); // Ensure it's not a match
+            sequence.push(rand);
+        }
     }
 
     console.log("Sequence:", sequence);
@@ -188,65 +222,100 @@ function createGrid() {
         let cell = document.createElement('div');
         cell.className = 'cell';
         cell.id = 'cell-' + i;
-        cell.textContent = i;
+        // cell.textContent = i; // Hiding the number for a cleaner look
         grid.appendChild(cell);
     }
 }
 
 function showNext() {
-    if(currentIndex > 0) {
-        document.getElementById('cell-' + sequence[currentIndex-1]).classList.remove('active');
+    if(currentIndex > 0 && sequence[currentIndex-1] !== undefined) {
+         const prevCell = document.getElementById('cell-' + sequence[currentIndex-1]);
+         if (prevCell) prevCell.classList.remove('active');
     }
 
     if(currentIndex >= sequence.length) {
         clearInterval(interval);
         interval = null;
         document.getElementById('matchBtn').disabled = true;
+        
+        // Re-enable controls
+        document.getElementById('gridSize').disabled = false;
+        document.getElementById('nBack').disabled = false;
+        document.querySelector('button[onclick="startGame()"]').disabled = false;
+
         calculateAccuracy();
         return;
     }
 
-    document.getElementById('cell-' + sequence[currentIndex]).classList.add('active');
+    const nextCell = document.getElementById('cell-' + sequence[currentIndex]);
+    if (nextCell) {
+        nextCell.classList.add('active');
+    }
     currentIndex++;
 }
 
 function matchClicked() {
-    userMatches.push(currentIndex-1);
+    if (currentIndex > 0) {
+        userMatches.push(currentIndex - 1);
+    }
 }
 
 function calculateAccuracy() {
     let correctClicks = 0;
+    
+    // Use a Set for efficient lookup
+    const userMatchSet = new Set(userMatches);
+    const actualMatchSet = new Set(matchPositions);
 
-    // Count correct clicks only if it matches an actual N-back position
-    for(let pos of userMatches) {
-        if(matchPositions.includes(pos)) correctClicks++;
+    // Count correct clicks
+    for(let pos of userMatchSet) {
+        if(actualMatchSet.has(pos)) {
+            correctClicks++;
+        }
     }
 
     // Count missed matches
-    let missed = matchPositions.filter(p => !userMatches.includes(p)).length;
+    let missed = 0;
+    for(let pos of actualMatchSet) {
+        if(!userMatchSet.has(pos)) {
+            missed++;
+        }
+    }
 
-    // Count false positives
-    let falsePositives = userMatches.filter(p => !matchPositions.includes(p)).length;
+    // Count false positives (wrong clicks)
+    let falsePositives = 0;
+    for(let pos of userMatchSet) {
+        if(!actualMatchSet.has(pos)) {
+            falsePositives++;
+        }
+    }
 
-    // Accuracy = correct / total clicks
-    let accuracy = userMatches.length > 0 ? (correctClicks / userMatches.length) * 100 : 0;
+    let accuracy = actualMatchSet.size > 0 ? (correctClicks / actualMatchSet.size) * 100 : 0;
+    if (userMatchSet.size === 0 && actualMatchSet.size === 0) accuracy = 100; // No matches expected, none clicked
 
     document.getElementById('result').textContent =
-        `Correct clicks: ${correctClicks}, Missed: ${missed}, Wrong clicks: ${falsePositives}, Accuracy: ${accuracy.toFixed(2)}%`;
+        `Found: ${correctClicks}/${actualMatchSet.size} | Missed: ${missed} | Wrong Clicks: ${falsePositives}`;
 
     // Highlight actual matched positions
     matchPositions.forEach(pos => {
-        const cell = document.getElementById('cell-' + sequence[pos]);
-        cell.classList.add('matched');
+        if (sequence[pos] !== undefined) {
+            const cell = document.getElementById('cell-' + sequence[pos]);
+            if (cell) cell.classList.add('matched');
+        }
     });
 
     setTimeout(() => {
         matchPositions.forEach(pos => {
-            const cell = document.getElementById('cell-' + sequence[pos]);
-            cell.classList.remove('matched');
+             if (sequence[pos] !== undefined) {
+                const cell = document.getElementById('cell-' + sequence[pos]);
+                if (cell) cell.classList.remove('matched');
+             }
         });
     }, 2000);
 }
+
+// Also update N display on load
+document.getElementById('nDisplay').textContent = document.getElementById('nBack').value;
 
 </script>
 
