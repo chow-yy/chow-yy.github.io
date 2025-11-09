@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>N-back Brain Game</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    margin-top: 20px;
+  }
+  #grid {
+    display: grid;
+    margin: 20px auto;
+    gap: 5px;
+  }
+  .cell {
+    width: 50px;
+    height: 50px;
+    background-color: lightgray;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    border-radius: 5px;
+    user-select: none;
+    transition: background-color 0.3s;
+  }
+  .active {
+    background-color: blue;
+    color: white;
+  }
+  .matched {
+    background-color: green !important;
+    color: white;
+  }
+  button {
+    margin-top: 20px;
+    font-size: 16px;
+    padding: 10px 20px;
+  }
+  label {
+    margin: 0 10px;
+  }
+</style>
+</head>
+<body>
+
+<h1>N-back Brain Training</h1>
+
+<label>Grid size (L): <input type="number" id="gridSize" value="3" min="2" max="6"></label>
+<label>N-back (N): <input type="number" id="nBack" value="2" min="1"></label>
+<button onclick="startGame()">Start Game</button>
+
+<div>
+  <label>Speed (ms): <span id="speedDisplay">1500</span></label>
+  <input type="range" id="speedSlider" min="500" max="3000" step="100" value="1500" oninput="updateSpeed(this.value)">
+</div>
+
+<div id="grid"></div>
+<button id="matchBtn" disabled onclick="matchClicked()">Match</button>
+
+<h2 id="result"></h2>
+
+<script>
+// === CONFIGURATION VARIABLES ===
+let DISPLAY_INTERVAL = 1500;  // initial milliseconds between each cell highlight
+let TOTAL_MATCHES = 5;        // number of N-back matches before stopping
+
+let L, N;
+let sequence = [];
+let matchPositions = [];
+let currentIndex = 0;
+let userMatches = [];
+let interval;
+
+function updateSpeed(value) {
+    DISPLAY_INTERVAL = parseInt(value);
+    document.getElementById('speedDisplay').textContent = DISPLAY_INTERVAL;
+
+    // If the game is running, restart interval with new speed
+    if(interval) {
+        clearInterval(interval);
+        interval = setInterval(showNext, DISPLAY_INTERVAL);
+    }
+}
+
+function startGame() {
+    L = parseInt(document.getElementById('gridSize').value);
+    N = parseInt(document.getElementById('nBack').value);
+
+    generateSequence();
+    createGrid();
+    currentIndex = 0;
+    userMatches = [];
+    document.getElementById('result').textContent = '';
+    document.getElementById('matchBtn').disabled = false;
+
+    // Start highlighting sequence at the current interval
+    interval = setInterval(showNext, DISPLAY_INTERVAL);
+}
+
+function generateSequence() {
+    sequence = [];
+    matchPositions = [];
+    let count = 0;
+
+    while(count < TOTAL_MATCHES) {
+        let rand = Math.floor(Math.random() * (L*L));
+        sequence.push(rand);
+
+        // Check if current position is an N-back match
+        if(sequence.length > N && sequence[sequence.length-1] === sequence[sequence.length-N-1]) {
+            count++;
+            matchPositions.push(sequence.length-1);
+        }
+    }
+
+    console.log("Sequence:", sequence);
+    console.log("Match positions:", matchPositions);
+}
+
+function createGrid() {
+    const grid = document.getElementById('grid');
+    grid.innerHTML = '';
+    grid.style.gridTemplateColumns = `repeat(${L}, 50px)`;
+    grid.style.gridTemplateRows = `repeat(${L}, 50px)`;
+
+    for(let i = 0; i < L*L; i++) {
+        let cell = document.createElement('div');
+        cell.className = 'cell';
+        cell.id = 'cell-' + i;
+        cell.textContent = i;
+        grid.appendChild(cell);
+    }
+}
+
+function showNext() {
+    if(currentIndex > 0) {
+        document.getElementById('cell-' + sequence[currentIndex-1]).classList.remove('active');
+    }
+
+    if(currentIndex >= sequence.length) {
+        clearInterval(interval);
+        interval = null;
+        document.getElementById('matchBtn').disabled = true;
+        calculateAccuracy();
+        return;
+    }
+
+    document.getElementById('cell-' + sequence[currentIndex]).classList.add('active');
+    currentIndex++;
+}
+
+function matchClicked() {
+    userMatches.push(currentIndex-1);
+}
+
+function calculateAccuracy() {
+    let correct = 0;
+    for(let pos of userMatches) {
+        if(matchPositions.includes(pos)) correct++;
+    }
+    let missed = matchPositions.filter(p => !userMatches.includes(p)).length;
+    document.getElementById('result').textContent = `Correct: ${correct}, Missed: ${missed}, Accuracy: ${((correct/matchPositions.length)*100).toFixed(2)}%`;
+
+    // Highlight actual matched positions
+    matchPositions.forEach(pos => {
+        const cell = document.getElementById('cell-' + sequence[pos]);
+        cell.classList.add('matched');
+    });
+
+    // Remove highlight after 2 seconds
+    setTimeout(() => {
+        matchPositions.forEach(pos => {
+            const cell = document.getElementById('cell-' + sequence[pos]);
+            cell.classList.remove('matched');
+        });
+    }, 2000);
+}
+</script>
+
+</body>
+</html>
