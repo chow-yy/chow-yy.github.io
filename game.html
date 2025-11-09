@@ -34,11 +34,13 @@
         }
         
         .game-image {
-            width: 150px;
-            height: 100px;
-            object-fit: cover;
+            /* --- MODIFIED --- */
+            width: 200px; /* Increased width */
+            height: 150px; /* Increased height */
+            object-fit: contain; /* Changed to contain to show the whole image */
+            /* Removed flex-shrink: 0 as it's less critical with contain */
+
             border-radius: 8px;
-            flex-shrink: 0; /* Prevents image from shrinking */
         }
         
         .game-info {
@@ -51,7 +53,6 @@
         .game-info p {
             margin: 0;
             color: #555;
-            /* Added line-height for better readability */
             line-height: 1.5;
         }
         
@@ -113,13 +114,14 @@
             
         </div>
 
+        
         <hr> 
+        
 
         <div class="game-entry">
             
             <img src="game/n-back_preview.png" alt="N-Back Game" class="game-image">
             
-            <!-- --- MODIFIED: Updated game title and description --- -->
             <div class="game-info">
                 <h3>N-Back Trainer</h3>
                 <p>
