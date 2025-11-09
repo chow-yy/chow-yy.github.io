@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Intro to FHE — Interactive Tutorial</title>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <style>
+    :root{--bg:#f9fafb;--card:#ffffff;--muted:#4b5563;--accent:#0284c7}
+    body{font-family:Inter,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:linear-gradient(180deg,#f0f9ff 0%,#ffffff 100%);color:#111827;margin:0;padding:32px}
+    .container{max-width:980px;margin:0 auto}
+    header{display:flex;align-items:center;gap:16px}
+    h1{margin:0;font-size:28px}
+    h2,h3,h4{scroll-margin-top:80px}
+    a{color:var(--accent);text-decoration:none}
+    a:hover{text-decoration:underline}
+    p.lead{color:var(--muted);margin-top:8px}
+    .card{background:var(--card);border-radius:12px;padding:18px;margin-top:18px;box-shadow:0 6px 24px rgba(0,0,0,0.05)}
+    pre{background:#f1f5f9;padding:12px;border-radius:8px;overflow:auto}
+    .grid{display:grid;grid-template-columns:1fr 360px;gap:16px}
+    label{font-size:13px;color:var(--muted)}
+    input,button,select,textarea{padding:8px;border-radius:8px;border:1px solid rgba(0,0,0,0.1);background:#f9fafb;color:inherit}
+    button{cursor:pointer;background:var(--accent);color:white;border:none}
+    button:hover{background:#0369a1}
+    .monospace{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+    .status{font-size:13px;color:var(--muted)}
+    .row{display:flex;gap:8px}
+    .output{background:#f1f5f9;padding:12px;border-radius:8px;overflow-x:auto}
+    footer{margin-top:28px;color:var(--muted);font-size:13px;text-align:center}
+    .note{background:#e0f2fe;padding:10px;border-radius:8px;color:#0369a1}
+    .cite-note{margin-top:8px;font-size:11px;color:#6b7280}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" aria-hidden>
+        <rect x="1" y="1" width="22" height="22" rx="6" fill="#e0f2fe" stroke="#0284c7" stroke-width="0.8"/>
+        <path d="M7 12h10M7 8h10M7 16h6" stroke="#0369a1" stroke-width="1.2" stroke-linecap="round"/>
+      </svg>
+      <div>
+        <h1>Homomorphic Encryption — Hands-on Intro (Toy LWE)</h1>
+        <p class="lead">A short interactive tutorial that demonstrates the core idea of homomorphic encryption using a simple LWE-style toy scheme. This is pedagogical — not secure. Use it to learn concepts: keys, encryption, noise growth, and homomorphic addition.</p>
+      </div>
+    </header>
+
+    <section class="card" id="what-is-fhe">
+      <h2>What is FHE (in one sentence)?</h2>
+      <p>Fully Homomorphic Encryption (FHE) lets you compute on encrypted data and obtain an encrypted result which, when decrypted, matches the result of performing the same computation on the plaintexts. In practice, FHE schemes are complex — this page shows a simplified <em>toy</em> LWE-style construction to build intuition.</p>
+    </section>
+
+    <section class="card">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#what-is-lwe">What is LWE</a></li>
+        <li><a href="#interactive-playground">Interactive playground (using LWE)</a></li>
+        <li><a href="#fhe-scheme-diagram">Diagram / timeline of FHE schemes (BFV and CKKS emphasis)</a></li>
+        <li><a href="#ckks">CKKS scheme</a></li>
+      </ol>
+    </section>
+
+    <section class="card" id="what-is-lwe">
+      <h2>1. What is LWE</h2>
+      <p>The Learning With Errors (LWE) problem is the mathematical foundation of many lattice-based cryptographic schemes, including modern FHE. It is believed to be hard even for quantum computers.</p>
+      <p>In LWE, we assume there exists a secret vector \( s \), and we observe many samples of the form \( (a, b = \langle a, s \rangle + e \mod q) \), where \( a \) is random, and \( e \) is a small noise term. The challenge is to recover \( s \) from these noisy linear equations — a problem known to be computationally hard.</p>
+      <p>Most FHE schemes build on variants of LWE, such as Ring-LWE (RLWE), where operations take place in polynomial rings for efficiency.</p>
+
+      <h3>Toy scheme (LWE-style) — mathematics (short)</h3>
+      <p>We define small parameters to illustrate encryption:</p>
+      <p>\[ q = 97, \quad s = 17, \quad e = \text{small noise term (e.g., ±1)} \]</p>
+      <p>To encrypt a message \( m \):</p>
+      <p>\[ Enc(m) = (a, b = a \cdot s + m + e \mod q) \]</p>
+      <p>To decrypt:</p>
+      <p>\[ Dec(a, b) = (b - a \cdot s) \mod q \approx m + e \]</p>
+      <p>Homomorphic addition works naturally:</p>
+      <p>\[ Enc(m_1) + Enc(m_2) = (a_1 + a_2, b_1 + b_2) \rightarrow m_1 + m_2 + (e_1 + e_2) \]</p>
+      <p>Noise accumulates with operations — a key limitation and motivation for advanced schemes like BFV and CKKS.</p>
+    </section>
+
+    <section class="card" id="interactive-playground">
+      <h2>2. Interactive playground (using LWE)</h2>
+      <p>Try encrypting two small integers, add them homomorphically, and decrypt to see how noise behaves.</p>
+
+      <h3>Interactive playground</h3>
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <div style="flex:1;min-width:280px">
+          <label>Modulus q (use large to avoid wraparound)</label>
+          <input id="q" value="65537" />
+        </div>
+        <div style="width:160px">
+          <label>Secret key s</label>
+          <input id="s" readonly class="monospace" />
+        </div>
+        <div style="width:160px">
+          <label>&nbsp;</label>
+          <button id="genKey">Generate key</button>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap">
+        <div style="flex:1;min-width:260px">
+          <label>Message A (small integer)</label>
+          <input id="m1" value="12" />
+        </div>
+        <div style="flex:1;min-width:260px">
+          <label>Message B (small integer)</label>
+          <input id="m2" value="7" />
+        </div>
+        <div style="width:160px">
+          <label>Noise stddev</label>
+          <input id="noise" value="2" />
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:10px">
+        <button id="encA">Encrypt A</button>
+        <button id="encB">Encrypt B</button>
+        <button id="add">Homomorphic Add (A+B)</button>
+        <button id="mulScalar">Scalar Multiply (A * 3)</button>
+        <button id="decrypt">Decrypt last result</button>
+        <button id="download">Download demo HTML</button>
+      </div>
+
+      <div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap">
+        <div style="flex:1;min-width:260px">
+          <div class="output" id="cipherA">Cipher A: —</div>
+        </div>
+        <div style="flex:1;min-width:260px">
+          <div class="output" id="cipherB">Cipher B: —</div>
+        </div>
+        <div style="flex:1;min-width:260px">
+          <div class="output" id="result">Result: —</div>
+        </div>
+      </div>
+
+      <div style="margin-top:12px">
+        <details>
+          <summary>Notes about this toy demo</summary>
+          <ul>
+            <li>Because noise accumulates, if you repeatedly add or multiply ciphertexts the decrypted value will eventually be wrong.</li>
+            <li>Real FHE schemes include operations (relinearization, modulus switching, bootstrapping) to manage noise and permit deep circuits.</li>
+          </ul>
+        </details>
+      </div>
+
+      <script>
+        function randNoise(std) { return Math.round((Math.random()*2-1)*std); }
+        let cipherA = null, cipherB = null, lastResult = null;
+        const sInput = document.getElementById('s');
+
+        document.getElementById('genKey').onclick = () => {
+          const q = parseInt(document.getElementById('q').value);
+          const s = Math.floor(Math.random()*q);
+          sInput.value = s;
+        };
+
+        document.getElementById('encA').onclick = () => {
+          const q=parseInt(document.getElementById('q').value);
+          const s=parseInt(sInput.value);
+          const m=parseInt(document.getElementById('m1').value);
+          const e=randNoise(parseInt(document.getElementById('noise').value));
+          const a=Math.floor(Math.random()*q), b=(a*s + m + e)%q;
+          cipherA={a,b};
+          document.getElementById('cipherA').innerText=`Cipher A: (a=${a}, b=${b})`;
+        };
+
+        document.getElementById('encB').onclick = () => {
+          const q=parseInt(document.getElementById('q').value);
+          const s=parseInt(sInput.value);
+          const m=parseInt(document.getElementById('m2').value);
+          const e=randNoise(parseInt(document.getElementById('noise').value));
+          const a=Math.floor(Math.random()*q), b=(a*s + m + e)%q;
+          cipherB={a,b};
+          document.getElementById('cipherB').innerText=`Cipher B: (a=${a}, b=${b})`;
+        };
+
+        document.getElementById('add').onclick = () => {
+          if(!cipherA||!cipherB){alert('Encrypt both A and B first'); return;}
+          const q=parseInt(document.getElementById('q').value);
+          const a=(cipherA.a+cipherB.a)%q;
+          const b=(cipherA.b+cipherB.b)%q;
+          lastResult={a,b};
+          document.getElementById('result').innerText=`Result: (a=${a}, b=${b})`;
+        };
+
+        document.getElementById('mulScalar').onclick = () => {
+          if(!cipherA){alert('Encrypt A first'); return;}
+          const q=parseInt(document.getElementById('q').value);
+          const scalar=3;
+          const a=(cipherA.a*scalar)%q;
+          const b=(cipherA.b*scalar)%q;
+          lastResult={a,b};
+          document.getElementById('result').innerText=`Result: (a=${a}, b=${b})`;
+        };
+
+        document.getElementById('decrypt').onclick = () => {
+          if(!lastResult){alert('No result to decrypt'); return;}
+          const q=parseInt(document.getElementById('q').value);
+          const s=parseInt(sInput.value);
+          const m=(lastResult.b - lastResult.a*s)%q;
+          document.getElementById('result').innerText+=`\nDecrypted: ${m}`;
+        };
+
+        document.getElementById('download').onclick = () => { alert('Download feature placeholder — implement if needed'); };
+      </script>
+    </section>
+
+    <section class="card" id="fhe-scheme-diagram">
+      <h2>3. Diagram / timeline for different FHE schemes</h2>
+      <p>The following timeline illustrates the evolution of FHE schemes, emphasizing the BFV and CKKS models.</p>
+      <ul>
+        <li><strong>2009 — Gentry’s Scheme:</strong> First fully homomorphic encryption construction using ideal lattices and bootstrapping.</li>
+        <li><strong>2012 — BGV:</strong> Efficient leveled FHE using modulus switching.</li>
+        <li><strong>2014 — BFV:</strong> Integer arithmetic over rings, supports exact computations.</li>
+        <li><strong>2017 — CKKS:</strong> Approximate arithmetic for real numbers, ideal for machine learning and signal processing.</li>
+      </ul>
+      <img src="https://upload.wikimedia.org/wikipedia/commons/3/3b/FHE_schemes_timeline_example.png" alt="FHE timeline diagram" style="max-width:100%;border-radius:8px;margin-top:10px;" />
+      <p class="note">BFV is exact and integer-based, whereas CKKS is approximate and supports floating-point operations. Both are widely used in modern FHE libraries such as Microsoft SEAL and HEAAN.</p>
+    </section>
+
+    <section class="card" id="ckks">
+      <h2>4. CKKS scheme</h2>
+      <p>The CKKS (Cheon–Kim–Kim–Song) scheme enables homomorphic operations on encrypted approximate real numbers. It achieves this through <em>rescaling</em> and <em>modulus switching</em> to manage noise and maintain precision.</p>
+      <ul>
+        <li>Encodes real numbers as complex plaintext polynomials.</li>
+        <li>Supports addition and multiplication with approximate results.</li>
+        <li>Ideal for machine learning inference and statistics on encrypted data.</li>
+        <li>Implements noise management techniques like <em>rescaling</em> to maintain stability.</li>
+      </ul>
+      <p>Mathematically, CKKS extends RLWE by representing plaintexts as floating-point values in the complex plane and using scaling factors to preserve precision.</p>
+    </section>
+
+    <footer>
+      <div class="card">
+        <strong>Credits</strong>
+        <p class="status">Author: Yvonne Chow — Educational demo (MIT License).</p>
+        <p class="cite-note">Generated with assistance from ChatGPT (GPT-5), OpenAI, November 2025.</p>
+      </div>
+    </footer>
+  </div>
+</body>
+</html>
