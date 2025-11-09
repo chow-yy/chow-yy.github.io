@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>CKKS Scheme — FHE Tutorial</title>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <style>
+    :root{--bg:#f9fafb;--card:#ffffff;--muted:#4b5563;--accent:#0284c7}
+    body{font-family:Inter,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:linear-gradient(180deg,#f0f9ff 0%,#ffffff 100%);color:#111827;margin:0;padding:32px}
+    .container{max-width:980px;margin:0 auto}
+    header{display:flex;align-items:center;gap:16px}
+    h1{margin:0;font-size:28px}
+    h2,h3,h4{scroll-margin-top:80px}
+    a{color:var(--accent);text-decoration:none}
+    a:hover{text-decoration:underline}
+    p.lead{color:var(--muted);margin-top:8px}
+    .card{background:var(--card);border-radius:12px;padding:18px;margin-top:18px;box-shadow:0 6px 24px rgba(0,0,0,0.05)}
+    pre{background:#f1f5f9;padding:12px;border-radius:8px;overflow:auto}
+    .grid{display:grid;grid-template-columns:1fr 360px;gap:16px}
+    label{font-size:13px;color:var(--muted)}
+    input,button,select,textarea{padding:8px;border-radius:8px;border:1px solid rgba(0,0,0,0.1);background:#f9fafb;color:inherit}
+    button{cursor:pointer;background:var(--accent);color:white;border:none}
+    button:hover{background:#0369a1}
+    .monospace{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+    .status{font-size:13px;color:var(--muted)}
+    .row{display:flex;gap:8px}
+    .output{background:#f1f5f9;padding:12px;border-radius:8px;overflow-x:auto}
+    footer{margin-top:28px;color:var(--muted);font-size:13px;text-align:center}
+    .note{background:#e0f2fe;padding:10px;border-radius:8px;color:#0369a1}
+    .cite-note{margin-top:8px;font-size:11px;color:#6b7280}
+    .back-link {position: fixed; top: 16px; left: 16px;  font-size: 16px; color: #0284c7; text-decoration: none; font-weight: 500; z-index: 1000;}
+    .back-link:hover {text-decoration: underline;}
+    table{border-collapse:collapse;margin-top:12px;width:100%}
+    table, th, td{border:1px solid #ccc}
+    th, td{padding:6px;text-align:center}
+  </style>
+</head>
+<body>
+  <a href="../fhe.html" class="back-link">&larr; Back to FHE Intro</a>
+  
+  <div class="container">
+    <header>
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" aria-hidden>
+        <rect x="1" y="1" width="22" height="22" rx="6" fill="#e0f2fe" stroke="#0284c7" stroke-width="0.8"/>
+        <path d="M7 12h10M7 8h10M7 16h6" stroke="#0369a1" stroke-width="1.2" stroke-linecap="round"/>
+      </svg>
+      <div>
+        <h1>The CKKS Scheme</h1>
+        <p class="lead">An overview of the scheme (Cheon-Kim-Kim-Song) that enables approximate arithmetic on encrypted real numbers.</p>
+      </div>
+    </header>
+
+    <section class="card">
+        <h2>Contents</h2>
+        <ol>
+          <li><a href="#what-is-ckks">What is CKKS? (And Why We Need It)</a></li>
+          <li><a href="#lwe-intuition">Toy LWE Intuition</a></li>
+          <li><a href="#encoding">Encoding Real Numbers</a></li>
+          <li><a href="#rescaling">Rescaling & Noise Management</a></li>
+          <li><a href="#batching">Batching (SIMD)</a></li>
+          <li><a href="#example">Concrete Example</a></li>
+          <li><a href="#interactive-playground">Interactive Playground</a></li>
+          <li><a href="#use-cases">When to Use CKKS</a></li>
+          <li><a href="#further-reading">Further Reading</a></li>
+        </ol>
+      </section>
+
+    <section class="card" id="what-is-ckks">
+      <h2>1. What is CKKS? (And Why We Need It)</h2>
+      <p>BFV and BGV schemes work perfectly with <strong>integers</strong>, giving exact results. But most machine learning and data analysis operate on <strong>real numbers</strong>. CKKS, introduced by Cheon, Kim, Kim, and Song (2016), is designed for <strong>approximate arithmetic</strong> on encrypted real and complex numbers.</p>
+    </section>
+
+    <section class="card" id="lwe-intuition">
+      <h2>2. Toy LWE Intuition</h2>
+      <p>Before CKKS, consider a simple LWE-style encryption (integers with noise) to build intuition:</p>
+      <p>We define small parameters:</p>
+      <p>\[ q = 97, \quad s = 17, \quad e = \text{small noise term (e.g., ±1)} \]</p>
+      <p>To encrypt a message \( m \) with key \( s \):</p>
+      <p>\[ a \text{ — random number in the same domain as } m \]</p>
+      <p>\[ Enc(m) = (a, b = (a \cdot s + m + e) \bmod q) \]</p>
+      <p>To decrypt:</p>
+      <p>\[ Dec(a, b) = (b - a \cdot s) \bmod q \approx m \]</p>
+      <p>Homomorphic addition works naturally:</p>
+      <p>\[ Enc(m_1) + Enc(m_2) = (a_1 + a_2, b_1 + b_2) \rightarrow m_1 + m_2 + (e_1 + e_2) \]</p>
+      <p>Noise accumulates with operations, motivating schemes like BFV and CKKS that manage noise carefully.</p>
+    </section>
+
+    <section class="card" id="encoding">
+      <h2>3. Encoding Real Numbers</h2>
+      <p>CKKS encodes real numbers as scaled integers using a scale factor $\Delta$:</p>
+      <p>\[ \text{Encode}(x) = \lfloor x \cdot \Delta \rceil \in \mathbb{Z}_q \]</p>
+      <p>For example, $x=3.14$ and $\Delta=2^{40}$ produces a high-precision integer. This integer is encrypted; the "noise" is now part of the approximation.</p>
+    </section>
+
+    <section class="card" id="rescaling">
+      <h2>4. Rescaling & Noise Management</h2>
+      <p>Multiplication grows the scale and noise. CKKS uses <strong>rescaling</strong> to divide the ciphertext by $\Delta$ and keep noise manageable:</p>
+      <p>\[ c' \xrightarrow{\text{rescale}} c'' \approx \frac{c'}{\Delta} \]</p>
+    </section>
+    
+    <section class="card" id="batching">
+        <h2>5. Batching (SIMD)</h2>
+        <p>CKKS allows packing thousands of numbers into a single ciphertext. Operations on ciphertexts then apply to all packed numbers simultaneously:</p>
+        <p>\[ C_{vec} = \text{Encrypt}([x_1, x_2, \dots, x_N]) \]</p>
+        <p>Adding two ciphertexts applies addition to each element in parallel.</p>
+    </section>
+
+    <section class="card" id="example">
+      <h2>6. Concrete Example</h2>
+      <p>Encoding $x=1.5$, $y=2.25$ with scale $\Delta=1000$:</p>
+      <ul>
+        <li>Encode: $\tilde{x}=1500$, $\tilde{y}=2250$</li>
+        <li>Encrypt to get $Enc(\tilde{x}), Enc(\tilde{y})$</li>
+        <li>Homomorphic Addition:
+          <br>$C_{add} = Enc(\tilde{x}) + Enc(\tilde{y})$
+          <br>Decrypt/Decode $\approx 3.75$</li>
+        <li>Homomorphic Multiplication:
+          <br>$C_{mult} = Enc(\tilde{x}) \cdot Enc(\tilde{y})$
+          <br>Rescale, then decrypt/decode $\approx 3.375$</li>
+      </ul>
+    </section>
+
+    <section class="card" id="interactive-playground">
+      <h2>7. Interactive Playground</h2>
+      <p>Try encrypting small integers, perform homomorphic operations, and see how noise behaves:</p>
+
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <div style="flex:1;min-width:280px">
+          <label>Modulus q</label>
+          <input id="q" value="97" />
+        </div>
+        <div style="width:160px">
+          <label>Secret key s</label>
+          <input id="s" readonly class="monospace" />
+        </div>
+        <div style="width:160px">
+          <label>&nbsp;</label>
+          <button id="genKey">Generate key</button>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap">
+        <div style="flex:1;min-width:260px">
+          <label>Message A</label>
+          <input id="m1" value="12" />
+        </div>
+        <div style="flex:1;min-width:260px">
+          <label>Message B</label>
+          <input id="m2" value="7" />
+        </div>
+        <div style="width:160px">
+          <label>Noise stddev</label>
+          <input id="noise" value="2" />
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:10px">
+        <button id="encA">Encrypt A</button>
+        <button id="encB">Encrypt B</button>
+        <button id="add">Add (A+B)</button>
+        <button id="mulScalar">Multiply by 3</button>
+        <button id="decrypt">Decrypt last result</button>
+      </div>
+
+      <div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap">
+        <div style="flex:1;min-width:260px">
+          <div class="output" id="cipherA">Cipher A: —</div>
+        </div>
+        <div style="flex:1;min-width:260px">
+          <div class="output" id="cipherB">Cipher B: —</div>
+        </div>
+        <div style="flex:1;min-width:260px">
+          <div class="output" id="result">Result: —</div>
+        </div>
+      </div>
+
+      <div style="margin-top:12px">
+        <details>
+          <summary>Notes about this toy demo</summary>
+          <ul>
+            <li>Noise accumulates; repeated operations may corrupt decrypted values.</li>
+            <li>Real FHE schemes use techniques like relinearization, modulus switching, and bootstrapping to manage noise.</li>
+          </ul>
+        </details>
+      </div>
+    </section>
+
+    <section class="card" id="use-cases">
+        <h2>8. When to Use CKKS</h2>
+        <ul>
+            <li><strong>Privacy-Preserving ML:</strong> Neural networks, logistic regression on encrypted data.</li>
+            <li><strong>Medical Research:</strong> Compute on encrypted patient data.</li>
+            <li><strong>Data Science:</strong> Visualization, filtering, aggregation on encrypted datasets.</li>
+        </ul>
+    </section>
+
+    <section class="card" id="further-reading">
+      <h2>9. Further Reading</h2>
+      <ul>
+        <li><a href="https://eprint.iacr.org/2016/421.pdf" target="_blank">CKKS Original Paper (Cheon et al.)</a> [4]</li>
+        <li><a href="https://homomorphicencryption.org/" target="_blank">HomomorphicEncryption.org — Standards & Community</a></li>
+      </ul>
+    </section>
+
+    <footer>
+      <p>Educational toy. Code adapted freely for learning purposes.</p>
+      <p class="cite-note">Citations: <br>
+        [2] Lyubashevsky, V., Peikert, C., & Regev, O. (2013). Lattice-based Cryptography. <br>
+        [3] FHE.org Community. (n.d.). History of FHE: A Timeline. Retrieved from https://fhe.org/history/ <br>
+        [4] Cheon, J. H., Kim, A., Kim, M., & Song, Y. (2017). Homomorphic Encryption for Arithmetic of Approximate Numbers.
+      </p>
+    </footer>
+  </div>
+
+  <script>
+    // Simple JS for toy interactive playground
+    let key;
+    document.getElementById('genKey').onclick = () => {
+      const s = Math.floor(Math.random()*97);
+      key = s;
+      document.getElementById('s').value = s;
+    };
+    function encrypt(m){const a=Math.floor(Math.random()*97);const e=parseInt(document.getElementById('noise').value);return {a,b:(a*key+m+e)%97};}
+    let lastResult;
+    document.getElementById('encA').onclick = ()=>{const m=parseInt(document.getElementById('m1').value);lastResult=encrypt(m);document.getElementById('cipherA').innerText="Cipher A: "+JSON.stringify(lastResult);};
+    document.getElementById('encB').onclick = ()=>{const m=parseInt(document.getElementById('m2').value);lastResult=encrypt(m);document.getElementById('cipherB').innerText="Cipher B: "+JSON.stringify(lastResult);};
+    document.getElementById('add').onclick = ()=>{const m1=encrypt(parseInt(document.getElementById('m1').value));const m2=encrypt(parseInt(document.getElementById('m2').value));lastResult={a:(m1.a+m2.a)%97,b:(m1.b+m2.b)%97};document.getElementById('result').innerText="Result: "+JSON.stringify(lastResult);};
+    document.getElementById('mulScalar').onclick = ()=>{const m=parseInt(document.getElementById('m1').value);lastResult={a:(m*3)%97,b:(encrypt(m).b*3)%97};document.getElementById('result').innerText="Result: "+JSON.stringify(lastResult);};
+    document.getElementById('decrypt').onclick = ()=>{if(!lastResult) return;const val=(lastResult.b-lastResult.a*key)%97;document.getElementById('result').innerText+="\nDecrypted ≈ "+val;};
+  </script>
+</body>
+</html>
