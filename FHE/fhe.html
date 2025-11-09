@@ -78,7 +78,7 @@
       <p>We define small parameters to illustrate encryption:</p>
       <p>\[ \text{modulus: } q = 97, \quad \text{secret key: } s = 17, \quad \text{noise: } e = \text{small random value (e.g., ±1)} \]</p>
       <p>To encrypt a message \( m \) with key \( s \):</p>
-      <p><em>a</em> — random number in the same domain as \( m \)</p>
+      <p>\[<em>a</em> — random integer 0 ≤ a &lt; q\]</p>
       <p>\[ Enc(m) = (a, b = (a \cdot s + m + e) \bmod q) \]</p>
       <p>To decrypt using \( s \):</p>
       <p>\[ Dec(a, b) = (b - a \cdot s) \bmod q \approx m + e \]</p>
