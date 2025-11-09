@@ -68,7 +68,10 @@
     <section class="card" id="what-is-lwe">
       <h2>1. What is LWE</h2>
       <p>The Learning With Errors (LWE) problem is the mathematical foundation of many lattice-based cryptographic schemes, including modern FHE. It is believed to be hard even for quantum computers.</p>
-      <p>In LWE, we assume there exists a secret vector \\( s \\), and we observe many samples of the form \\( (a, b = \\langle a, s \\rangle + e \\mod q) \\), where \\( a \\) is random, and \\( e \\) is a small noise term. The challenge is to recover \\( s \\) from these noisy linear equations — a problem known to be computationally hard.</p>
+      <p>In LWE, we assume there exists a secret vector \( s \), and we observe many samples of the form:</p>
+      <p>\[ (a, b = \langle a, s \rangle + e \bmod q) \]</p>
+      <p>where \( a \) is random, and \( e \) is a small noise term. The challenge is to recover \( s \) from these noisy linear equations — a problem known to be computationally hard.</p>
+
       <p>Most FHE schemes build on variants of LWE, such as Ring-LWE (RLWE), where operations take place in polynomial rings for efficiency.</p>
 
       <h3>Toy scheme (LWE-style) — mathematics (short)</h3>
