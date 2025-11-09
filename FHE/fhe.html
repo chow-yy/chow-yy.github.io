@@ -58,8 +58,7 @@
     <section class="card">
       <h2>Contents</h2>
       <ol>
-        <li><a href="#what-is-lwe">What is LWE</a></li>
-        <li><a href="#interactive-playground">Interactive playground (using LWE)</a></li>
+        <li><a href="#what-is-lwe">What is LWE (and Interactive Playground)</a></li>
         <li><a href="#fhe-scheme-diagram">Diagram / timeline of FHE schemes (BFV and CKKS emphasis)</a></li>
         <li><a href="#ckks">CKKS scheme</a></li>
       </ol>
@@ -73,6 +72,15 @@
       <p>where \( a \) is random, and \( e \) is a small noise term. The challenge is to recover \( s \) from these noisy linear equations — a problem known to be computationally hard.</p>
 
       <p>Most FHE schemes build on variants of LWE, such as Ring-LWE (RLWE), where operations take place in polynomial rings for efficiency.</p>
+
+      <h4>Public Key vs. Secret Key (A Practical Note)</h4>
+      <p>The toy example below uses a single <strong>secret key</strong> (<code>s</code>) for both encryption and decryption. This is called a <em>symmetric-key</em> scheme, and we use it here to keep the math simple and build intuition.</p>
+      <p>However, practical, real-world FHE schemes (like BFV and CKKS) are <strong>public-key</strong> (or <em>asymmetric</em>) systems. In that model:</p>
+      <ul>
+        <li>A <strong>Public Key (pk)</strong> is generated and shared with everyone. Anyone can use this key to encrypt messages (e.g., <code>Encrypt(pk, message)</code>).</li>
+        <li>A <strong>Secret Key (sk)</strong> is kept completely private by the data owner. Only this key can decrypt the messages (e.g., <code>Decrypt(sk, ciphertext)</code>).</li>
+      </ul>
+      <p>This is powerful because a server can receive encrypted data from many different people (who all used the public key) and compute on it, all without ever being able to decrypt the underlying data.</p>
 
       <h3>Toy scheme (LWE-style) — mathematics (short)</h3>
       <p>We define small parameters to illustrate encryption:</p>
@@ -91,10 +99,10 @@
       <p>Encrypt \( m = 5 \) using \( q = 97 \), \( s = 17 \), and \( e = 1 \).</p>
       <ul>
         <li>Choose \( a = 23 \)</li>
-        <li>Compute ciphertext: 
+        <li>Compute ciphertext:  
           \[ b = (23 \cdot 17 + 5 + 1) \bmod 97 = 12 \]</li>
         <li>Encrypted message: \( Enc(5) = (23, 12) \)</li>
-        <li>Decrypt: 
+        <li>Decrypt:  
           \[ Dec(23, 12) = (12 - 23 \cdot 17) \bmod 97 = 5 \approx m \]</li>
       </ul>
       <p>Noise is tiny, so decryption recovers the original message.</p>
@@ -120,10 +128,8 @@
       <p>Decrypting the sum:</p>
       <p>\[ Dec(40, 27) = (27 - 40 \cdot 17) \bmod 97 = 12 \approx m_1 + m_2 + (e_1 + e_2) \]</p>
       <p>This shows how noise accumulates and motivates advanced noise management in FHE.</p>
-    </section>
-
-    <section class="card" id="interactive-playground">
-      <h3>Interactive playground</h3>
+      
+      <h4 style="margin-top: 24px; border-top: 1px solid #e5e7eb; padding-top: 20px;">Interactive playground</h4>
       <p>Try encrypting two small integers, add them homomorphically, and decrypt to see how noise behaves.</p>
 
       <div style="display:flex;gap:12px;flex-wrap:wrap">
@@ -186,7 +192,7 @@
           </ul>
         </details>
       </div>
-    </section>
+      </section>
 
     <section class="card" id="fhe-scheme-diagram">
       <h2>FHE Scheme Timeline / Diagram</h2>
