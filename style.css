@@ -16,6 +16,19 @@ body {
       box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
     }
 
+/* --- global style for standalone links with class="links" --- */
+      a.links {
+        color: #004080;
+        text-decoration: none;
+        transition: color 0.2s;
+      }
+      
+      a.links:hover {
+        text-decoration: underline;
+        color: #002b5c;
+      }
+
+
     /* ========== Header ========== */
     header.main-header {
       display: flex;
