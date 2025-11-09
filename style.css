@@ -1,0 +1,91 @@
+/* === Global Page Layout === */
+:root {
+  --bg: #f9fafb;
+  --text: #222;
+  --accent: #0369a1;
+  --card-bg: #ffffff;
+  --border: #e5e7eb;
+  --font-body: "Inter", "Segoe UI", Roboto, sans-serif;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  line-height: 1.6;
+  margin: 0;
+  padding: 0;
+}
+
+/* === Header === */
+header {
+  text-align: center;
+  background: var(--accent);
+  color: white;
+  padding: 1.5rem 1rem;
+  font-size: 1.8rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+/* === Main Content === */
+main {
+  max-width: 850px;
+  margin: 2rem auto;
+  padding: 0 1.5rem;
+  background: var(--card-bg);
+  border-radius: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Headings */
+h1, h2, h3 {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+h1 { font-size: 1.8rem; margin-top: 1.4rem; }
+h2 { font-size: 1.5rem; margin-top: 1.2rem; }
+h3 { font-size: 1.2rem; margin-top: 1rem; }
+
+/* === Code & Math Blocks === */
+code, pre {
+  font-family: "JetBrains Mono", monospace;
+  background: #f3f4f6;
+  border-radius: 6px;
+}
+
+pre {
+  padding: 1rem;
+  overflow-x: auto;
+  border: 1px solid var(--border);
+}
+
+/* === Flowchart / Diagram === */
+.flowchart {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 2rem auto;
+}
+
+.flowchart svg, .flowchart img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* === Footer === */
+footer {
+  text-align: center;
+  margin-top: 3rem;
+  padding: 1rem 0;
+  color: #555;
+  font-size: 0.9rem;
+  border-top: 1px solid var(--border);
+}
+
+/* "Under Construction" notice */
+footer .construction {
+  font-style: italic;
+  color: #888;
+}
