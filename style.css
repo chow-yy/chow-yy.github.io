@@ -115,6 +115,30 @@ body {
       text-decoration: underline;
     }
 
+/* =================== Contents Links =================== */
+
+.card#contents ol {
+  padding-left: 20px;
+}
+
+.card#contents ol li {
+  margin-bottom: 8px;
+}
+
+.card#contents ol li a {
+  color: var(--accent);       /* blue accent color */
+  text-decoration: none;      /* remove underline */
+  font-weight: 500;           /* medium weight */
+  transition: all 0.2s ease;
+}
+
+.card#contents ol li a:hover {
+  text-decoration: underline; /* underline on hover */
+  color: #0369a1;             /* slightly darker blue */
+  transform: translateX(4px); /* subtle hover shift */
+}
+
+
     /* ========== Sections ========== */
     section {
       margin-bottom: 45px;
