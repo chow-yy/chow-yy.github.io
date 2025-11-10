@@ -229,22 +229,22 @@ body {
     }
 
  /* ========== Compact Two-Row Flowchart diagram ==========*/
-      .flow-diagram-branch {
+      .flow-diagram-horizontal {
         display: flex;
         flex-direction: column;
         align-items: center;
         margin-top: 16px;
-        gap: 12px;
+        gap: 16px;
       }
       
-      .flow-branch-row {
+      .flow-row {
         display: flex;
-        justify-content: center;
+        align-items: center;
         gap: 12px;
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
       }
       
-      .flow-step-branch {
+      .flow-step-horizontal {
         background: #f9fafb;
         border: 1px solid #e5e7eb;
         border-radius: 8px;
@@ -254,7 +254,7 @@ body {
         box-shadow: 0 2px 4px rgba(0,0,0,0.03);
       }
       
-      .flow-step-sub-branch {
+      .flow-step-sub-horizontal {
         background: #fff;
         border: 1px dashed #ccc;
         border-radius: 6px;
@@ -262,12 +262,12 @@ body {
         margin-top: 6px;
       }
       
-      .flow-arrow-branch {
+      .flow-arrow-horizontal {
         font-size: 20px;
         color: var(--accent);
         font-weight: bold;
-        align-self: center;
       }
+
 
       
       
