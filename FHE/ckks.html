@@ -93,11 +93,91 @@
       <p>This integer is then encrypted; the “noise” becomes part of the approximation.</p>
     </section>
 
-    <section class="card" id="rescaling">
-      <h2>4. Rescaling & Noise Management</h2>
-      <p>Multiplication grows both the scale and the noise. CKKS uses <strong>rescaling</strong> to divide the ciphertext by \(\Delta\) and keep results in a manageable range:</p>
-      <p>\[ c' \xrightarrow{\text{rescale}} c'' \approx \frac{c'}{\Delta} \]</p>
-    </section>
+    
+    
+  <section class="card" id="rescaling">
+  <h2>4. Rescaling & Noise Management</h2>
+  <p>Multiplication grows both the scale and the noise. CKKS uses <strong>rescaling</strong> to divide the ciphertext by \(\Delta\) and keep results in a manageable range:</p>
+  <p>\[ c' \xrightarrow{\text{rescale}} c'' \approx \frac{c'}{\Delta} \]</p>
+  
+  <p>To understand why this is necessary, it's crucial to look at the two distinct types of noise in CKKS.</p>
+
+  <div class="subsection" id="noise-details">
+    <h3>4b. The Two Types of Noise in CKKS</h3>
+    <p>In CKKS, "noise" comes from two sources, unlike base LWE/RLWE schemes [2]:</p>
+
+    <h4>1. Base Encryption Noise (\(e_1\))</h4>
+    <p>Like standard LWE/RLWE encryption, CKKS ciphertexts include a small random noise \(e_1\) to ensure semantic security [2]:</p>
+    <pre>
+Enc(tilde_x) = (a, b = a * s + tilde_x + e1 mod q)
+    </pre>
+    <p>This noise grows as you perform additions and multiplications.</p>
+
+    <h4>2. Encoding / Rounding Error (\(e_2\))</h4>
+    <p>CKKS encodes real numbers as integers using a scale factor Δ [4]:</p>
+    <p>\[ \tilde{x} = \text{Round}(x \cdot \Delta) \]</p>
+    <p>This means the encoded value can be seen as the "true" scaled value plus a small rounding error, \(e_2\):</p>
+    <p>\[ \tilde{x} = (x \cdot \Delta) + e_2 \]</p>
+    <p>Here, \(e_2\) is the rounding error. Unlike \(e_1\), it is not cryptographic; it represents the inherent approximation from scaling real numbers.</p>
+
+    <h4>3. How Noise Propagates</h4>
+    <ul>
+      <li><strong>Addition:</strong> Noise adds linearly:
+        <br>
+        \(c_1 + c_2 \implies e_\text{total} = e_1^{(1)} + e_1^{(2)} + e_2^{(1)} + e_2^{(2)}\)
+      </li>
+      <li><strong>Multiplication:</strong> Noise grows roughly multiplicatively with the scale:
+        <br>
+        <em>Compact form:</em>
+        <br>
+        \(c_1 * c_2 \implies e_\text{total} \approx (\tilde{x} + e_1^{(1)} + e_2^{(1)}) (\tilde{y} + e_1^{(2)} + e_2^{(2)}) - \tilde{x}\tilde{y}\)
+        <br>
+        <em>Expanded form (main contributions):</em>
+        <br>
+        \(e_\text{total} \approx \tilde{x} e_1^{(2)} + \tilde{y} e_1^{(1)} + \tilde{x} e_2^{(2)} + \tilde{y} e_2^{(1)} + e_1^{(1)} e_1^{(2)} + \text{smaller cross-terms}\)
+        <br>
+        Here, the terms involving \(\tilde{x}\) and \(\tilde{y}\) dominate the growth; the higher-order error products are typically much smaller.
+      </li>
+      <li><strong>Rescaling:</strong> Divides both value and noise by Δ, keeping errors manageable for decoding.</li>
+    </ul>
+
+    <h4>4. Visualizing Noise</h4>
+    <p>Think of CKKS ciphertexts as "fuzzy" numbers [4]:</p>
+    <div class="flow-diagram">
+      <div class="flow-step">
+        Plaintext x = 1.5
+        <br>Encode & scale: tilde_x = 1500 + e2
+        <br>Encrypt: c = Enc(tilde_x) + e1
+      </div>
+      <div class="flow-arrow">▼</div>
+      <div class="flow-step">
+        Homomorphic addition/multiplication → Noise grows
+        <br>e_total = e1 + e2 (+ more from operations)
+      </div>
+      <div class="flow-arrow">▼</div>
+      <div class="flow-step">
+        Rescale → Keep noise / scale manageable
+        <br>Decrypt & decode → x ± small approximation error
+      </div>
+    </div>
+
+    <p class="note">
+      ✅ CKKS embraces the noise: the cryptographic noise e1 ensures security, while the encoding error e2 defines the unavoidable approximation. Controlled rescaling and scale management allow arithmetic on real numbers with predictable approximation.
+    </p>
+
+    <h4>5. Bounding Noise (The Noise Model)</h4>
+    <p>CKKS papers and libraries don't use a single formula, but a <strong>noise model</strong> to track growth [4]. The primary goal is to ensure the final noise is smaller than the desired precision after decoding.</p>
+    <ul>
+        <li><strong>Key Insight:</strong> Unlike other schemes where noise grows exponentially, CKKS's <strong>rescaling</strong> step makes the noise grow (at worst) <strong>linearly</strong> with the multiplicative depth.</li>
+        <li><strong>Parameter Selection:</strong> In practice, you tell the library your desired precision (e.g., 40 bits) and multiplicative depth (e.g., 7 levels). The library uses this noise model to automatically select parameters (like the polynomial degree \(N\) and the modulus chain \(q_L, ..., q_0\)) that guarantee the final error is acceptably small.</li>
+        <li><strong>Security:</strong> This bound is also crucial for security. To prevent "decryption attacks" (IND-CPA-D) where an attacker analyzes noise statistics, libraries add *new* random noise (called "noise flooding") after decryption to mask the original computation's noise.</li>
+    </ul>
+  </div>
+</section>
+
+    
+    
+
     
     <section class="card" id="batching">
         <h2>5. Batching (SIMD)</h2>
@@ -187,6 +267,8 @@
 
 
     </section>
+    
+    
 
     <section class="card" id="interactive-playground">
       <h2>7. Interactive Playground</h2>
@@ -266,14 +348,15 @@
       </ul>
     </section>
 
-    <footer>
-      <p>Educational toy. Code adapted freely for learning purposes.</p>
-      <p class="cite-note">Citations: <br>
-        [2] Lyubashevsky, V., Peikert, C., & Regev, O. (2013). Lattice-based Cryptography. <br>
-        [3] FHE.org Community. (n.d.). History of FHE: A Timeline. Retrieved from https://fhe.org/history/ <br>
-        [4] Cheon, J. H., Kim, A., Kim, M., & Song, Y. (2017). Homomorphic Encryption for Arithmetic of Approximate Numbers.
-      </p>
-    </footer>
+<footer>
+  <p>Educational toy. Code adapted freely for learning purposes.</p>
+  <p class="cite-note">
+    Citations:<br>
+    [2] Lyubashevsky, V., Peikert, C., & Regev, O. (2013). Lattice-based Cryptography.<br>
+    [3] FHE.org Community. (n.d.). History of FHE: A Timeline. Retrieved from https://fhe.org/history/<br>
+    [4] Cheon, J. H., Kim, A., Kim, M., & Song, Y. (2017). Homomorphic Encryption for Arithmetic of Approximate Numbers.
+  </p>
+</footer>
   </div>
 
   <script>
