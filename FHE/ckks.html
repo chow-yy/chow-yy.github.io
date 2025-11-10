@@ -108,14 +108,17 @@
 
     <h4>1. Base Encryption Noise (\(e_1\))</h4>
     <p>Like standard LWE/RLWE encryption, CKKS ciphertexts include a small random noise \(e_1\) to ensure semantic security [2]:</p>
-    <pre>
-Enc(tilde_x) = (a, b = a * s + tilde_x + e1 mod q)
-    </pre>
+    <p>
+    \[\text{Enc}(\tilde{x}) = \big(a, \; b = (a \cdot s + \tilde{x} + e_1) \bmod q\big)\]
+    </p>
     <p>This noise grows as you perform additions and multiplications.</p>
-
+  
+    
     <h4>2. Encoding / Rounding Error (\(e_2\))</h4>
-    <p>CKKS encodes real numbers as integers using a scale factor Δ [4]:</p>
-    <p>\[ \tilde{x} = \text{Round}(x \cdot \Delta) \]</p>
+    <p>CKKS encodes real numbers as integers using a scale factor \(\Delta\) [4]:</p>
+    <p>\[
+    \tilde{x} = \text{Round}(x \cdot \Delta)
+    \]</p>
     <p>This means the encoded value can be seen as the "true" scaled value plus a small rounding error, \(e_2\):</p>
     <p>\[ \tilde{x} = (x \cdot \Delta) + e_2 \]</p>
     <p>Here, \(e_2\) is the rounding error. Unlike \(e_1\), it is not cryptographic; it represents the inherent approximation from scaling real numbers.</p>
@@ -145,19 +148,19 @@ Enc(tilde_x) = (a, b = a * s + tilde_x + e1 mod q)
     <p>Think of CKKS ciphertexts as "fuzzy" numbers [4]:</p>
     <div class="flow-diagram">
       <div class="flow-step">
-        Plaintext x = 1.5
-        <br>Encode & scale: tilde_x = 1500 + e2
-        <br>Encrypt: c = Enc(tilde_x) + e1
+        Plaintext \(x = 1.5\) <br>
+        Encode & scale: \(\tilde{x} = 1500 + e_2\) <br>
+        Encrypt: \(c = \text{Enc}(\tilde{x})\) (includes \(e_1\))
       </div>
       <div class="flow-arrow">▼</div>
       <div class="flow-step">
-        Homomorphic addition/multiplication → Noise grows
-        <br>e_total = e1 + e2 (+ more from operations)
+        Homomorphic addition/multiplication → Noise grows <br>
+        \(e_\text{total} = e_1 + e_2\) (+ more from operations)
       </div>
       <div class="flow-arrow">▼</div>
       <div class="flow-step">
-        Rescale → Keep noise / scale manageable
-        <br>Decrypt & decode → x ± small approximation error
+        Rescale → Keep noise / scale manageable <br>
+        Decrypt & decode → \(x \pm\) small approximation error
       </div>
     </div>
 
