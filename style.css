@@ -114,29 +114,60 @@ body {
       transform: translateX(3px);
       text-decoration: underline;
     }
+      
+      /* =================== Contents Two-Column Layout =================== */
+      .card#contents {
+        padding: 16px 20px;
+      }
+      
+      .card#contents h2 {
+        font-size: 22px;
+        margin-bottom: 12px;
+      }
+      
+      .card#contents ol {
+        counter-reset: section;
+        padding-left: 0;
+        margin: 0;
+        list-style: none;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 6px 12px; /* vertical gap 6px, horizontal gap 12px */
+      }
+      
+      .card#contents ol li {
+        counter-increment: section;
+        background: #f0f9ff;
+        border-radius: 6px;
+        padding: 6px 10px;
+        display: flex;
+        align-items: center;
+        transition: background 0.2s;
+      }
+      
+      .card#contents ol li:hover {
+        background: #e0f2fe;
+      }
+      
+      .card#contents ol li::before {
+        content: counter(section) ".";
+        font-weight: bold;
+        margin-right: 8px;
+        color: var(--accent);
+      }
+      
+      .card#contents ol li a {
+        color: #0369a1;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.2s;
+      }
+      
+      .card#contents ol li a:hover {
+        text-decoration: underline;
+        transform: translateX(3px);
+      }
 
-/* =================== Contents Links =================== */
-
-.card#contents ol {
-  padding-left: 20px;
-}
-
-.card#contents ol li {
-  margin-bottom: 8px;
-}
-
-.card#contents ol li a {
-  color: var(--accent);       /* blue accent color */
-  text-decoration: none;      /* remove underline */
-  font-weight: 500;           /* medium weight */
-  transition: all 0.2s ease;
-}
-
-.card#contents ol li a:hover {
-  text-decoration: underline; /* underline on hover */
-  color: #0369a1;             /* slightly darker blue */
-  transform: translateX(4px); /* subtle hover shift */
-}
 
 
     /* ========== Sections ========== */
