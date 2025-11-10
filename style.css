@@ -260,13 +260,24 @@ body {
         font-weight: bold;
       }
       
+      .flow-row-horizontal {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-top: 6px;
+      }
+      
+      .flow-column {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        flex: 1;
+      }
+      
       .flow-sub-row {
         display: flex;
-        align-items: flex-start;
+        gap: 12px;
         justify-content: center;
-        gap: 40px;
-        flex-wrap: wrap;
-        margin-top: 8px;
       }
       
       .flow-step-sub {
@@ -277,18 +288,7 @@ body {
         min-width: 140px;
         text-align: center;
       }
-      
-      .flow-row-horizontal {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        margin-top: 6px;
-      }
 
-
-
-      
-      
 
     /* ========== Footer ========== */
     footer {
