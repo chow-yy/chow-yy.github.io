@@ -229,7 +229,7 @@ body {
     }
 
  /* ========== Compact Two-Row Flowchart diagram ==========*/
-      .flow-diagram-horizontal {
+      .flow-diagram-compact {
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -244,7 +244,7 @@ body {
         flex-wrap: nowrap;
       }
       
-      .flow-step-horizontal {
+      .flow-step {
         background: #f9fafb;
         border: 1px solid #e5e7eb;
         border-radius: 8px;
@@ -254,18 +254,35 @@ body {
         box-shadow: 0 2px 4px rgba(0,0,0,0.03);
       }
       
-      .flow-step-sub-horizontal {
+      .flow-arrow {
+        font-size: 20px;
+        color: var(--accent);
+        font-weight: bold;
+      }
+      
+      .flow-sub-row {
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        gap: 40px;
+        flex-wrap: wrap;
+        margin-top: 8px;
+      }
+      
+      .flow-step-sub {
         background: #fff;
         border: 1px dashed #ccc;
         border-radius: 6px;
         padding: 6px;
-        margin-top: 6px;
+        min-width: 140px;
+        text-align: center;
       }
       
-      .flow-arrow-horizontal {
-        font-size: 20px;
-        color: var(--accent);
-        font-weight: bold;
+      .flow-row-horizontal {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-top: 6px;
       }
 
 
