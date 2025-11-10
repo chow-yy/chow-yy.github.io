@@ -123,46 +123,57 @@
       <p>This diagram shows the full lifecycle of data using the values from above.</p>
       
      <div class="flow-diagram-horizontal">
-    <!-- Main steps 1-4 -->
-    <div class="flow-row">
-      <div class="flow-step-horizontal">
-        <strong>1. Plaintext</strong><br> x = 1.5
+      <!-- Step 1-3 -->
+      <div class="flow-row">
+        <div class="flow-step-horizontal">
+          <strong>1. Plaintext</strong><br> x = 1.5
+        </div>
+        <div class="flow-arrow-horizontal">→</div>
+        <div class="flow-step-horizontal">
+          <strong>2. Encode & Scale</strong><br> x_scaled = 1.5·1000 = 1500
+        </div>
+        <div class="flow-arrow-horizontal">→</div>
+        <div class="flow-step-horizontal">
+          <strong>3. Encrypt</strong><br> (a, b = a·s + 1500 + e mod q)
+        </div>
       </div>
-      <div class="flow-arrow-horizontal">→</div>
-      <div class="flow-step-horizontal">
-        <strong>2. Encode & Scale</strong><br> x_scaled = 1.5·1000 = 1500
-      </div>
-      <div class="flow-arrow-horizontal">→</div>
-      <div class="flow-step-horizontal">
-        <strong>3. Encrypt</strong><br> (a, b = a·s + 1500 + e mod q)
-      </div>
-      <div class="flow-arrow-horizontal">→</div>
-      <div class="flow-step-horizontal">
-        <strong>4. Homomorphic Ops</strong><br>
-        <div class="flow-step-sub-horizontal">Add: C_add = C1 + C2</div>
-        <div class="flow-step-sub-horizontal">Mul: C_mult = C1 · C2</div>
+    
+      <!-- Step 4: Homomorphic Ops (branching point) -->
+      <div class="flow-row">
+        <div class="flow-step-horizontal">
+          <strong>4. Homomorphic Ops</strong><br>
+          Add / Multiply
+        </div>
+    
+        <div style="width:40px"></div> <!-- gap between branches -->
+    
+        <!-- Addition Path -->
+        <div class="flow-step-horizontal">
+          <strong>Addition Path</strong><br>
+          Decrypt C_add ≈ 1.5 + 2.25 = 3.75
+        </div>
+    
+        <div style="width:40px"></div>
+    
+        <!-- Multiplication Path -->
+        <div class="flow-step-horizontal">
+          <strong>Multiplication Path</strong>
+          <div class="flow-row" style="margin-top:8px;">
+            <div class="flow-step-sub-horizontal">
+              5. Rescale C_mult / Δ
+            </div>
+            <div class="flow-arrow-horizontal">→</div>
+            <div class="flow-step-sub-horizontal">
+              6. Decrypt → 3375
+            </div>
+            <div class="flow-arrow-horizontal">→</div>
+            <div class="flow-step-sub-horizontal">
+              7. Decode → 3.375
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-  
-    <!-- Branching row: addition vs multiplication -->
-    <div class="flow-row">
-      <!-- Addition path -->
-      <div class="flow-step-horizontal">
-        <strong>Addition Path</strong><br>
-        Decrypt C_add ≈ 1.5 + 2.25 = 3.75
-      </div>
-  
-      <div style="width:20px"></div> <!-- gap between branches -->
-  
-      <!-- Multiplication path -->
-      <div class="flow-step-horizontal">
-        <strong>Multiplication Path</strong><br>
-        <div class="flow-step-sub-horizontal">5. Rescale C_mult / Δ</div>
-        <div class="flow-step-sub-horizontal">6. Decrypt → 3375</div>
-        <div class="flow-step-sub-horizontal">7. Decode → 3.375</div>
-      </div>
-    </div>
-  </div>
 
 
 
