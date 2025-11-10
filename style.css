@@ -229,39 +229,40 @@ body {
     }
 
  /* ========== Compact Two-Row Flowchart diagram ==========*/
-      .flow-diagram-compact {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 12px;
-        margin-top: 16px;
-      }
-      
-      .flow-step-compact {
-        background: #f9fafb;
-        border: 1px solid #e5e7eb;
-        border-radius: 8px;
-        padding: 8px 12px;
-        text-align: center;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.03);
-        flex: 1 1 140px; /* allow wrapping if screen is small */
-        min-width: 120px;
-      }
-      
-      .flow-step-sub-compact {
-        background: #fff;
-        border: 1px dashed #ccc;
-        border-radius: 6px;
-        padding: 6px;
-        margin-top: 6px;
-      }
-      
-      .flow-arrow-compact {
-        font-size: 20px;
-        color: var(--accent);
-        font-weight: bold;
-        align-self: center;
-      }
+.flow-diagram-2row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.flow-step-2row {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 10px 12px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+  flex: 1 1 180px; /* allow wrapping */
+  min-width: 160px;
+}
+
+.flow-step-sub-2row {
+  background: #fff;
+  border: 1px dashed #ccc;
+  border-radius: 6px;
+  padding: 6px;
+  margin-top: 6px;
+}
+
+.flow-arrow-2row {
+  font-size: 20px;
+  color: var(--accent);
+  font-weight: bold;
+  align-self: center;
+}
+
       
       
 
