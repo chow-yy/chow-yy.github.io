@@ -122,37 +122,51 @@
       <h3>CKKS Data Flow</h3>
       <p>This diagram shows the full lifecycle of data using the values from above.</p>
       
-     <div class="flow-diagram-compact">
-        <div class="flow-step-compact">
-          <strong>1. Plaintext</strong><br>Real number x (1.5)
-        </div>
-        <div class="flow-arrow-compact">→</div>
-        <div class="flow-step-compact">
-          <strong>2. Encode & Scale</strong><br>Δ = 1000 → 1500
-        </div>
-        <div class="flow-arrow-compact">→</div>
-        <div class="flow-step-compact">
-          <strong>3. Encrypt</strong><br>(a, b = a·s + 1500 + e)
-        </div>
-        <div class="flow-arrow-compact">→</div>
-        <div class="flow-step-compact">
-          <strong>4. Homomorphic Ops</strong>
-          <div class="flow-step-sub-compact"><strong>Add</strong>: C_add = C1 + C2</div>
-          <div class="flow-step-sub-compact"><strong>Multiply</strong>: C_mult = C1·C2</div>
-        </div>
-        <div class="flow-arrow-compact">→</div>
-        <div class="flow-step-compact">
-          <strong>5. Rescale</strong><br>Divide by Δ
-        </div>
-        <div class="flow-arrow-compact">→</div>
-        <div class="flow-step-compact">
-          <strong>6. Decrypt</strong><br>Dec(C'_mult) ≈ 3375
-        </div>
-        <div class="flow-arrow-compact">→</div>
-        <div class="flow-step-compact">
-          <strong>7. Decode</strong><br>3375 / 1000 ≈ 3.375
-        </div>
-      </div>
+     <div class="flow-diagram-2row">
+  <!-- Row 1 -->
+  <div class="flow-step-2row">
+    <strong>1. Plaintext</strong><br>
+    Real number x (e.g., <strong>1.5</strong>)
+  </div>
+  <div class="flow-arrow-2row">→</div>
+  <div class="flow-step-2row">
+    <strong>2. Encode & Scale</strong><br>
+    Δ = 1000 → x_scaled = Round(1.5·1000) = <strong>1500</strong>
+  </div>
+  <div class="flow-arrow-2row">→</div>
+  <div class="flow-step-2row">
+    <strong>3. Encrypt</strong><br>
+    LWE-style:<br>
+    <span class="monospace" style="font-size: 13px;">
+      (a, b = a·s + 1500 + e mod q)
+    </span>
+  </div>
+
+  <!-- Row 2 -->
+  <div class="flow-arrow-2row">→</div>
+  <div class="flow-step-2row">
+    <strong>4. Homomorphic Operations</strong><br>
+    (y = 2.25 → y_scaled = 2250)
+    <div class="flow-step-sub-2row"><strong>Add Enc(2250)</strong><br>C_add = C1 + C2</div>
+    <div class="flow-step-sub-2row"><strong>Multiply Enc(2250)</strong><br>C_mult = C1 · C2</div>
+  </div>
+  <div class="flow-arrow-2row">→</div>
+  <div class="flow-step-2row">
+    <strong>5. Rescale</strong><br>
+    Divide result by Δ to manage scale
+  </div>
+  <div class="flow-arrow-2row">→</div>
+  <div class="flow-step-2row">
+    <strong>6. Decrypt</strong><br>
+    Dec(C'_mult) ≈ 3375
+  </div>
+  <div class="flow-arrow-2row">→</div>
+  <div class="flow-step-2row">
+    <strong>7. Decode</strong><br>
+    3375 / 1000 ≈ <strong>3.375</strong>
+  </div>
+</div>
+
 
     </section>
 
