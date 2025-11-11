@@ -1,440 +1,440 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-  <meta http-equiv="Pragma" content="no-cache" />
-  <meta http-equiv="Expires" content="0" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
 
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>CKKS Scheme — FHE Tutorial</title>
-  <link rel="stylesheet" href="../style.css?v=zTEfWdo/alrOjIbFsIc30bmoXtKMl//JRc2+f6R/OkQ=" />
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-  <style>
-    :root{--bg:#f9fafb;--card:#ffffff;--muted:#4b5563;--accent:#0284c7}
-    body{font-family:Inter,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:linear-gradient(180deg,#f0f9ff 0%,#ffffff 100%);color:#111827;margin:0;padding:32px}
-    .container{max-width:980px;margin:0 auto}
-    header{display:flex;align-items:center;gap:16px}
-    h1{margin:0;font-size:28px}
-    h2,h3,h4{scroll-margin-top:80px}
-    a{color:var(--accent);text-decoration:none}
-    a:hover{text-decoration:underline}
-    p.lead{color:var(--muted);margin-top:8px}
-    .card{background:var(--card);border-radius:12px;padding:18px;margin-top:18px;box-shadow:0 6px 24px rgba(0,0,0,0.05)}
-    pre{background:#f1f5f9;padding:12px;border-radius:8px;overflow:auto}
-    .grid{display:grid;grid-template-columns:1fr 360px;gap:16px}
-    label{font-size:13px;color:var(--muted)}
-    input,button,select,textarea{padding:8px;border-radius:8px;border:1px solid rgba(0,0,0,0.1);background:#f9fafb;color:inherit}
-    button{cursor:pointer;background:var(--accent);color:white;border:none}
-    button:hover{background:#0369a1}
-    .monospace{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
-    .status{font-size:13px;color:var(--muted)}
-    .row{display:flex;gap:8px}
-    .output{background:#f1f5f9;padding:12px;border-radius:8px;overflow-x:auto}
-    footer{margin-top:28px;color:var(--muted);font-size:13px;text-align:center}
-    .note{background:#e0f2fe;padding:10px;border-radius:8px;color:#0369a1}
-    .cite-note{margin-top:8px;font-size:11px;color:#6b7280}
-    table{border-collapse:collapse;margin-top:12px;width:100%}
-    table, th, td{border:1px solid #ccc}
-    th, td{padding:6px;text-align:center}
-    .flow-diagram {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  margin-top: 16px;
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>CKKS Scheme — FHE Tutorial</title>
+  <link rel="stylesheet" href="../style.css?v=20251110" />
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <style>
+    :root{--bg:#f9fafb;--card:#ffffff;--muted:#4b5563;--accent:#0284c7}
+    body{font-family:Inter,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:linear-gradient(180deg,#f0f9ff 0%,#ffffff 100%);color:#111827;margin:0;padding:32px}
+    .container{max-width:980px;margin:0 auto}
+    header{display:flex;align-items:center;gap:16px}
+    h1{margin:0;font-size:28px}
+    h2,h3,h4{scroll-margin-top:80px}
+    a{color:var(--accent);text-decoration:none}
+    a:hover{text-decoration:underline}
+    p.lead{color:var(--muted);margin-top:8px}
+    .card{background:var(--card);border-radius:12px;padding:18px;margin-top:18px;box-shadow:0 6px 24px rgba(0,0,0,0.05)}
+    pre{background:#f1f5f9;padding:12px;border-radius:8px;overflow:auto}
+    .grid{display:grid;grid-template-columns:1fr 360px;gap:16px}
+    label{font-size:13px;color:var(--muted)}
+    input,button,select,textarea{padding:8px;border-radius:8px;border:1px solid rgba(0,0,0,0.1);background:#f9fafb;color:inherit}
+    button{cursor:pointer;background:var(--accent);color:white;border:none}
+    button:hover{background:#0369a1}
+    .monospace{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+    .status{font-size:13px;color:var(--muted)}
+    .row{display:flex;gap:8px}
+    .output{background:#f1f5f9;padding:12px;border-radius:8px;overflow-x:auto}
+    footer{margin-top:28px;color:var(--muted);font-size:13px;text-align:center}
+    .note{background:#e0f2fe;padding:10px;border-radius:8px;color:#0369a1}
+    .cite-note{margin-top:8px;font-size:11px;color:#6b7280}
+    table{border-collapse:collapse;margin-top:12px;width:100%}
+    table, th, td{border:1px solid #ccc}
+    th, td{padding:6px;text-align:center}
+    .flow-diagram {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
 }
-  </style>
+  </style>
 </head>
 <body>
-  <a href="fhe.html?v=zTEfWdo/alrOjIbFsIc30bmoXtKMl//JRc2+f6R/OkQ=" class="back-link">&larr; Back to FHE Intro</a>
+  <a href="fhe.html?v=20251110" class="back-link">&larr; Back to FHE Intro</a>
 
-  
-  <div class="container">
-    <header>
-      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" aria-hidden>
-        <rect x="1" y="1" width="22" height="22" rx="6" fill="#e0f2fe" stroke="#0284c7" stroke-width="0.8"/>
-        <path d="M7 12h10M7 8h10M7 16h6" stroke="#0369a1" stroke-width="1.2" stroke-linecap="round"/>
-      </svg>
-      <div>
-        <h1>The CKKS Scheme</h1>
-        <p class="lead">An overview of the scheme (Cheon-Kim-Kim-Song) that enables approximate arithmetic on encrypted real numbers.</p>
-      </div>
-    </header>
+  
+  <div class="container">
+    <header>
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" aria-hidden>
+        <rect x="1" y="1" width="22" height="22" rx="6" fill="#e0f2fe" stroke="#0284c7" stroke-width="0.8"/>
+        <path d="M7 12h10M7 8h10M7 16h6" stroke="#0369a1" stroke-width="1.2" stroke-linecap="round"/>
+      </svg>
+      <div>
+        <h1>The CKKS Scheme</h1>
+        <p class="lead">An overview of the scheme (Cheon-Kim-Kim-Song) that enables approximate arithmetic on encrypted real numbers.</p>
+      </div>
+    </header>
 
-    <section class="card" id="contents">
-        <h2>Contents</h2>
-        <ol>
-          <li><a href="#what-is-ckks">What is CKKS? (And Why We Need It)</a></li>
-          <li><a href="#lwe-intuition">Toy LWE Intuition</a></li>
-          <li><a href="#encoding">Encoding Real Numbers</a></li>
-          <li><a href="#rescaling">Rescaling & Noise Management</a></li>
-          <li><a href="#batching">Batching (SIMD)</a></li>
-          <li><a href="#example">Concrete Example</a></li>
-          <li><a href="#interactive-playground">Interactive Playground</a></li>
-          <li><a href="#use-cases">When to Use CKKS</a></li>
-          <li><a href="#further-reading">Further Reading</a></li>
-        </ol>
-      </section>
+    <section class="card" id="contents">
+        <h2>Contents</h2>
+        <ol>
+          <li><a href="#what-is-ckks">What is CKKS? (And Why We Need It)</a></li>
+          <li><a href="#lwe-intuition">Toy LWE Intuition</a></li>
+          <li><a href="#encoding">Encoding Real Numbers</a></li>
+          <li><a href="#rescaling">Rescaling & Noise Management</a></li>
+          <li><a href="#batching">Batching (SIMD)</a></li>
+          <li><a href="#example">Concrete Example</a></li>
+          <li><a href="#interactive-playground">Interactive Playground</a></li>
+          <li><a href="#use-cases">When to Use CKKS</a></li>
+          <li><a href="#further-reading">Further Reading</a></li>
+        </ol>
+      </section>
 
-    <section class="card" id="what-is-ckks">
-      <h2>1. What is CKKS? (And Why We Need It)</h2>
-      <p>BFV and BGV schemes work perfectly with <strong>integers</strong>, giving exact results. But most machine learning and data analysis operate on <strong>real numbers</strong>. CKKS, introduced by Cheon, Kim, Kim, and Song (2016), is designed for <strong>approximate arithmetic</strong> on encrypted real and complex numbers.</p>
-    </section>
+    <section class="card" id="what-is-ckks">
+      <h2>1. What is CKKS? (And Why We Need It)</h2>
+      <p>BFV and BGV schemes work perfectly with <strong>integers</strong>, giving exact results. But most machine learning and data analysis operate on <strong>real numbers</strong>. CKKS, introduced by Cheon, Kim, Kim, and Song (2016), is designed for <strong>approximate arithmetic</strong> on encrypted real and complex numbers.</p>
+    </section>
 
-    <section class="card" id="lwe-intuition">
-      <h2>2. Toy LWE Intuition</h2>
-      <p>Before CKKS, consider a simple LWE-style encryption (integers with noise) to build intuition:</p>
-      <p>\[ q = 97, \quad s = 17, \quad e = \text{small noise term (e.g., ±1)} \]</p>
-      <p>Encryption: \[ Enc(m) = (a, b = (a \cdot s + m + e) \bmod q) \]</p>
-      <p>Decryption: \[ Dec(a,b) = (b - a\cdot s) \bmod q \approx m \]</p>
-      <p>Noise grows with operations; CKKS handles this carefully for real numbers.</p>
-    </section>
+    <section class="card" id="lwe-intuition">
+      <h2>2. Toy LWE Intuition</h2>
+      <p>Before CKKS, consider a simple LWE-style encryption (integers with noise) to build intuition:</p>
+      <p>\[ q = 97, \quad s = 17, \quad e = \text{small noise term (e.g., ±1)} \]</p>
+      <p>Encryption: \[ Enc(m) = (a, b = (a \cdot s + m + e) \bmod q) \]</p>
+      <p>Decryption: \[ Dec(a,b) = (b - a\cdot s) \bmod q \approx m \]</p>
+      <p>Noise grows with operations; CKKS handles this carefully for real numbers.</p>
+    </section>
 
-    <section class="card" id="encoding">
-      <h2>3. Encoding Real Numbers</h2>
-      <p>CKKS encodes real numbers as scaled integers using a scale factor \(\Delta\):</p>
-      <p>\[ \text{Encode}(x) = \lfloor x \cdot \Delta \rceil \]</p>
-      <p>This integer is then encrypted; the “noise” becomes part of the approximation.</p>
-    </section>
+    <section class="card" id="encoding">
+      <h2>3. Encoding Real Numbers</h2>
+      <p>CKKS encodes real numbers as scaled integers using a scale factor \(\Delta\):</p>
+      <p>\[ \text{Encode}(x) = \lfloor x \cdot \Delta \rceil \]</p>
+      <p>This integer is then encrypted; the “noise” becomes part of the approximation.</p>
+    </section>
 
-    
-    
-  <section class="card" id="rescaling">
-  <h2>4. Rescaling & Noise Management</h2>
-  <p>Multiplication grows both the scale and the noise. CKKS uses <strong>rescaling</strong> to divide the ciphertext by \(\Delta\) and keep results in a manageable range:</p>
-  <p>\[ c' \xrightarrow{\text{rescale}} c'' \approx \frac{c'}{\Delta} \]</p>
-  
-  <p>To understand why this is necessary, it's crucial to look at the two distinct types of noise in CKKS.</p>
+    
+    
+  <section class="card" id="rescaling">
+  <h2>4. Rescaling & Noise Management</h2>
+  <p>Multiplication grows both the scale and the noise. CKKS uses <strong>rescaling</strong> to divide the ciphertext by \(\Delta\) and keep results in a manageable range:</p>
+  <p>\[ c' \xrightarrow{\text{rescale}} c'' \approx \frac{c'}{\Delta} \]</p>
+  
+  <p>To understand why this is necessary, it's crucial to look at the two distinct types of noise in CKKS.</p>
 
-  <div class="subsection" id="noise-details">
-    <h3>4b. The Two Types of Noise in CKKS</h3>
-    <p>In CKKS, "noise" comes from two sources, unlike base LWE/RLWE schemes [2]:</p>
+  <div class="subsection" id="noise-details">
+    <h3>4b. The Two Types of Noise in CKKS</h3>
+    <p>In CKKS, "noise" comes from two sources, unlike base LWE/RLWE schemes [2]:</p>
 
-    <h4>1. Base Encryption Noise (\(e_1\))</h4>
-    <p>Like standard LWE/RLWE encryption, CKKS ciphertexts include a small random noise \(e_1\) to ensure semantic security [2]:</p>
-    <p>
-    \[\text{Enc}(\tilde{x}) = \big(a, \; b = (a \cdot s + \tilde{x} + e_1) \bmod q\big)\]
-    </p>
-    <p>This noise grows as you perform additions and multiplications.</p>
-  
-    
-    <h4>2. Encoding / Rounding Error (\(e_2\))</h4>
-    <p>CKKS encodes real numbers as integers using a scale factor \(\Delta\) [4]:</p>
-    <p>\[
-    \tilde{x} = \text{Round}(x \cdot \Delta)
-    \]</p>
-    <p>This means the encoded value can be seen as the "true" scaled value plus a small rounding error, \(e_2\):</p>
-    <p>\[ \tilde{x} = (x \cdot \Delta) + e_2 \]</p>
-    <p>Here, \(e_2\) is the rounding error. Unlike \(e_1\), it is not cryptographic; it represents the inherent approximation from scaling real numbers.</p>
+    <h4>1. Base Encryption Noise (\(e_1\))</h4>
+    <p>Like standard LWE/RLWE encryption, CKKS ciphertexts include a small random noise \(e_1\) to ensure semantic security [2]:</p>
+    <p>
+    \[\text{Enc}(\tilde{x}) = \big(a, \; b = (a \cdot s + \tilde{x} + e_1) \bmod q\big)\]
+    </p>
+    <p>This noise grows as you perform additions and multiplications.</p>
+  
+    
+    <h4>2. Encoding / Rounding Error (\(e_2\))</h4>
+    <p>CKKS encodes real numbers as integers using a scale factor \(\Delta\) [4]:</p>
+    <p>\[
+    \tilde{x} = \text{Round}(x \cdot \Delta)
+    \]</p>
+    <p>This means the encoded value can be seen as the "true" scaled value plus a small rounding error, \(e_2\):</p>
+    <p>\[ \tilde{x} = (x \cdot \Delta) + e_2 \]</p>
+    <p>Here, \(e_2\) is the rounding error. Unlike \(e_1\), it is not cryptographic; it represents the inherent approximation from scaling real numbers.</p>
 
-    <h4>3. How Noise Propagates</h4>
-    <ul>
-      <li><strong>Addition:</strong> Noise adds linearly:
-        <br>
-        \(c_1 + c_2 \implies e_\text{total} = e_1^{(1)} + e_1^{(2)} + e_2^{(1)} + e_2^{(2)}\)
-      </li>
-      <li><strong>Multiplication:</strong> Noise grows roughly multiplicatively with the scale:
-        <br>
-        <em>Compact form:</em>
-        <br>
-        \(c_1 * c_2 \implies e_\text{total} \approx (\tilde{x} + e_1^{(1)} + e_2^{(1)}) (\tilde{y} + e_1^{(2)} + e_2^{(2)}) - \tilde{x}\tilde{y}\)
-        <br>
-        <em>Expanded form (main contributions):</em>
-        <br>
-        \(e_\text{total} \approx \tilde{x} e_1^{(2)} + \tilde{y} e_1^{(1)} + \tilde{x} e_2^{(2)} + \tilde{y} e_2^{(1)} + e_1^{(1)} e_1^{(2)} + \text{smaller cross-terms}\)
-        <br>
-        Here, the terms involving \(\tilde{x}\) and \(\tilde{y}\) dominate the growth; the higher-order error products are typically much smaller.
-      </li>
-      <li><strong>Rescaling:</strong> Divides both value and noise by Δ, keeping errors manageable for decoding.</li>
-    </ul>
+    <h4>3. How Noise Propagates</h4>
+    <ul>
+      <li><strong>Addition:</strong> Noise adds linearly:
+        <br>
+        \(c_1 + c_2 \implies e_\text{total} = e_1^{(1)} + e_1^{(2)} + e_2^{(1)} + e_2^{(2)}\)
+      </li>
+      <li><strong>Multiplication:</strong> Noise grows roughly multiplicatively with the scale:
+        <br>
+        <em>Compact form:</em>
+        <br>
+        \(c_1 * c_2 \implies e_\text{total} \approx (\tilde{x} + e_1^{(1)} + e_2^{(1)}) (\tilde{y} + e_1^{(2)} + e_2^{(2)}) - \tilde{x}\tilde{y}\)
+        <br>
+        <em>Expanded form (main contributions):</em>
+        <br>
+        \(e_\text{total} \approx \tilde{x} e_1^{(2)} + \tilde{y} e_1^{(1)} + \tilde{x} e_2^{(2)} + \tilde{y} e_2^{(1)} + e_1^{(1)} e_1^{(2)} + \text{smaller cross-terms}\)
+        <br>
+        Here, the terms involving \(\tilde{x}\) and \(\tilde{y}\) dominate the growth; the higher-order error products are typically much smaller.
+      </li>
+      <li><strong>Rescaling:</strong> Divides both value and noise by Δ, keeping errors manageable for decoding.</li>
+    </ul>
 
-    <h4>4. Visualizing Noise</h4>
-    <p>Think of CKKS ciphertexts as "fuzzy" numbers [4]:</p>
-    <div class="flow-diagram">
-      <div class="flow-step">
-        Plaintext \(x = 1.5\) <br>
-        Encode & scale: \(\tilde{x} = 1500 + e_2\) <br>
-        Encrypt: \(c = \text{Enc}(\tilde{x})\) (includes \(e_1\))
-      </div>
-      <div class="flow-arrow">▼</div>
-      <div class="flow-step">
-        Homomorphic addition/multiplication → Noise grows <br>
-        \(e_\text{total} = e_1 + e_2\) (+ more from operations)
-      </div>
-      <div class="flow-arrow">▼</div>
-      <div class="flow-step">
-        Rescale → Keep noise / scale manageable <br>
-        Decrypt & decode → \(x \pm\) small approximation error
-      </div>
-    </div>
+    <h4>4. Visualizing Noise</h4>
+    <p>Think of CKKS ciphertexts as "fuzzy" numbers [4]:</p>
+    <div class="flow-diagram">
+      <div class="flow-step">
+        Plaintext \(x = 1.5\) <br>
+        Encode & scale: \(\tilde{x} = 1500 + e_2\) <br>
+        Encrypt: \(c = \text{Enc}(\tilde{x})\) (includes \(e_1\))
+      </div>
+      <div class="flow-arrow">▼</div>
+      <div class="flow-step">
+        Homomorphic addition/multiplication → Noise grows <br>
+        \(e_\text{total} = e_1 + e_2\) (+ more from operations)
+      </div>
+      <div class="flow-arrow">▼</div>
+      <div class="flow-step">
+        Rescale → Keep noise / scale manageable <br>
+        Decrypt & decode → \(x \pm\) small approximation error
+      </div>
+    </div>
 
-    <p class="note">
-      ✅ CKKS embraces the noise: the cryptographic noise e1 ensures security, while the encoding error e2 defines the unavoidable approximation. Controlled rescaling and scale management allow arithmetic on real numbers with predictable approximation.
-    </p>
+    <p class="note">
+      ✅ CKKS embraces the noise: the cryptographic noise e1 ensures security, while the encoding error e2 defines the unavoidable approximation. Controlled rescaling and scale management allow arithmetic on real numbers with predictable approximation.
+    </p>
 
-    <h4>5. Bounding Noise (The Noise Model)</h4>
-    <p>CKKS papers and libraries don't use a single formula, but a <strong>noise model</strong> to track growth [4]. The primary goal is to ensure the final noise is smaller than the desired precision after decoding.</p>
-    <ul>
-        <li><strong>Key Insight:</strong> Unlike other schemes where noise grows exponentially, CKKS's <strong>rescaling</strong> step makes the noise grow (at worst) <strong>linearly</strong> with the multiplicative depth.</li>
-        <li><strong>Parameter Selection:</strong> In practice, you tell the library your desired precision (e.g., 40 bits) and multiplicative depth (e.g., 7 levels). The library uses this noise model to automatically select parameters (like the polynomial degree \(N\) and the modulus chain \(q_L, ..., q_0\)) that guarantee the final error is acceptably small.</li>
-        <li><strong>Security:</strong> This bound is also crucial for security. To prevent "decryption attacks" (IND-CPA-D) where an attacker analyzes noise statistics, libraries add *new* random noise (called "noise flooding") after decryption to mask the original computation's noise.</li>
-    </ul>
-  </div>
+    <h4>5. Bounding Noise (The Noise Model)</h4>
+    <p>CKKS papers and libraries don't use a single formula, but a <strong>noise model</strong> to track growth [4]. The primary goal is to ensure the final noise is smaller than the desired precision after decoding.</p>
+    <ul>
+        <li><strong>Key Insight:</strong> Unlike other schemes where noise grows exponentially, CKKS's <strong>rescaling</strong> step makes the noise grow (at worst) <strong>linearly</strong> with the multiplicative depth.</li>
+        <li><strong>Parameter Selection:</strong> In practice, you tell the library your desired precision (e.g., 40 bits) and multiplicative depth (e.g., 7 levels). The library uses this noise model to automatically select parameters (like the polynomial degree \(N\) and the modulus chain \(q_L, ..., q_0\)) that guarantee the final error is acceptably small.</li>
+        <li><strong>Security:</strong> This bound is also crucial for security. To prevent "decryption attacks" (IND-CPA-D) where an attacker analyzes noise statistics, libraries add *new* random noise (called "noise flooding") after decryption to mask the original computation's noise.</li>
+    </ul>
+  </div>
 </section>
 
-    
-    
+    
+    
 
-    
-    <section class="card" id="batching">
-        <h2>5. Batching (SIMD)</h2>
-        <p>CKKS allows packing thousands of numbers into one ciphertext. Operations on ciphertexts apply to all packed numbers simultaneously:</p>
-        <p>\[ C_{vec} = \text{Encrypt}([x_1, x_2, \dots, x_N]) \]</p>
-    </section>
+    
+    <section class="card" id="batching">
+        <h2>5. Batching (SIMD)</h2>
+        <p>CKKS allows packing thousands of numbers into one ciphertext. Operations on ciphertexts apply to all packed numbers simultaneously:</p>
+        <p>\[ C_{vec} = \text{Encrypt}([x_1, x_2, \dots, x_N]) \]</p>
+    </section>
 
- <section class="card" id="example">
-      <h2>7. Concrete Example</h2>
-      <p>Encoding \(x=1.5\), \(y=2.25\) with scale \(\Delta=1000\):</p>
-      <ul>
-        <li>Encode: \(\tilde{x}=1500\), \(\tilde{y}=2250\)</li>
-        <li>Encrypt to get \(Enc(\tilde{x})\), \(Enc(\tilde{y})\)</li>
-        <li>Homomorphic Addition:
-          <br>\(C_{add} = Enc(\tilde{x}) + Enc(\tilde{y})\)
-          <br>Decrypt/Decode \(\approx 3.75\)</li>
-        <li>Homomorphic Multiplication:
-          <br>\(C_{mult} = Enc(\tilde{x}) \cdot Enc(\tilde{y})\)
-          <br>Rescale, then decrypt/decode \(\approx 3.375\)</li>
-      </ul>
+ <section class="card" id="example">
+      <h2>7. Concrete Example</h2>
+      <p>Encoding \(x=1.5\), \(y=2.25\) with scale \(\Delta=1000\):</p>
+      <ul>
+        <li>Encode: \(\tilde{x}=1500\), \(\tilde{y}=2250\)</li>
+        <li>Encrypt to get \(Enc(\tilde{x})\), \(Enc(\tilde{y})\)</li>
+        <li>Homomorphic Addition:
+          <br>\(C_{add} = Enc(\tilde{x}) + Enc(\tilde{y})\)
+          <br>Decrypt/Decode \(\approx 3.75\)</li>
+        <li>Homomorphic Multiplication:
+          <br>\(C_{mult} = Enc(\tilde{x}) \cdot Enc(\tilde{y})\)
+          <br>Rescale, then decrypt/decode \(\approx 3.375\)</li>
+      </ul>
 
-      <h3>CKKS Data Flow</h3>
-      <p>This diagram shows the full lifecycle of data using the values from above.</p>
-      
-    <div class="flow-diagram-compact">
-  <!-- Row 1: Steps 1-3 -->
-  <div class="flow-row">
-    <div class="flow-step">
-      <strong>1. Plaintext</strong><br>
-      Real number x = <strong>1.5</strong>
-    </div>
-    <div class="flow-arrow">▼</div>
-    <div class="flow-step">
-      <strong>2. Encode & Scale</strong><br>
-      \(\tilde{x} = \text{Round}(1.5 \cdot \Delta) = \mathbf{1500}\)
-    </div>
-    <div class="flow-arrow">▼</div>
-    <div class="flow-step">
-      <strong>3. Encrypt</strong><br>
-      LWE-style: (a, b = a·s + 1500 + e mod q)
-    </div>
-  </div>
+      <h3>CKKS Data Flow</h3>
+      <p>This diagram shows the full lifecycle of data using the values from above.</p>
+      
+    <div class="flow-diagram-compact">
+  <!-- Row 1: Steps 1-3 -->
+  <div class="flow-row">
+    <div class="flow-step">
+      <strong>1. Plaintext</strong><br>
+      Real number x = <strong>1.5</strong>
+    </div>
+    <div class="flow-arrow">▼</div>
+    <div class="flow-step">
+      <strong>2. Encode & Scale</strong><br>
+      \(\tilde{x} = \text{Round}(1.5 \cdot \Delta) = \mathbf{1500}\)
+    </div>
+    <div class="flow-arrow">▼</div>
+    <div class="flow-step">
+      <strong>3. Encrypt</strong><br>
+      LWE-style: (a, b = a·s + 1500 + e mod q)
+    </div>
+  </div>
 
-  <!-- Row 2: two-column layout -->
-  <div class="flow-row" style="margin-top:16px; width:100%; gap:24px;">
-    <!-- Left column: Step 4 only -->
-    <div class="flow-column">
-      <div class="flow-step" style="text-align:center;">
-        <strong>4. Homomorphic Operations</strong><br>
-        Operate on ciphertexts <br>
-        \( \text{(with } y = 2.25 \rightarrow \tilde{y} = \mathbf{2250}\text{)} \)
-      </div>
-    </div>
+  <!-- Row 2: two-column layout -->
+  <div class="flow-row" style="margin-top:16px; width:100%; gap:24px;">
+    <!-- Left column: Step 4 only -->
+    <div class="flow-column">
+      <div class="flow-step" style="text-align:center;">
+        <strong>4. Homomorphic Operations</strong><br>
+        Operate on ciphertexts <br>
+        \( \text{(with } y = 2.25 \rightarrow \tilde{y} = \mathbf{2250}\text{)} \)
+      </div>
+    </div>
 
-    <!-- Right column: Addition and Multiplication paths -->
-    <div class="flow-column">
-      <!-- Top sub-row: Addition Path -->
-      <div class="flow-step-sub">
-        <strong>Addition Path</strong><br>
-        C_add = Enc(1500) + Enc(2250)<br>
-        Decrypt & Decode ≈ 3.75
-      </div>
+    <!-- Right column: Addition and Multiplication paths -->
+    <div class="flow-column">
+      <!-- Top sub-row: Addition Path -->
+      <div class="flow-step-sub">
+        <strong>Addition Path</strong><br>
+        C_add = Enc(1500) + Enc(2250)<br>
+        Decrypt & Decode ≈ 3.75
+      </div>
 
-      <!-- Bottom sub-row: Multiplication Path -->
-      <div class="flow-step-sub">
-        <strong>Multiplication Path</strong>
-        <div class="flow-row-horizontal">
-          <div class="flow-step-sub">
-            5. Multiply<br>
-            C_mult = Enc(1500) · Enc(2250)
-          </div>
-          <div class="flow-arrow">→</div>
-          <div class="flow-step-sub">
-            6. Rescale<br>
-            C_mult / Δ ≈ 3375
-          </div>
-          <div class="flow-arrow">→</div>
-          <div class="flow-step-sub">
-            7. Decrypt & Decode<br>
-            3375 / Δ ≈ 3.375
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+      <!-- Bottom sub-row: Multiplication Path -->
+      <div class="flow-step-sub">
+        <strong>Multiplication Path</strong>
+        <div class="flow-row-horizontal">
+          <div class="flow-step-sub">
+            5. Multiply<br>
+            C_mult = Enc(1500) · Enc(2250)
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step-sub">
+            6. Rescale<br>
+            C_mult / Δ ≈ 3375
+          </div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step-sub">
+            7. Decrypt & Decode<br>
+            3375 / Δ ≈ 3.375
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 
-    </section>
-    
-    
+    </section>
+    
+    
 
-    <section class="card" id="interactive-playground">
-      <h2>7. Interactive Playground</h2>
-      <p>Try encrypting real numbers using CKKS-like approximate arithmetic:</p>
+    <section class="card" id="interactive-playground">
+      <h2>7. Interactive Playground</h2>
+      <p>Try encrypting real numbers using CKKS-like approximate arithmetic:</p>
 
-      <div style="display:flex;gap:12px;flex-wrap:wrap">
-        <div style="flex:1;min-width:280px">
-          <label>Scale Δ</label>
-          <input id="delta" value="1000" />
-        </div>
-        <div style="width:160px">
-          <label>Secret key s</label>
-          <input id="s" readonly class="monospace" />
-        </div>
-        <div style="width:160px">
-          <label>&nbsp;</label>
-          <button id="genKey">Generate key</button>
-        </div>
-      </div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        <div style="flex:1;min-width:280px">
+          <label>Scale Δ</label>
+          <input id="delta" value="1000" />
+        </div>
+        <div style="width:160px">
+          <label>Secret key s</label>
+          <input id="s" readonly class="monospace" />
+        </div>
+        <div style="width:160px">
+          <label>&nbsp;</label>
+          <button id="genKey">Generate key</button>
+        </div>
+      </div>
 
-      <div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap">
-        <div style="flex:1;min-width:260px">
-          <label>Message A</label>
-          <input id="m1" value="12.3" />
-        </div>
-        <div style="flex:1;min-width:260px">
-          <label>Message B</label>
-          <input id="m2" value="7.8" />
-        </div>
-      </div>
+      <div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap">
+        <div style="flex:1;min-width:260px">
+          <label>Message A</label>
+          <input id="m1" value="12.3" />
+        </div>
+        <div style="flex:1;min-width:260px">
+          <label>Message B</label>
+          <input id="m2" value="7.8" />
+        </div>
+      </div>
 
-      <div class="row" style="margin-top:10px">
-        <button id="encA">Encrypt A</button>
-        <button id="encB">Encrypt B</button>
-        <button id="add">Add (A+B)</button>
-        <button id="mulScalar">Multiply A by 3</button>
-        <button id="decrypt">Decrypt last result</button>
-      </div>
+      <div class="row" style="margin-top:10px">
+        <button id="encA">Encrypt A</button>
+        <button id="encB">Encrypt B</button>
+        <button id="add">Add (A+B)</button>
+        <button id="mulScalar">Multiply A by 3</button>
+        <button id="decrypt">Decrypt last result</button>
+      </div>
 
-      <div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap">
-        <div style="flex:1;min-width:260px">
-          <div class="output" id="cipherA">Cipher A: —</div>
-        </div>
-        <div style="flex:1;min-width:260px">
-          <div class="output" id="cipherB">Cipher B: —</div>
-        </div>
-        <div style="flex:1;min-width:260px">
-          <div class="output" id="result">Result: —</div>
-        </div>
-      </div>
+      <div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap">
+        <div style="flex:1;min-width:260px">
+          <div class="output" id="cipherA">Cipher A: —</div>
+        </div>
+        <div style="flex:1;min-width:260px">
+          <div class="output" id="cipherB">Cipher B: —</div>
+        </div>
+        <div style="flex:1;min-width:260px">
+          <div class="output" id="result">Result: —</div>
+        </div>
+      </div>
 
-      <div style="margin-top:12px">
-        <details>
-          <summary>Notes about this toy demo</summary>
-          <ul>
-            <li>Real numbers are scaled and rounded; the result is approximate.</li>
-            <li>Repeated operations increase approximation error.</li>
-          </ul>
-        </details>
-      </div>
-    </section>
+      <div style="margin-top:12px">
+        <details>
+          <summary>Notes about this toy demo</summary>
+          <ul>
+            <li>Real numbers are scaled and rounded; the result is approximate.</li>
+            <li>Repeated operations increase approximation error.</li>
+          </ul>
+        </details>
+      </div>
+    </section>
 
-    <section class="card" id="use-cases">
-        <h2>8. When to Use CKKS</h2>
-        <ul>
-            <li><strong>Privacy-Preserving ML:</strong> Neural networks, logistic regression on encrypted data.</li>
-            <li><strong>Medical Research:</strong> Compute on encrypted patient data.</li>
-            <li><strong>Data Science:</strong> Visualization, filtering, aggregation on encrypted datasets.</li>
-        </ul>
-    </section>
+    <section class="card" id="use-cases">
+        <h2>8. When to Use CKKS</h2>
+        <ul>
+            <li><strong>Privacy-Preserving ML:</strong> Neural networks, logistic regression on encrypted data.</li>
+            <li><strong>Medical Research:</strong> Compute on encrypted patient data.</li>
+            <li><strong>Data Science:</strong> Visualization, filtering, aggregation on encrypted datasets.</li>
+        </ul>
+    </section>
 
-    <section class="card" id="further-reading">
-      <h2>9. Further Reading</h2>
-      <ul>
-        <li><a href="https://eprint.iacr.org/2016/421.pdf" target="_blank">CKKS Original Paper (Cheon et al.)</a> [4]</li>
-        <li><a href="https://homomorphicencryption.org/" target="_blank">HomomorphicEncryption.org — Standards & Community</a></li>
-      </ul>
-    </section>
+    <section class="card" id="further-reading">
+      <h2>9. Further Reading</h2>
+      <ul>
+        <li><a href="https://eprint.iacr.org/2016/421.pdf" target="_blank">CKKS Original Paper (Cheon et al.)</a> [4]</li>
+        <li><a href="https://homomorphicencryption.org/" target="_blank">HomomorphicEncryption.org — Standards & Community</a></li>
+      </ul>
+    </section>
 
 <footer>
-  <p>Educational toy. Code adapted freely for learning purposes.</p>
-  <p class="cite-note">
-    Citations:<br>
-    [2] Lyubashevsky, V., Peikert, C., & Regev, O. (2013). Lattice-based Cryptography.<br>
-    [3] FHE.org Community. (n.d.). History of FHE: A Timeline. Retrieved from https://fhe.org/history/<br>
-    [4] <a href="https://eprint.iacr.org/2016/421.pdf" target="_blank">Cheon, J. H., Kim, A., Kim, M., & Song, Y. (2017). Homomorphic Encryption for Arithmetic of Approximate Numbers.</a>
-  </p>
+  <p>Educational toy. Code adapted freely for learning purposes.</p>
+  <p class="cite-note">
+    Citations:<br>
+    [2] Lyubashevsky, V., Peikert, C., & Regev, O. (2013). Lattice-based Cryptography.<br>
+    [3] FHE.org Community. (n.d.). History of FHE: A Timeline. Retrieved from https://fhe.org/history/<br>
+    [4] Cheon, J. H., Kim, A., Kim, M., & Song, Y. (2017). Homomorphic Encryption for Arithmetic of Approximate Numbers.
+  </p>
 </footer>
-  </div>
+  </div>
 
-  <script>
-    // CKKS-like toy interactive playground
-    let key, lastCipherA, lastCipherB, lastResult;
+  <script>
+    // CKKS-like toy interactive playground
+    let key, lastCipherA, lastCipherB, lastResult;
 
-    const deltaInput = () => parseFloat(document.getElementById('delta').value) || 1000;
+    const deltaInput = () => parseFloat(document.getElementById('delta').value) || 1000;
 
-    document.getElementById('genKey').onclick = () => {
-      key = Math.random(); // toy secret key
-      document.getElementById('s').value = key.toFixed(3);
-    };
+    document.getElementById('genKey').onclick = () => {
+      key = Math.random(); // toy secret key
+      document.getElementById('s').value = key.toFixed(3);
+    };
 
-    function encode(x) { return Math.round(x*deltaInput()); }
-    function decode(x) { return x/deltaInput(); }
+    function encode(x) { return Math.round(x*deltaInput()); }
+    function decode(x) { return x/deltaInput(); }
 
-    function encryptCKKS(m) {
-      const a = encode(Math.random()); 
-      const b = a*key + encode(m); 
-      return {a,b};
-    }
+    function encryptCKKS(m) {
+      const a = encode(Math.random()); 
+      const b = a*key + encode(m); 
+      return {a,b};
+    }
 
-    function addCKKS(c1,c2) {
-      return {a:c1.a+c2.a, b:c1.b+c2.b};
-    }
+    function addCKKS(c1,c2) {
+      return {a:c1.a+c2.a, b:c1.b+c2.b};
+    }
 
-    function mulCKKSScalar(c, scalar) {
-    let a = c.a * scalar;
-    let b = c.b * scalar; 
-    return {a, b};
-    }
+    function mulCKKSScalar(c, scalar) {
+    let a = c.a * scalar;
+    let b = c.b * scalar; 
+    return {a, b};
+    }
 
 
-    function decryptCKKS(c) {
-      return decode(c.b - c.a*key);
-    }
+    function decryptCKKS(c) {
+      return decode(c.b - c.a*key);
+    }
 
-    document.getElementById('encA').onclick = () => {
-      const m = parseFloat(document.getElementById('m1').value);
-      lastCipherA = encryptCKKS(m);
-      document.getElementById('cipherA').innerText = "Cipher A: "+JSON.stringify(lastCipherA);
-      lastResult = lastCipherA;
-      document.getElementById('result').innerText = "Result: —";
-    };
+    document.getElementById('encA').onclick = () => {
+      const m = parseFloat(document.getElementById('m1').value);
+      lastCipherA = encryptCKKS(m);
+      document.getElementById('cipherA').innerText = "Cipher A: "+JSON.stringify(lastCipherA);
+      lastResult = lastCipherA;
+      document.getElementById('result').innerText = "Result: —";
+    };
 
-    document.getElementById('encB').onclick = () => {
-      const m = parseFloat(document.getElementById('m2').value);
-      lastCipherB = encryptCKKS(m);
-      document.getElementById('cipherB').innerText = "Cipher B: "+JSON.stringify(lastCipherB);
-      lastResult = lastCipherB;
-      document.getElementById('result').innerText = "Result: —";
-    };
+    document.getElementById('encB').onclick = () => {
+      const m = parseFloat(document.getElementById('m2').value);
+      lastCipherB = encryptCKKS(m);
+      document.getElementById('cipherB').innerText = "Cipher B: "+JSON.stringify(lastCipherB);
+      lastResult = lastCipherB;
+      document.getElementById('result').innerText = "Result: —";
+    };
 
-    document.getElementById('add').onclick = () => {
-      if(!lastCipherA || !lastCipherB) return alert("Encrypt both A and B first.");
-      lastResult = addCKKS(lastCipherA,lastCipherB);
-      document.getElementById('result').innerText = "Result (ciphertext): "+JSON.stringify(lastResult);
-    };
+    document.getElementById('add').onclick = () => {
+      if(!lastCipherA || !lastCipherB) return alert("Encrypt both A and B first.");
+      lastResult = addCKKS(lastCipherA,lastCipherB);
+      document.getElementById('result').innerText = "Result (ciphertext): "+JSON.stringify(lastResult);
+    };
 
-    document.getElementById('mulScalar').onclick = () => {
-      if(!lastCipherA) return alert("Encrypt A first.");
-      lastResult = mulCKKSScalar(lastCipherA,3);
-      document.getElementById('result').innerText = "Result (ciphertext): "+JSON.stringify(lastResult);
-    };
+    document.getElementById('mulScalar').onclick = () => {
+      if(!lastCipherA) return alert("Encrypt A first.");
+      lastResult = mulCKKSScalar(lastCipherA,3);
+      document.getElementById('result').innerText = "Result (ciphertext): "+JSON.stringify(lastResult);
+    };
 
-    document.getElementById('decrypt').onclick = () => {
-      if(!lastResult) return;
-      const val = decryptCKKS(lastResult);
-      document.getElementById('result').innerText += "\nDecrypted ≈ "+val.toFixed(4);
-    };
-  </script>
+    document.getElementById('decrypt').onclick = () => {
+      if(!lastResult) return;
+      const val = decryptCKKS(lastResult);
+      document.getElementById('result').innerText += "\nDecrypted ≈ "+val.toFixed(4);
+    };
+  </script>
 </body>
 </html>
