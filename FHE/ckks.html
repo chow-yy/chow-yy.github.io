@@ -356,21 +356,7 @@
       </ul>
     </section>
 
-    <section class="card" id="ckks-bootstrap-depth">
-  <h2>Detailed Breakdown of CKKS Bootstrapping Depth (OpenFHE)</h2>
-  <p>CKKS bootstrapping allows refreshing ciphertexts to reduce accumulated noise, enabling further homomorphic operations beyond the original multiplicative depth.</p>
-  <p>Key points from OpenFHE implementation:</p>
-  <ul>
-    <li><strong>Initial Depth:</strong> Ciphertexts start with a finite multiplicative depth depending on the modulus chain.</li>
-    <li><strong>Bootstrapping Operation:</strong> A special homomorphic evaluation that reduces noise and resets the scale.</li>
-    <li><strong>Depth Cost:</strong> Each bootstrap consumes a certain depth, so libraries track the “bootstrap depth” separately from multiplicative depth.</li>
-    <li><strong>Practical Use:</strong> Typically, bootstrapping is only invoked when the remaining depth is insufficient for the next multiplication or when very long computations are needed.</li>
-  </ul>
-  <p class="note">
-    ✅ OpenFHE provides tools to visualize bootstrapping depth and automatically select parameters to balance performance, precision, and security.
-  </p>
-  <p>For official documentation, see <a href="https://openfhe.org" target="_blank">OpenFHE — Bootstrapping Overview</a>.</p>
-</section>
+    
 
 <footer>
   <p>Educational toy. Code adapted freely for learning purposes.</p>
