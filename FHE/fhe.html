@@ -1,291 +1,288 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-<script id="MathJax-script" async
-        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
-</script>
-
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-  <meta http-equiv="Pragma" content="no-cache" />
-  <meta http-equiv="Expires" content="0" />
-
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Intro to FHE — Interactive Tutorial</title>
-  <link rel="stylesheet" href="../style.css?v=zTEfWdo/alrOjIbFsIc30bmoXtKMl//JRc2+f6R/OkQ=" />
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js?v=zTEfWdo/alrOjIbFsIc30bmoXtKMl//JRc2+f6R/OkQ="></script>
-
-  <style>
-    :root{--bg:#f9fafb;--card:#ffffff;--muted:#4b5563;--accent:#0284c7}
-    body{font-family:Inter,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:linear-gradient(180deg,#f0f9ff 0%,#ffffff 100%);color:#111827;margin:0;padding:32px}
-    .container{max-width:980px;margin:0 auto}
-    header{display:flex;align-items:center;gap:16px}
-    h1{margin:0;font-size:28px}
-    h2,h3,h4{scroll-margin-top:80px}
-    a{color:var(--accent);text-decoration:none}
-    a:hover{text-decoration:underline}
-    p.lead{color:var(--muted);margin-top:8px}
-    .card{background:var(--card);border-radius:12px;padding:18px;margin-top:18px;box-shadow:0 6px 24px rgba(0,0,0,0.05)}
-    pre{background:#f1f5f9;padding:12px;border-radius:8px;overflow:auto}
-    .grid{display:grid;grid-template-columns:1fr 360px;gap:16px}
-    label{font-size:13px;color:var(--muted)}
-    input,button,select,textarea{padding:8px;border-radius:8px;border:1px solid rgba(0,0,0,0.1);background:#f9fafb;color:inherit}
-    button{cursor:pointer;background:var(--accent);color:white;border:none}
-    button:hover{background:#0369a1}
-    .monospace{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
-    .status{font-size:13px;color:var(--muted)}
-    .row{display:flex;gap:8px}
-    .output{background:#f1f5f9;padding:12px;border-radius:8px;overflow-x:auto}
-    footer{margin-top:28px;color:var(--muted);font-size:13px;text-align:center}
-    .note{background:#e0f2fe;padding:10px;border-radius:8px;color:#0369a1}
-    .cite-note{margin-top:8px;font-size:11px;color:#6b7280}
-    table{border-collapse:collapse;margin-top:12px;width:100%}
-    table, th, td{border:1px solid #ccc}
-    th, td{padding:6px;text-align:center}
-  </style>
-</head>
-<body>
-  <a href="../snack_break.html?v=zTEfWdo/alrOjIbFsIc30bmoXtKMl//JRc2+f6R/OkQ=" class="back-link">&larr; Back to 🥨</a>
-  <div class="container">
-    <header>
-      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" aria-hidden>
-        <rect x="1" y="1" width="22" height="22" rx="6" fill="#e0f2fe" stroke="#0284c7" stroke-width="0.8"/>
-        <path d="M7 12h10M7 8h10M7 16h6" stroke="#0369a1" stroke-width="1.2" stroke-linecap="round"/>
-      </svg>
-      <div>
-        <h1>Homomorphic Encryption — Hands-on Intro (Toy LWE)</h1>
-        <p class="lead">A short interactive tutorial that demonstrates the core idea of homomorphic encryption using a simple LWE-style toy scheme. This is pedagogical — not secure. Use it to learn concepts: keys, encryption, noise growth, and homomorphic addition.</p>
-      </div>
-    </header>
-
-    <section class="card" id="what-is-fhe">
-      <h2>What is FHE (in one sentence)?</h2>
-      <p>Fully Homomorphic Encryption (FHE) lets you compute on encrypted data and obtain an encrypted result which, when decrypted, matches the result of performing the same computation on the plaintexts. In practice, FHE schemes are complex — this page shows a simplified <em>toy</em> LWE-style construction to build intuition.</p>
-    </section>
-
-    <section class="card" id="contents">
-      <h2>Contents</h2>
-      <ol>
-        <li><a href="#what-is-lwe">What is LWE (and Interactive Playground)</a></li>
-        <li><a href="#fhe-scheme-diagram">FHE Scheme Timeline</a></li>
-        <li><a href="#bgv">BGV Scheme</a></li>
-        <li><a href="#ckks">CKKS Scheme</a></li>
-        <li><a href="#tfhe">TFHE Scheme</a></li>
-      </ol>
-    </section>
-
-    <section class="card" id="what-is-lwe">
-      <h2>1. What is LWE</h2>
-      <p>The Learning With Errors (LWE) problem is the mathematical foundation of many lattice-based cryptographic schemes, including modern FHE. It is believed to be hard even for quantum computers [1].</p>
-      <p>In LWE, we assume there exists a secret vector \( s \), and we observe many samples of the form:</p>
-      <p>\[ (a, b = \langle a, s \rangle + e \bmod q) \]</p>
-      <p>where \( a \) is random, and \( e \) is a small noise term. The challenge is to recover \( s \) from these noisy linear equations — a problem known to be computationally hard.</p>
-
-      <p>Most FHE schemes build on variants of LWE, such as Ring-LWE (RLWE), where operations take place in polynomial rings for efficiency.</p>
-
-      <h4>Public Key vs. Secret Key (A Practical Note)</h4>
-      <p>The toy example below uses a single <strong>secret key</strong> (<code>s</code>) for both encryption and decryption. This is called a <em>symmetric-key</em> scheme, and we use it here to keep the math simple and build intuition.</p>
-      <p>However, practical, real-world FHE schemes (like BFV and CKKS) are <strong>public-key</strong> (or <em>asymmetric</em>) systems. In that model:</p>
-      <ul>
-        <li>A <strong>Public Key (pk)</strong> is generated and shared with everyone. Anyone can use this key to encrypt messages (e.g., <code>Encrypt(pk, message)</code>).</li>
-        <li>A <strong>Secret Key (sk)</strong> is kept completely private by the data owner. Only this key can decrypt the messages (e.g., <code>Decrypt(sk, ciphertext)</code>).</li>
-      </ul>
-      <p>This is powerful because a server can receive encrypted data from many different people (who all used the public key) and compute on it, all without ever being able to decrypt the underlying data.</p>
-
-      <h3>Toy scheme (LWE-style) — mathematics (short)</h3>
-      <p>We define small parameters to illustrate encryption:</p>
-      <p>\[ \text{modulus: } q = 97, \quad \text{secret key: } s = 17, \quad \text{noise: } e = \text{small random value (e.g., ±1)} \]</p>
-      <p>To encrypt a message \( m \) with key \( s \):</p>
-      <p>
-        \[ a \text{ — random integer } 0 \le a < q \]
-      </p>
-      <p>\[ Enc(m) = (a, b = (a \cdot s + m + e) \bmod q) \]</p>
-      <p>To decrypt using \( s \):</p>
-      <p>\[ Dec(a, b) = (b - a \cdot s) \bmod q \approx m + e \]</p>
-      <p>Since \( e \) is small, the result is approximately \( m \).</p>
-      <p>Homomorphic addition works naturally:</p>
-      <p>\[ Enc(m_1) + Enc(m_2) = (a_1 + a_2, b_1 + b_2) \bmod q \;\;\rightarrow\;\; m_1 + m_2 + (e_1 + e_2) \]</p>
-      <p>Noise accumulates with operations — a key limitation and motivation for advanced schemes like BFV and CKKS.</p>
-
-      <h4>Example: Encrypting and Decrypting a Small Message</h4>
-      <p>Encrypt \( m = 5 \) using \( q = 97 \), \( s = 17 \), and \( e = 1 \).</p>
-      <ul>
-        <li>Choose \( a = 23 \)</li>
-        <li>Compute ciphertext:  
-          \[ b = (23 \cdot 17 + 5 + 1) \bmod 97 = 12 \]</li>
-        <li>Encrypted message: \( Enc(5) = (23, 12) \)</li>
-        <li>Decrypt:  
-          \[ Dec(23, 12) = (12 - 23 \cdot 17) \bmod 97 = 5 \approx m \]</li>
-      </ul>
-      <p>Noise is tiny, so decryption recovers the original message.</p>
-
-      <h4>Example: Homomorphic Addition and Noise Accumulation</h4>
-      <p>Encrypt two messages \( m_1 = 5 \) and \( m_2 = 7 \):</p>
-      <table>
-        <thead>
-          <tr>
-            <th>Message</th>
-            <th>Random a</th>
-            <th>Noise e</th>
-            <th>Ciphertext b = (a·s + m + e) mod q</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td>5</td><td>23</td><td>1</td><td>12</td></tr>
-          <tr><td>7</td><td>17</td><td>-1</td><td>15</td></tr>
-        </tbody>
-      </table>
-      <p>Homomorphic addition of ciphertexts:</p>
-      <p>\[ Enc(m_1) + Enc(m_2) = (23 + 17, 12 + 15) \bmod 97 = (40, 27) \]</p>
-      <p>Decrypting the sum:</p>
-      <p>\[ Dec(40, 27) = (27 - 40 \cdot 17) \bmod 97 = 12 \approx m_1 + m_2 + (e_1 + e_2) \]</p>
-      <p>This shows how noise accumulates and motivates advanced noise management in FHE.</p>
-      
-      <h4 style="margin-top: 24px; border-top: 1px solid #e5e7eb; padding-top: 20px;">Interactive playground</h4>
-      <p>Try encrypting two small integers, add them homomorphically, and decrypt to see how noise behaves.</p>
-
-      <div style="display:flex;gap:12px;flex-wrap:wrap">
-        <div style="flex:1;min-width:280px">
-          <label>Modulus q (use large to avoid wraparound)</label>
-          <input id="q" value="65537" />
+  <!doctype html>
+  <html lang="en">
+  <head>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script id="MathJax-script" async
+          src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+  
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+  
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Intro to FHE — Interactive Tutorial</title>
+    <link rel="stylesheet" href="../style.css?v=zTEfWdo/alrOjIbFsIc30bmoXtKMl//JRc2+f6R/OkQ=" />
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js?v=zTEfWdo/alrOjIbFsIc30bmoXtKMl//JRc2+f6R/OkQ="></script>
+  
+    <style>
+      :root{--bg:#f9fafb;--card:#ffffff;--muted:#4b5563;--accent:#0284c7}
+      body{font-family:Inter,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:linear-gradient(180deg,#f0f9ff 0%,#ffffff 100%);color:#111827;margin:0;padding:32px}
+      .container{max-width:980px;margin:0 auto}
+      header{display:flex;align-items:center;gap:16px}
+      h1{margin:0;font-size:28px}
+      h2,h3,h4{scroll-margin-top:80px}
+      a{color:var(--accent);text-decoration:none}
+      a:hover{text-decoration:underline}
+      p.lead{color:var(--muted);margin-top:8px}
+      .card{background:var(--card);border-radius:12px;padding:18px;margin-top:18px;box-shadow:0 6px 24px rgba(0,0,0,0.05)}
+      pre{background:#f1f5f9;padding:12px;border-radius:8px;overflow:auto}
+      .grid{display:grid;grid-template-columns:1fr 360px;gap:16px}
+      label{font-size:13px;color:var(--muted)}
+      input,button,select,textarea{padding:8px;border-radius:8px;border:1px solid rgba(0,0,0,0.1);background:#f9fafb;color:inherit}
+      button{cursor:pointer;background:var(--accent);color:white;border:none}
+      button:hover{background:#0369a1}
+      .monospace{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+      .status{font-size:13px;color:var(--muted)}
+      .row{display:flex;gap:8px}
+      .output{background:#f1f5f9;padding:12px;border-radius:8px;overflow-x:auto}
+      footer{margin-top:28px;color:var(--muted);font-size:13px;text-align:center}
+      .note{background:#e0f2fe;padding:10px;border-radius:8px;color:#0369a1}
+      .cite-note{margin-top:8px;font-size:11px;color:#6b7280}
+      table{border-collapse:collapse;margin-top:12px;width:100%}
+      table, th, td{border:1px solid #ccc}
+      th, td{padding:6px;text-align:center}
+    </style>
+  </head>
+  <body>
+    <a href="../snack_break.html?v=zTEfWdo/alrOjIbFsIc30bmoXtKMl//JRc2+f6R/OkQ=" class="back-link">&larr; Back to 🥨</a>
+    <div class="container">
+      <header>
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" aria-hidden>
+          <rect x="1" y="1" width="22" height="22" rx="6" fill="#e0f2fe" stroke="#0284c7" stroke-width="0.8"/>
+          <path d="M7 12h10M7 8h10M7 16h6" stroke="#0369a1" stroke-width="1.2" stroke-linecap="round"/>
+        </svg>
+        <div>
+          <h1>Homomorphic Encryption — Hands-on Intro (Toy LWE)</h1>
+          <p class="lead">A short interactive tutorial that demonstrates the core idea of homomorphic encryption using a simple LWE-style toy scheme. This is pedagogical — not secure. Use it to learn concepts: keys, encryption, noise growth, and homomorphic addition.</p>
         </div>
-        <div style="width:160px">
-          <label>Secret key s</label>
-          <input id="s" readonly class="monospace" />
-        </div>
-        <div style="width:160px">
-          <label>&nbsp;</label>
-          <button id="genKey">Generate key</button>
-        </div>
-      </div>
-
-      <div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap">
-        <div style="flex:1;min-width:260px">
-          <label>Message A (small integer)</label>
-          <input id="m1" value="12" />
-        </div>
-        <div style="flex:1;min-width:260px">
-          <label>Message B (small integer)</label>
-          <input id="m2" value="7" />
-        </div>
-        <div style="width:160px">
-          <label>Noise stddev</label>
-          <input id="noise" value="2" />
-        </div>
-      </div>
-
-      <div class="row" style="margin-top:10px">
-        <button id="encA">Encrypt A</button>
-        <button id="encB">Encrypt B</button>
-        <button id="add">Homomorphic Add (A+B)</button>
-        <button id="mulScalar">Scalar Multiply (A * 3)</button>
-        <button id="decrypt">Decrypt last result</button>
-        <button id="download">Download demo HTML</button>
-      </div>
-
-      <div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap">
-        <div style="flex:1;min-width:260px">
-          <div class="output" id="cipherA">Cipher A: —</div>
-        </div>
-        <div style="flex:1;min-width:260px">
-          <div class="output" id="cipherB">Cipher B: —</div>
-        </div>
-        <div style="flex:1;min-width:260px">
-          <div class="output" id="result">Result: —</div>
-        </div>
-      </div>
-
-      <div style="margin-top:12px">
-        <details>
-          <summary>Notes about this toy demo</summary>
-          <ul>
-            <li>Because noise accumulates, repeated operations eventually produce incorrect results.</li>
-            <li>Real FHE schemes include relinearization, modulus switching, and bootstrapping to manage noise for deeper circuits.</li>
-          </ul>
-        </details>
-      </div>
+      </header>
+  
+      <section class="card" id="what-is-fhe">
+        <h2>What is FHE (in one sentence)?</h2>
+        <p>Fully Homomorphic Encryption (FHE) lets you compute on encrypted data and obtain an encrypted result which, when decrypted, matches the result of performing the same computation on the plaintexts. In practice, FHE schemes are complex — this page shows a simplified <em>toy</em> LWE-style construction to build intuition.</p>
       </section>
-
-    <section class="card" id="fhe-scheme-diagram">
-      <h2>2. FHE Scheme Timeline</h2>
-      
-      <p>The concept of computing on encrypted data—once a theoretical dream from the 1970s known as "privacy homomorphisms"—took decades to become a practical reality. This timeline charts the pivotal moments in that journey.</p>
-      
-      <p>It begins with early <strong>partially homomorphic</strong> schemes (like RSA, which could only perform multiplication) and moves to the watershed 2009 breakthrough by Craig Gentry, which finally proved FHE was possible. From there, it follows the rapid innovation that gave us today's powerful and specialized schemes, paving the way for secure cloud computing and machine learning.</p>
-      
-      <img src="fhe_timeline.png?v=zTEfWdo/alrOjIbFsIc30bmoXtKMl//JRc2+f6R/OkQ=" alt="A timeline of FHE development from 1977 to 2016" style="width:100%; max-width: 800px; margin: 16px auto; display: block; border-radius: 8px;">
-      
-      <p style="text-align: center; font-size: 13px; color: #4b5563;">Key milestones in FHE history, based on information from FHE.org [2].</p>
-      
-      <h3 style="margin-top: 24px;">Key Milestones in FHE History</h3>
-      
-      <ul>
-        <li><strong>1977 (RSA):</strong> This foundational public-key cryptosystem was the first major scheme to exhibit a <strong>partial</strong> homomorphic property. It allows for the multiplication of ciphertexts (e.g., <code>Enc(m1) * Enc(m2) = Enc(m1 * m2)</code>), proving that computation on encrypted data was possible, even if limited to a single operation.</li>
+  
+      <section class="card" id="contents">
+        <h2>Contents</h2>
+        <ol>
+          <li><a href="#what-is-lwe">What is LWE (and Interactive Playground)</a></li>
+          <li><a href="#fhe-scheme-diagram">FHE Scheme Timeline</a></li>
+          <li><a href="#bgv">BGV Scheme</a></li>
+          <li><a href="#ckks">CKKS Scheme</a></li>
+          <li><a href="#tfhe">TFHE Scheme</a></li>
+        </ol>
+      </section>
+  
+      <section class="card" id="what-is-lwe">
+        <h2>1. What is LWE</h2>
+        <p>The Learning With Errors (LWE) problem is the mathematical foundation of many lattice-based cryptographic schemes, including modern FHE. It is believed to be hard even for quantum computers [1].</p>
+        <p>In LWE, we assume there exists a secret vector \( s \), and we observe many samples of the form:</p>
+        <p>\[ (a, b = \langle a, s \rangle + e \bmod q) \]</p>
+        <p>where \( a \) is random, and \( e \) is a small noise term. The challenge is to recover \( s \) from these noisy linear equations — a problem known to be computationally hard.</p>
+  
+        <p>Most FHE schemes build on variants of LWE, such as Ring-LWE (RLWE), where operations take place in polynomial rings for efficiency.</p>
+  
+        <h4>Public Key vs. Secret Key (A Practical Note)</h4>
+        <p>The toy example below uses a single <strong>secret key</strong> (<code>s</code>) for both encryption and decryption. This is called a <em>symmetric-key</em> scheme, and we use it here to keep the math simple and build intuition.</p>
+        <p>However, practical, real-world FHE schemes (like BFV and CKKS) are <strong>public-key</strong> (or <em>asymmetric</em>) systems. In that model:</p>
+        <ul>
+          <li>A <strong>Public Key (pk)</strong> is generated and shared with everyone. Anyone can use this key to encrypt messages (e.g., <code>Encrypt(pk, message)</code>).</li>
+          <li>A <strong>Secret Key (sk)</strong> is kept completely private by the data owner. Only this key can decrypt the messages (e.g., <code>Decrypt(sk, ciphertext)</code>).</li>
+        </ul>
+        <p>This is powerful because a server can receive encrypted data from many different people (who all used the public key) and compute on it, all without ever being able to decrypt the underlying data.</p>
+  
+        <h3>Toy scheme (LWE-style) — mathematics (short)</h3>
+        <p>We define small parameters to illustrate encryption:</p>
+        <p>\[ \text{modulus: } q = 97, \quad \text{secret key: } s = 17, \quad \text{noise: } e = \text{small random value (e.g., ±1)} \]</p>
+        <p>To encrypt a message \( m \) with key \( s \):</p>
+        <p>
+          \[ a \text{ — random integer } 0 \le a < q \]
+        </p>
+        <p>\[ Enc(m) = (a, b = (a \cdot s + m + e) \bmod q) \]</p>
+        <p>To decrypt using \( s \):</p>
+        <p>\[ Dec(a, b) = (b - a \cdot s) \bmod q \approx m + e \]</p>
+        <p>Since \( e \) is small, the result is approximately \( m \).</p>
+        <p>Homomorphic addition works naturally:</p>
+        <p>\[ Enc(m_1) + Enc(m_2) = (a_1 + a_2, b_1 + b_2) \bmod q \;\;\rightarrow\;\; m_1 + m_2 + (e_1 + e_2) \]</p>
+        <p>Noise accumulates with operations — a key limitation and motivation for advanced schemes like BFV and CKKS.</p>
+  
+        <h4>Example: Encrypting and Decrypting a Small Message</h4>
+        <p>Encrypt \( m = 5 \) using \( q = 97 \), \( s = 17 \), and \( e = 1 \).</p>
+        <ul>
+          <li>Choose \( a = 23 \)</li>
+          <li>Compute ciphertext:  
+            \[ b = (23 \cdot 17 + 5 + 1) \bmod 97 = 12 \]</li>
+          <li>Encrypted message: \( Enc(5) = (23, 12) \)</li>
+          <li>Decrypt:  
+            \[ Dec(23, 12) = (12 - 23 \cdot 17) \bmod 97 = 5 \approx m \]</li>
+        </ul>
+        <p>Noise is tiny, so decryption recovers the original message.</p>
+  
+        <h4>Example: Homomorphic Addition and Noise Accumulation</h4>
+        <p>Encrypt two messages \( m_1 = 5 \) and \( m_2 = 7 \):</p>
+        <table>
+          <thead>
+            <tr>
+              <th>Message</th>
+              <th>Random a</th>
+              <th>Noise e</th>
+              <th>Ciphertext b = (a·s + m + e) mod q</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>5</td><td>23</td><td>1</td><td>12</td></tr>
+            <tr><td>7</td><td>17</td><td>-1</td><td>15</td></tr>
+          </tbody>
+        </table>
+        <p>Homomorphic addition of ciphertexts:</p>
+        <p>\[ Enc(m_1) + Enc(m_2) = (23 + 17, 12 + 15) \bmod 97 = (40, 27) \]</p>
+        <p>Decrypting the sum:</p>
+        <p>\[ Dec(40, 27) = (27 - 40 \cdot 17) \bmod 97 = 12 \approx m_1 + m_2 + (e_1 + e_2) \]</p>
+        <p>This shows how noise accumulates and motivates advanced noise management in FHE.</p>
         
-        <li><strong>2009 (Gentry's Breakthrough):</strong> Craig Gentry's doctoral thesis provided the first plausible construction for a <strong>Fully</strong> Homomorphic Encryption scheme. It solved the critical problem of noise accumulation by introducing "bootstrapping," a revolutionary technique to refresh a ciphertext, theoretically allowing for an unlimited number of computations.</li>
+        <h4 style="margin-top: 24px; border-top: 1px solid #e5e7eb; padding-top: 20px;">Interactive playground</h4>
+        <p>Try encrypting two small integers, add them homomorphically, and decrypt to see how noise behaves.</p>
+  
+        <div style="display:flex;gap:12px;flex-wrap:wrap">
+          <div style="flex:1;min-width:280px">
+            <label>Modulus q (use large to avoid wraparound)</label>
+            <input id="q" value="65537" />
+          </div>
+          <div style="width:160px">
+            <label>Secret key s</label>
+            <input id="s" readonly class="monospace" />
+          </div>
+          <div style="width:160px">
+            <label>&nbsp;</label>
+            <button id="genKey">Generate key</button>
+          </div>
+        </div>
+  
+        <div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap">
+          <div style="flex:1;min-width:260px">
+            <label>Message A (small integer)</label>
+            <input id="m1" value="12" />
+          </div>
+          <div style="flex:1;min-width:260px">
+            <label>Message B (small integer)</label>
+            <input id="m2" value="7" />
+          </div>
+          <div style="width:160px">
+            <label>Noise stddev</label>
+            <input id="noise" value="2" />
+          </div>
+        </div>
+  
+        <div class="row" style="margin-top:10px">
+          <button id="encA">Encrypt A</button>
+          <button id="encB">Encrypt B</button>
+          <button id="add">Homomorphic Add (A+B)</button>
+          <button id="mulScalar">Scalar Multiply (A * 3)</button>
+          <button id="decrypt">Decrypt last result</button>
+          <button id="download">Download demo HTML</button>
+        </div>
+  
+        <div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap">
+          <div style="flex:1;min-width:260px">
+            <div class="output" id="cipherA">Cipher A: —</div>
+          </div>
+          <div style="flex:1;min-width:260px">
+            <div class="output" id="cipherB">Cipher B: —</div>
+          </div>
+          <div style="flex:1;min-width:260px">
+            <div class="output" id="result">Result: —</div>
+          </div>
+        </div>
+  
+        <div style="margin-top:12px">
+          <details>
+            <summary>Notes about this toy demo</summary>
+            <ul>
+              <li>Because noise accumulates, repeated operations eventually produce incorrect results.</li>
+              <li>Real FHE schemes include relinearization, modulus switching, and bootstrapping to manage noise for deeper circuits.</li>
+            </ul>
+          </details>
+        </div>
+        </section>
+  
+      <section class="card" id="fhe-scheme-diagram">
+        <h2>2. FHE Scheme Timeline</h2>
         
-        <li><strong>2011-2012 (BGV / BFV):</strong> These "second-generation" schemes (named for Brakerski, Gentry, Vaikuntanathan, and Fan-Vercauteren) made FHE more practical. Based on the Ring-LWE problem, they introduced new noise-management techniques (like modulus switching) and are optimized for <strong>exact integer arithmetic</strong>—ideal for private database queries and financial applications.</li>
+        <p>The concept of computing on encrypted data—once a theoretical dream from the 1970s known as "privacy homomorphisms"—took decades to become a practical reality. This timeline charts the pivotal moments in that journey.</p>
         
-        <li><strong>2016 (CKKS):</strong> A revolutionary scheme (from Cheon, Kim, Kim, Song) designed for <strong>approximate arithmetic</strong>. By treating the noise as part of the calculation, CKKS can efficiently perform computations on encrypted real or complex numbers. This breakthrough unlocked the use of FHE for data science and privacy-preserving machine learning.</li>
+        <p>It begins with early <strong>partially homomorphic</strong> schemes (like RSA, which could only perform multiplication) and moves to the watershed 2009 breakthrough by Craig Gentry, which finally proved FHE was possible. From there, it follows the rapid innovation that gave us today's powerful and specialized schemes, paving the way for secure cloud computing and machine learning.</p>
         
-        <li><strong>2016 (TFHE):</strong> This scheme (Fast Fully Homomorphic Encryption over the Torus) takes a different approach by operating on individual bits. It excels at evaluating <strong>boolean circuits</strong> (logic gates like AND, OR, NOT) and is notable for its incredibly fast and efficient bootstrapping, allowing for complex programs to be run on encrypted data.</li>
-      </ul>
-    </section>
-
-    <section class="card" id="bgv">
-      <h2>BGV Scheme</h2>
-      <p>The BGV scheme (named for its authors: Brakerski, Gentry, and Vaikuntanathan) is a foundational "second-generation" FHE scheme, often grouped with BFV. It is based on the Ring-LWE problem and is designed for efficient and exact arithmetic on integers.</p>
-      <p>Its primary innovation was a new <strong>modulus switching</strong> technique, which effectively "shrinks" the ciphertext and its noise in a controlled way after each multiplication. This allows for deeper computational circuits before bootstrapping is required.</p>
-      <!-- <p style="margin-top: 16px;">
-        <a href="bgv?v=zTEfWdo/alrOjIbFsIc30bmoXtKMl//JRc2+f6R/OkQ=.html" style="font-weight: 500;">Learn more about the BGV Scheme &rarr;</a>
-      </p> -->
-    </section>
-
-    <section class="card" id="ckks">
-      <h2>CKKS Scheme</h2>
-      <p>The CKKS scheme (named for its authors: Cheon, Kim, Kim, and Song) is a breakthrough FHE scheme optimized for <strong>approximate arithmetic</strong>. Unlike BFV or BGV which handle exact integers, CKKS works on encrypted real or complex numbers.</p>
-      <p>It achieves this by treating the "noise" as part of the approximation error, similar to floating-point arithmetic. It uses a special <strong>rescaling</strong> procedure to manage the magnitude of the encrypted values, making it the standard for privacy-preserving machine learning and data analysis.</p>
-      <p style="margin-top: 16px;">
-        <a href="ckks.html?v=zTEfWdo/alrOjIbFsIc30bmoXtKMl//JRc2+f6R/OkQ" style="font-weight: 500;">Learn more about the CKKS Scheme &rarr;</a>
-      </p>
-    </section>
-
-    <section class="card" id="tfhe">
-      <h2>TFHE Scheme</h2>
-      <p>TFHE (Fast Fully Homomorphic Encryption over the Torus) is a unique FHE scheme that operates at the bit level. Instead of encrypting large numbers, it is optimized for encrypting individual bits and performing <strong>boolean operations</strong> (like AND, OR, NOT).</p>
-      <p>Its most famous feature is its extremely fast <strong>bootstrapping</strong>, which can "refresh" an encrypted bit in milliseconds. This allows for the evaluation of any arbitrary circuit or function, including running complex conditional logic (like "if" statements) on encrypted data.</p>
-      <!-- <p style="margin-top: 16px;">
-        <a href="tfhe?v=zTEfWdo/alrOjIbFsIc30bmoXtKMl//JRc2+f6R/OkQ=.html" style="font-weight: 500;">Learn more about the TFHE Scheme &rarr;</a>
-      </p> -->
-    </section>
-
-    <section class="card" id="rings">
+        <img src="fhe_timeline.png?v=zTEfWdo/alrOjIbFsIc30bmoXtKMl//JRc2+f6R/OkQ=" alt="A timeline of FHE development from 1977 to 2016" style="width:100%; max-width: 800px; margin: 16px auto; display: block; border-radius: 8px;">
+        
+        <p style="text-align: center; font-size: 13px; color: #4b5563;">Key milestones in FHE history, based on information from FHE.org [2].</p>
+        
+        <h3 style="margin-top: 24px;">Key Milestones in FHE History</h3>
+        
+        <ul>
+          <li><strong>1977 (RSA):</strong> This foundational public-key cryptosystem was the first major scheme to exhibit a <strong>partial</strong> homomorphic property. It allows for the multiplication of ciphertexts (e.g., <code>Enc(m1) * Enc(m2) = Enc(m1 * m2)</code>), proving that computation on encrypted data was possible, even if limited to a single operation.</li>
+          
+          <li><strong>2009 (Gentry's Breakthrough):</strong> Craig Gentry's doctoral thesis provided the first plausible construction for a <strong>Fully</strong> Homomorphic Encryption scheme. It solved the critical problem of noise accumulation by introducing "bootstrapping," a revolutionary technique to refresh a ciphertext, theoretically allowing for an unlimited number of computations.</li>
+          
+          <li><strong>2011-2012 (BGV / BFV):</strong> These "second-generation" schemes (named for Brakerski, Gentry, Vaikuntanathan, and Fan-Vercauteren) made FHE more practical. Based on the Ring-LWE problem, they introduced new noise-management techniques (like modulus switching) and are optimized for <strong>exact integer arithmetic</strong>—ideal for private database queries and financial applications.</li>
+          
+          <li><strong>2016 (CKKS):</strong> A revolutionary scheme (from Cheon, Kim, Kim, Song) designed for <strong>approximate arithmetic</strong>. By treating the noise as part of the calculation, CKKS can efficiently perform computations on encrypted real or complex numbers. This breakthrough unlocked the use of FHE for data science and privacy-preserving machine learning.</li>
+          
+          <li><strong>2016 (TFHE):</strong> This scheme (Fast Fully Homomorphic Encryption over the Torus) takes a different approach by operating on individual bits. It excels at evaluating <strong>boolean circuits</strong> (logic gates like AND, OR, NOT) and is notable for its incredibly fast and efficient bootstrapping, allowing for complex programs to be run on encrypted data.</li>
+        </ul>
+      </section>
+  
+      <section class="card" id="bgv">
+        <h2>BGV Scheme</h2>
+        <p>The BGV scheme (named for its authors: Brakerski, Gentry, and Vaikuntanathan) is a foundational "second-generation" FHE scheme, often grouped with BFV. It is based on the Ring-LWE problem and is designed for efficient and exact arithmetic on integers.</p>
+        <p>Its primary innovation was a new <strong>modulus switching</strong> technique, which effectively "shrinks" the ciphertext and its noise in a controlled way after each multiplication. This allows for deeper computational circuits before bootstrapping is required.</p>
+        <!-- <p style="margin-top: 16px;">
+          <a href="bgv?v=zTEfWdo/alrOjIbFsIc30bmoXtKMl//JRc2+f6R/OkQ=.html" style="font-weight: 500;">Learn more about the BGV Scheme &rarr;</a>
+        </p> -->
+      </section>
+  
+      <section class="card" id="ckks">
+        <h2>CKKS Scheme</h2>
+        <p>The CKKS scheme (named for its authors: Cheon, Kim, Kim, and Song) is a breakthrough FHE scheme optimized for <strong>approximate arithmetic</strong>. Unlike BFV or BGV which handle exact integers, CKKS works on encrypted real or complex numbers.</p>
+        <p>It achieves this by treating the "noise" as part of the approximation error, similar to floating-point arithmetic. It uses a special <strong>rescaling</strong> procedure to manage the magnitude of the encrypted values, making it the standard for privacy-preserving machine learning and data analysis.</p>
+        <p style="margin-top: 16px;">
+          <a href="ckks.html?v=zTEfWdo/alrOjIbFsIc30bmoXtKMl//JRc2+f6R/OkQ" style="font-weight: 500;">Learn more about the CKKS Scheme &rarr;</a>
+        </p>
+      </section>
+  
+      <section class="card" id="tfhe">
+        <h2>TFHE Scheme</h2>
+        <p>TFHE (Fast Fully Homomorphic Encryption over the Torus) is a unique FHE scheme that operates at the bit level. Instead of encrypting large numbers, it is optimized for encrypting individual bits and performing <strong>boolean operations</strong> (like AND, OR, NOT).</p>
+        <p>Its most famous feature is its extremely fast <strong>bootstrapping</strong>, which can "refresh" an encrypted bit in milliseconds. This allows for the evaluation of any arbitrary circuit or function, including running complex conditional logic (like "if" statements) on encrypted data.</p>
+        <!-- <p style="margin-top: 16px;">
+          <a href="tfhe?v=zTEfWdo/alrOjIbFsIc30bmoXtKMl//JRc2+f6R/OkQ=.html" style="font-weight: 500;">Learn more about the TFHE Scheme &rarr;</a>
+        </p> -->
+      </section>
+  
+      <section class="card" id="rings">
   <h2>3. Polynomial Rings in FHE (Why They Matter)</h2>
 
   <p>
     Modern FHE schemes are built on the <strong>Ring-LWE (RLWE)</strong> problem. Instead of encrypting
-    large vectors of integers (standard LWE), RLWE works with <strong>polynomials</strong> whose coefficients
+    large vectors of integers (as in standard LWE), RLWE works with <strong>polynomials</strong> whose coefficients
     are integers modulo a large number \(q\). This polynomial structure is key to efficiency:
   </p>
-
   <ul>
-    <li><strong>Efficiency:</strong> Polynomial multiplication is used for homomorphic multiplication and can be accelerated using the <strong>Number Theoretic Transform (NTT)</strong>, a fast analogue of the FFT for polynomials.</li>
-    <li><strong>Packing (Batching):</strong> A single RLWE ciphertext can encrypt hundreds or thousands of messages (<em>slots</em>), improving throughput.</li>
+    <li><strong>Efficiency:</strong> Polynomial multiplication is used for homomorphic multiplication and can be accelerated using the <strong>Number Theoretic Transform (NTT)</strong>, a fast, polynomial-based analogue of the FFT.</li>
+    <li><strong>Packing (Batching):</strong> A single RLWE ciphertext can encrypt hundreds or thousands of messages (called <strong>slots</strong>), improving throughput.</li>
   </ul>
 
-  <p>The standard polynomial ring used in FHE is:</p>
-
+  <p>The standard polynomial ring in FHE is:</p>
   <p style="text-align:center; font-family: ui-monospace, monospace;">
     \[ R_q = \mathbb{Z}_q[x] / (x^N + 1) \]
   </p>
   <p>
-    Where \(N\) is a power-of-two degree and \(q\) is the large coefficient modulus.
-    Different FHE schemes utilize variations of this ring depending on their computational goal.
+    Here \(N\) is a power-of-two degree and \(q\) is the coefficient modulus.
+    Different FHE schemes use variations of this ring depending on their computational goals.
   </p>
 
   <h3>Which scheme uses which ring?</h3>
-
   <table>
     <thead>
       <tr>
@@ -297,117 +294,108 @@
     <tbody>
       <tr>
         <td><strong>BFV / BGV</strong></td>
-        <td>\(\mathbb{Z}_q[x]/(x^N + 1)\) (Integer coefficients mod \(q\))</td>
+        <td>\( \mathbb{Z}_q[x]/(x^N + 1) \) (Integer coefficients mod \(q\))</td>
         <td>Exact integer arithmetic (private databases, sums)</td>
       </tr>
       <tr>
         <td><strong>CKKS</strong></td>
-        <td>\(\mathbb{Z}_q[x]/(x^N + 1)\) (Integer coefficients mod \(q\))</td>
+        <td>\( \mathbb{Z}_q[x]/(x^N + 1) \) (Integer coefficients mod \(q\))</td>
         <td>Approximate real/complex arithmetic (ML, data science)</td>
       </tr>
       <tr>
         <td><strong>TFHE</strong></td>
-        <td>\(\mathbb{T}[x]/(x^N + 1)\) (Torus coefficients mod 1)</td>
-        <td>Boolean circuits and very fast bootstrapping</td>
+        <td>\( \mathbb{T}[x]/(x^N + 1) \) (Torus coefficients mod 1)</td>
+        <td>Boolean circuits and ultra-fast bootstrapping</td>
       </tr>
     </tbody>
   </table>
 
   <p class="note">
-    <strong>Key Distinction:</strong> BFV, BGV, and CKKS are built on <strong>RLWE</strong> (integer polynomial rings). 
-    TFHE is built on <strong>TLWE/TRLWE</strong> (torus-based), using \(\mathbb{T} = \mathbb{R}/\mathbb{Z}\), enabling extremely fast bootstrapping.
+    <strong>Key Distinction:</strong> BFV, BGV, and CKKS are RLWE schemes using integer polynomial rings. TFHE uses <strong>TLWE/TRLWE</strong> (Torus LWE / RLWE), algebraically similar but with the <strong>torus</strong> \(\mathbb{T} = \mathbb{R}/\mathbb{Z}\), enabling very fast bootstrapping.
   </p>
 
   <h3>Intuition: What do these rings look like?</h3>
 
   <p><strong>1. Integer Polynomial Rings (BFV, BGV, CKKS)</strong></p>
-  <pre>
-R_q = ℤ_q[x] / (x^N + 1)
-
-A “number” is a polynomial:
-    a(x) = a₀ + a₁ x + a₂ x² + ... + a_{N-1} x^{N-1}
-
-Operations:
-    • Coefficients aᵢ are integers modulo q
-    • Polynomial wraps modulo x^N + 1
-  </pre>
+  <div style="background:#f1f5f9; padding:12px; border-radius:8px; font-family: ui-monospace, monospace;">
+    \[ R_q = \mathbb{Z}_q[x] / (x^N + 1) \] <br>
+    A “number” is a polynomial: <br>
+    \[ a(x) = a_0 + a_1 x + a_2 x^2 + \dots + a_{N-1} x^{N-1} \] <br>
+    Operations: <br>
+    • Coefficients \(a_i\) are integers mod \(q\) <br>
+    • Polynomial arithmetic wraps mod \(x^N + 1\)
+  </div>
   <p>
-    Messages are embedded in the low-order coefficients, so a single polynomial can "pack" many integer or approximate values into its \(N\) slots.
+    Messages are usually embedded into low-order coefficients. This allows a single ciphertext
+    to pack many integer or approximate values into its \(N\) slots.
   </p>
 
   <p><strong>2. Torus Polynomial Ring (TFHE)</strong></p>
-  <pre>
-T = ℝ / ℤ  (Torus: real values in [0,1) with wrap-around)
-TRLWE = T[x] / (x^N + 1)
-  </pre>
+  <div style="background:#f1f5f9; padding:12px; border-radius:8px; font-family: ui-monospace, monospace;">
+    \[ \mathbb{T} = \mathbb{R} / \mathbb{Z} \quad (\text{values mod 1}) \] <br>
+    TRLWE = \( \mathbb{T}[x] / (x^N + 1) \)
+  </div>
   <p>
-    In TFHE, messages \(m \in \{0,1\}\) are encoded as \(m/2\) (0 or 0.5) in the torus. Noise is a tiny fractional value, wrapping around like points on a unit circle. This fractional-noise setup enables TFHE’s ultra-fast bootstrapping.
+    TFHE encodes binary messages \(m \in \{0,1\}\) as \(m/2\) (0 or 0.5) in the torus.
+    Noise is a small fractional value. Values wrap around like points on a unit circle.
+    This fractional-noise encoding enables ultra-fast, table-lookup-based bootstrapping.
   </p>
 
-  <h3>Visual comparison of coefficients</h3>
-  <div style="display:flex; gap:16px; flex-wrap:wrap; margin-top: 16px;">
+  <h3>Visual Comparison of Coefficients</h3>
+  <div style="display:flex; gap:16px; flex-wrap:wrap; margin-top:16px;">
     <div style="flex:1; min-width:260px; background:#f1f5f9; padding:12px; border-radius:8px;">
       <h4>BFV / BGV / CKKS (RLWE)</h4>
-      <p>Integer coefficients modulo a large \(q\) (e.g., \(2^{60}\)).</p>
+      <p>Integer coefficients modulo a large \(q\) (e.g., \(2^{60}\))</p>
       <p style="font-family:ui-monospace,monospace; font-size:13px;">
-        Example:<br>
-        a(x) = [1203, 9931, 8123, …] mod q
+        Example: <br>
+        \( a(x) = [1203, 9931, 8123, …] \mod q \)
       </p>
     </div>
     <div style="flex:1; min-width:260px; background:#f1f5f9; padding:12px; border-radius:8px;">
       <h4>TFHE (TRLWE)</h4>
-      <p>Coefficients on the torus (real numbers modulo 1).</p>
+      <p>Coefficients on the torus (real numbers modulo 1)</p>
       <p style="font-family:ui-monospace,monospace; font-size:13px;">
-        Example:<br>
-        a(x) = [0.13, 0.92, 0.51, …] mod 1
+        Example: <br>
+        \( a(x) = [0.13, 0.92, 0.51, …] \mod 1 \)
       </p>
     </div>
   </div>
 
-  <h3 style="margin-top:20px;">Why different rings?</h3>
+  <h3>Why different rings?</h3>
   <ul>
-    <li><strong>BFV / BGV:</strong> Exact integer arithmetic → integer rings</li>
-    <li><strong>CKKS:</strong> Approximate real arithmetic → integer rings with scaling/rescaling</li>
-    <li><strong>TFHE:</strong> Fast boolean logic → torus for efficient bootstrapping</li>
+    <li><strong>BFV / BGV</strong> → Exact integer arithmetic → integer rings.</li>
+    <li><strong>CKKS</strong> → Approximate real arithmetic → same integer ring, but messages are scaled; noise is acceptable approximation error.</li>
+    <li><strong>TFHE</strong> → Fast boolean logic → torus domain enables FFT-based bootstrapping for single-bit operations.</li>
   </ul>
 
   <h2>RLWE Ciphertext = Polynomial + Noise (BFV/CKKS)</h2>
   <p>
     RLWE generalizes LWE from vectors to polynomials. Each ciphertext component is a polynomial
-    whose coefficients contain small noise modulo \(q\), enabling efficient homomorphic multiplication.
+    whose coefficients contain small noise modulo \(q\), enabling homomorphic operations.
   </p>
 
-  <h3>Encryption Example</h3>
-  <pre>
-m(x): plaintext polynomial
-s(x): secret key polynomial
-a(x): random public polynomial
-e(x): small noise polynomial
+  <h3>Encryption Example (Conceptual)</h3>
+  <div style="background:#f1f5f9; padding:12px; border-radius:8px; font-family: ui-monospace, monospace;">
+    <p>
+      \( m(x) \) : plaintext polynomial <br>
+      \( s(x) \) : secret key polynomial <br>
+      \( a(x) \) : randomly sampled public polynomial <br>
+      \( e(x) \) : small noise polynomial <br><br>
 
-Ciphertext:
-    c₀(x) = a(x)                   mod (x^N + 1, q)
-    c₁(x) = a(x)·s(x) + m(x) + e(x)  mod (x^N + 1, q)
-  </pre>
-  <p>
-    In RLWE, a ciphertext is a pair of polynomials (c₀(x), c₁(x)) instead of integer pairs (a,b) in standard LWE.
-  </p>
+      Ciphertext components: <br>
+      \( c_0(x) = a(x) \mod (x^N+1, q) \) <br>
+      \( c_1(x) = a(x) \cdot s(x) + m(x) + e(x) \mod (x^N+1, q) \)
+    </p>
+  </div>
 
-  <div style="padding:16px; background:#f1f5f9; border-radius:8px;">
-    <pre style="font-size:13px; white-space:pre-wrap;">
-Example N=4:
-m(x) = 12 + 3x + 7x^2
-
-Polynomial coefficients:
-   [12, 3, 7, 0]
-
-Noise e(x):
-   [0, -1, 2, 0]
-
-Ciphertext c₁(x) (simplified):
-   [b₀, b₁, b₂, b₃] mod q
-     ↑   ↑   ↑
-  polynomial coefficients with small noise
-    </pre>
+  <div style="background:#f1f5f9; padding:12px; border-radius:8px; font-family: ui-monospace, monospace;">
+    <p>
+      Example with \(N=4\): <br>
+      \( m(x) = 12 + 3x + 7x^2 \) <br>
+      Coefficients: \( [12, 3, 7, 0] \) <br>
+      Noise: \( e(x) = [0, -1, 2, 0] \) <br>
+      Ciphertext \( c_1(x) = [b_0, b_1, b_2, b_3] \mod q \) (polynomial coefficients with small noise)
+    </p>
   </div>
 
   <p class="note">
@@ -416,25 +404,32 @@ Ciphertext c₁(x) (simplified):
 
   <h2>Torus Representation (TFHE)</h2>
   <p>
-    TFHE uses the <strong>torus</strong> \(\mathbb{T} = \mathbb{R}/\mathbb{Z}\), meaning values wrap around modulo 1.
-    For example, \(0.9 + 0.3 = 1.2 \equiv 0.2 \pmod 1\).
+    TFHE uses the <strong>torus</strong> \(\mathbb{T} = \mathbb{R}/\mathbb{Z}\), so values wrap around in [0,1). 
+    For example, \(0.9 + 0.3 \equiv 0.2 \pmod 1\). Binary messages \(m \in \{0,1\}\) are encoded as \(m/2\).
   </p>
 
-  <p style="text-align:center; font-family:ui-monospace,monospace;">
-    \(\mathbb{T} = \mathbb{R}/\mathbb{Z}\)
-  </p>
+  <h3>Diagram: Values on the Torus</h3>
+  <div style="display:flex; justify-content:center; margin:16px 0;">
+    <svg width="240" height="240">
+      <circle cx="120" cy="120" r="100" stroke="#0ea5e9" stroke-width="3" fill="none"/>
+      <text x="110" y="12" font-size="12">0</text>
+      <text x="210" y="125" font-size="12">0.25</text>
+      <text x="120" y="235" font-size="12">0.5</text>
+      <text x="15" y="125" font-size="12">0.75</text>
 
-  <p>
-    Binary messages \(m \in \{0,1\}\) are encoded as \(m/2\) in the torus. Noise is small and fractional, allowing extremely fast bootstrapping via FFT.
-  </p>
+      <circle cx="120" cy="20" r="6" fill="#0ea5e9"/>
+      <circle cx="205" cy="120" r="6" fill="#0ea5e9"/>
+      <circle cx="120" cy="220" r="6" fill="#0ea5e9"/>
+      <circle cx="35" cy="120" r="6" fill="#0ea5e9"/>
+    </svg>
+  </div>
+  <p style="text-align:center;">Each coefficient is a fractional value modulo 1.</p>
 
-  <h3>TRLWE Sample (TFHE)</h3>
-  <pre>
-(a(x), b(x) = a(x)·s(x) + μ(x) + e(x)) mod (x^N+1, 1)
-  </pre>
-  <p>
-    μ(x) is the encoded message polynomial; all coefficients are modulo 1.
-  </p>
+  <h3>TRLWE Sample</h3>
+  <div style="background:#f1f5f9; padding:12px; border-radius:8px; font-family: ui-monospace, monospace;">
+    \( (a(x), b(x) = a(x)\cdot s(x) + \mu(x) + e(x)) \mod (x^N+1, 1) \) <br>
+    Where \( \mu(x) \) is the encoded message polynomial.
+  </div>
 
   <h2>LWE → RLWE → TLWE → TRLWE: How They Relate</h2>
   <table>
@@ -449,26 +444,26 @@ Ciphertext c₁(x) (simplified):
     <tbody>
       <tr>
         <td>LWE</td>
-        <td>(a, b = ⟨a,s⟩ + e) mod q</td>
-        <td>ℤ_qⁿ (integer vectors mod q)</td>
+        <td>\((\mathbf{a}, b = \langle \mathbf{a}, \mathbf{s} \rangle + e) \pmod q\)</td>
+        <td>\(\mathbb{Z}_q^n\) (vectors of integers)</td>
         <td>FHEW, GSW</td>
       </tr>
       <tr>
         <td>RLWE</td>
-        <td>(a(x), b(x) = a(x)s(x) + e(x)) mod (x^N+1, q)</td>
-        <td>ℤ_q[x]/(x^N+1) (integer polynomials mod q)</td>
+        <td>\((\mathbf{a}(x), \mathbf{b}(x) = \mathbf{a}(x)\mathbf{s}(x) + \mathbf{e}(x)) \pmod{x^N+1, q}\)</td>
+        <td>\(\mathbb{Z}_q[x]/(x^N+1)\)</td>
         <td>BFV, BGV, CKKS</td>
       </tr>
       <tr>
         <td>TLWE</td>
-        <td>(a, b = ⟨a,s⟩ + e) mod 1</td>
-        <td>𝕋ⁿ (vectors on the torus)</td>
+        <td>\((\mathbf{a}, b = \langle \mathbf{a}, \mathbf{s} \rangle + e) \pmod 1\)</td>
+        <td>\(\mathbb{T}^n\) (vectors on torus)</td>
         <td>TFHE</td>
       </tr>
       <tr>
         <td>TRLWE</td>
-        <td>(a(x), b(x) = a(x)s(x) + e(x)) mod (x^N+1, 1)</td>
-        <td>𝕋[x]/(x^N+1) (polynomials on the torus)</td>
+        <td>\((\mathbf{a}(x), \mathbf{b}(x) = \mathbf{a}(x)\mathbf{s}(x) + \mathbf{e}(x)) \pmod{x^N+1,1}\)</td>
+        <td>\(\mathbb{T}[x]/(x^N+1)\)</td>
         <td>TFHE</td>
       </tr>
     </tbody>
@@ -476,127 +471,124 @@ Ciphertext c₁(x) (simplified):
 
   <h3>Summary</h3>
   <pre style="white-space:pre-wrap;">
-LWE     → Integer vectors mod q (base FHE)
-RLWE    → Integer polynomials mod q (BFV/BGV/CKKS)
-TLWE    → Torus vectors mod 1 (TFHE)
-TRLWE   → Torus polynomials mod 1 (TFHE)
+LWE    → Integer vectors mod q
+RLWE   → Integer polynomials mod q
+TLWE   → Torus vectors mod 1
+TRLWE  → Torus polynomials mod 1
   </pre>
 
   <h2>Playground: Visualizing Polynomial Multiplication & Noise</h2>
   <p>
-    Static example showing polynomial multiplication and noise accumulation in RLWE (BFV/BGV/CKKS).
+    Static example showing polynomial multiplication and noise accumulation in RLWE.
   </p>
 
-  <div style="background:#f8fafc; padding:16px; border-radius:8px;">
-    <h3>Input Polynomials</h3>
-    <pre>
-a(x) = 3 + x + 4x² + 0x³
-b(x) = 2 + 0x + x² + 5x³
-    </pre>
+  <div style="background:#f8fafc; padding:16px; border-radius:8px; font-family: ui-monospace, monospace;">
+    <p>Input Polynomials:</p>
+    <p>\( a(x) = 3 + 1x + 4x^2 + 0x^3 \)</p>
+    <p>\( b(x) = 2 + 0x + 1x^2 + 5x^3 \)</p>
 
-    <h3>Polynomial Multiplication mod (x⁴+1)</h3>
-    <pre>
-a(x)·b(x) = 6 + 2x + 11x² + 15x³ + 4x⁴ + 5x⁵ + 0x⁶
-Reduce mod x⁴+1 (x⁴ ≡ -1):
-a(x)·b(x) ≡ 11 + 22x + 11x² + 16x³
-    </pre>
+    <p>Multiplication mod \(x^4+1\):</p>
+    <p>\( a(x)\cdot b(x) = 6 + 2x + 11x^2 + 15x^3 + 4x^4 + 5x^5 \)</p>
+    <p>Reduce mod \(x^4+1\) (since \(x^4 \equiv -1\)):</p>
+    <p>\( a(x)\cdot b(x) \equiv 11 + 22x + 11x^2 + 16x^3 \) (vector: \([11, 22, 11, 16]\))</p>
 
-    <h3>Add Noise (Simplified)</h3>
-    <pre>
-e(x) = 1 + 0x - x² + 2x³
-Ciphertext c(x) = a(x)·b(x) + e(x) ≡ 12 + 22x + 10x² + 18x³ mod q
-    </pre>
+    <p>Add noise:</p>
+    <p>\( e(x) = 1 + 0x - 1x^2 + 2x^3 \)</p>
+    <p>Resulting ciphertext component:</p>
+    <p>\( c(x) = a(x)\cdot b(x) + e(x) \equiv 12 + 22x + 10x^2 + 18x^3 \mod q \)</p>
   </div>
 
   <p class="note">
-    RLWE ciphertexts accumulate noise with each operation — controlling growth is the core challenge addressed by modulus switching and rescaling.
+    RLWE ciphertexts accumulate noise with each operation. Modulus switching (BFV/BGV) or rescaling (CKKS) is used to control this growth.
   </p>
+
 </section>
 
-
-
-    <footer>
-      <p>Educational toy. Code adapted freely for learning purposes.</p>
-      <p class="cite-note">Citations: <br>
-        [1] Lyubashevsky, V., Peikert, C., & Regev, O. (2013). Lattice-based Cryptography. <br>
-        [2] FHE.org Community. (n.d.). History of FHE: A Timeline. Retrieved from https://fhe.org/history/
-      </p>
-    </footer>
-
-  <script>
-  let secretKey = null;
-  let cipherA = null;
-  let cipherB = null;
-  let lastResult = null;
-
-  function mod(n, q) {
-    return ((n % q) + q) % q;
-  }
-
-  document.getElementById('genKey').addEventListener('click', () => {
-    const q = parseInt(document.getElementById('q').value);
-    secretKey = Math.floor(Math.random() * q);
-    document.getElementById('s').value = secretKey;
-    cipherA = cipherB = lastResult = null;
-    document.getElementById('cipherA').textContent = "Cipher A: —";
-    document.getElementById('cipherB').textContent = "Cipher B: —";
-    document.getElementById('result').textContent = "Result: —";
-  });
-
-  document.getElementById('encA').addEventListener('click', () => {
-    const q = parseInt(document.getElementById('q').value);
-    const m1 = parseInt(document.getElementById('m1').value);
-    const e = parseInt(document.getElementById('noise').value);
-    const a = Math.floor(Math.random() * q);
-    cipherA = { a: a, b: mod(a * secretKey + m1 + e, q) };
-    document.getElementById('cipherA').textContent = `Cipher A: (${cipherA.a}, ${cipherA.b})`;
-    lastResult = null;
-    document.getElementById('result').textContent = "Result: —";
-  });
-
-  document.getElementById('encB').addEventListener('click', () => {
-    const q = parseInt(document.getElementById('q').value);
-    const m2 = parseInt(document.getElementById('m2').value);
-    const e = parseInt(document.getElementById('noise').value);
-    const a = Math.floor(Math.random() * q);
-    cipherB = { a: a, b: mod(a * secretKey + m2 + e, q) };
-    document.getElementById('cipherB').textContent = `Cipher B: (${cipherB.a}, ${cipherB.b})`;
-    lastResult = null;
-    document.getElementById('result').textContent = "Result: —";
-  });
-
-  document.getElementById('add').addEventListener('click', () => {
-    if(!cipherA || !cipherB) { alert("Encrypt A and B first!"); return; }
-    const q = parseInt(document.getElementById('q').value);
-    lastResult = { a: mod(cipherA.a + cipherB.a, q), b: mod(cipherA.b + cipherB.b, q) };
-    document.getElementById('result').textContent = `Result: (${lastResult.a}, ${lastResult.b})`;
-  });
-
-  document.getElementById('mulScalar').addEventListener('click', () => {
-    if(!cipherA) { alert("Encrypt A first!"); return; }
-    const q = parseInt(document.getElementById('q').value);
-    const scalar = 3;
-    lastResult = { a: mod(cipherA.a * scalar, q), b: mod(cipherA.b * scalar, q) };
-    document.getElementById('result').textContent = `Result: (${lastResult.a}, ${lastResult.b})`;
-  });
-
-  document.getElementById('decrypt').addEventListener('click', () => {
-    if(!lastResult) { alert("Perform an operation first!"); return; }
-    const q = parseInt(document.getElementById('q').value);
-    const dec = mod(lastResult.b - lastResult.a * secretKey, q);
-    alert(`Decrypted result: ${dec}`);
-  });
-
-  document.getElementById('download').addEventListener('click', () => {
-    const blob = new Blob([document.documentElement.outerHTML], {type: "text/html"});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = "fhe_toy_demo.html";
-    a.click();
-    URL.revokeObjectURL(url);
-  });
-</script>
-
-</body>
-</html>
+  
+  
+  
+      <footer>
+        <p>Educational toy. Code adapted freely for learning purposes.</p>
+        <p class="cite-note">Citations: <br>
+          [1] Lyubashevsky, V., Peikert, C., & Regev, O. (2013). Lattice-based Cryptography. <br>
+          [2] FHE.org Community. (n.d.). History of FHE: A Timeline. Retrieved from https://fhe.org/history/
+        </p>
+      </footer>
+  
+    <script>
+    let secretKey = null;
+    let cipherA = null;
+    let cipherB = null;
+    let lastResult = null;
+  
+    function mod(n, q) {
+      return ((n % q) + q) % q;
+    }
+  
+    document.getElementById('genKey').addEventListener('click', () => {
+      const q = parseInt(document.getElementById('q').value);
+      secretKey = Math.floor(Math.random() * q);
+      document.getElementById('s').value = secretKey;
+      cipherA = cipherB = lastResult = null;
+      document.getElementById('cipherA').textContent = "Cipher A: —";
+      document.getElementById('cipherB').textContent = "Cipher B: —";
+      document.getElementById('result').textContent = "Result: —";
+    });
+  
+    document.getElementById('encA').addEventListener('click', () => {
+      const q = parseInt(document.getElementById('q').value);
+      const m1 = parseInt(document.getElementById('m1').value);
+      const e = parseInt(document.getElementById('noise').value);
+      const a = Math.floor(Math.random() * q);
+      cipherA = { a: a, b: mod(a * secretKey + m1 + e, q) };
+      document.getElementById('cipherA').textContent = `Cipher A: (${cipherA.a}, ${cipherA.b})`;
+      lastResult = null;
+      document.getElementById('result').textContent = "Result: —";
+    });
+  
+    document.getElementById('encB').addEventListener('click', () => {
+      const q = parseInt(document.getElementById('q').value);
+      const m2 = parseInt(document.getElementById('m2').value);
+      const e = parseInt(document.getElementById('noise').value);
+      const a = Math.floor(Math.random() * q);
+      cipherB = { a: a, b: mod(a * secretKey + m2 + e, q) };
+      document.getElementById('cipherB').textContent = `Cipher B: (${cipherB.a}, ${cipherB.b})`;
+      lastResult = null;
+      document.getElementById('result').textContent = "Result: —";
+    });
+  
+    document.getElementById('add').addEventListener('click', () => {
+      if(!cipherA || !cipherB) { alert("Encrypt A and B first!"); return; }
+      const q = parseInt(document.getElementById('q').value);
+      lastResult = { a: mod(cipherA.a + cipherB.a, q), b: mod(cipherA.b + cipherB.b, q) };
+      document.getElementById('result').textContent = `Result: (${lastResult.a}, ${lastResult.b})`;
+    });
+  
+    document.getElementById('mulScalar').addEventListener('click', () => {
+      if(!cipherA) { alert("Encrypt A first!"); return; }
+      const q = parseInt(document.getElementById('q').value);
+      const scalar = 3;
+      lastResult = { a: mod(cipherA.a * scalar, q), b: mod(cipherA.b * scalar, q) };
+      document.getElementById('result').textContent = `Result: (${lastResult.a}, ${lastResult.b})`;
+    });
+  
+    document.getElementById('decrypt').addEventListener('click', () => {
+      if(!lastResult) { alert("Perform an operation first!"); return; }
+      const q = parseInt(document.getElementById('q').value);
+      const dec = mod(lastResult.b - lastResult.a * secretKey, q);
+      alert(`Decrypted result: ${dec}`);
+    });
+  
+    document.getElementById('download').addEventListener('click', () => {
+      const blob = new Blob([document.documentElement.outerHTML], {type: "text/html"});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = "fhe_toy_demo.html";
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+  </script>
+  
+  </body>
+  </html>
