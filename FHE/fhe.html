@@ -255,6 +255,250 @@
       </p> -->
     </section>
 
+    <section class="card" id="rings">
+  <h2>3. Polynomial Rings in FHE (Why They Matter)</h2>
+
+  <p>
+    Modern FHE schemes are built on the <strong>Ring-LWE (RLWE)</strong> problem. Instead of encrypting
+    large vectors of integers (as in standard LWE), RLWE works with <strong>polynomials</strong> whose coefficients
+    are integers modulo a large number $q$. This polynomial structure is key to efficiency:
+  </p>
+  <ul>
+    <li><strong>Efficiency:</strong> Polynomial multiplication is used for homomorphic multiplication and can be accelerated using the <strong>Number Theoretic Transform (NTT)</strong>, a fast, polynomial-based analogue of the Fast Fourier Transform (FFT).</li>
+    <li><strong>"Packing" (Batching):</strong> A single RLWE ciphertext can encrypt many messages simultaneously (called <strong>slots</strong>), vastly improving throughput.</li>
+  </ul>
+
+  <p>The standard polynomial ring used in FHE is:</p>
+  <p style="text-align:center; font-family: ui-monospace, monospace;">
+    \[ R_q = \mathbb{Z}_q[x] / (x^N + 1) \]
+  </p>
+  <p>
+    Where $N$ is a power-of-two degree and $q$ is the large modulus. Different FHE schemes use variations of this ring depending on whether they need exact integer arithmetic, approximate arithmetic, or boolean logic.
+  </p>
+
+  <h3>Which scheme uses which ring?</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Scheme</th>
+        <th>Underlying Ring / Domain</th>
+        <th>Purpose</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>BFV / BGV</td>
+        <td>$\mathbb{Z}_q[x]/(x^N + 1)$ (Integer coefficients mod $q$)</td>
+        <td>Exact integer arithmetic (e.g., private databases, sums)</td>
+      </tr>
+      <tr>
+        <td>CKKS</td>
+        <td>$\mathbb{Z}_q[x]/(x^N + 1)$ (Integer coefficients mod $q$, scaled)</td>
+        <td>Approximate real/complex arithmetic (ML, data science)</td>
+      </tr>
+      <tr>
+        <td>TFHE</td>
+        <td>$\mathbb{T}[x]/(x^N + 1)$ (Torus coefficients mod 1)</td>
+        <td>Boolean circuits with very fast bootstrapping</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p class="note">
+    <strong>Key Distinction:</strong> BFV/BGV/CKKS are based on RLWE using integer polynomial rings. 
+    TFHE is based on TLWE/TRLWE, which is algebraically similar but uses the <strong>torus</strong> 
+    ($\mathbb{R}/\mathbb{Z}$), enabling extremely fast bootstrapping.
+  </p>
+
+  <h3>Intuition: What do these rings look like?</h3>
+
+  <p><strong>1. Integer Polynomial Rings (BFV, BGV, CKKS)</strong></p>
+  <pre>
+R_q = Z_q[x] / (x^N + 1)
+
+A "number" is a polynomial:
+    a(x) = a₀ + a₁ x + a₂ x² + ... + a_{N-1} x^{N-1}
+
+Operations:
+    • The coefficients (aᵢ) are integers modulo q.
+    • Polynomial multiplication wraps around modulo x^N + 1.
+  </pre>
+  <p>
+    Messages are typically embedded in the low-order coefficients. CKKS uses the same ring but scales real/complex numbers into integers; small rounding errors are treated as acceptable approximation.
+  </p>
+
+  <p><strong>2. Torus Polynomial Ring (TFHE)</strong></p>
+  <pre>
+T = R / Z   (the Torus: real values in [0,1) with wrap-around)
+TRLWE = T[x] / (x^N + 1)
+  </pre>
+  <p>
+    Each coefficient is a fractional value modulo 1. Binary messages $m \in \{0,1\}$ are encoded as $m/2$ (0 or 0.5). Noise is a tiny fractional value. Arithmetic modulo 1 ensures coefficients "wrap around," which enables extremely fast FFT-based bootstrapping.
+  </p>
+
+  <h3>Visual comparison of coefficients</h3>
+  <div style="display:flex; gap:16px; flex-wrap:wrap; margin-top:16px;">
+    <div style="flex:1; min-width:260px; background:#f1f5f9; padding:12px; border-radius:8px;">
+      <h4>BFV / BGV / CKKS (RLWE)</h4>
+      <p>Integer coefficients modulo a large $q$ (CKKS scales reals into integers).</p>
+      <p style="font-family:ui-monospace,monospace; font-size:13px;">
+        Example q ≈ 2^60:<br>
+        a(x) = [1203, 9931, 8123, …] mod q
+      </p>
+    </div>
+    <div style="flex:1; min-width:260px; background:#f1f5f9; padding:12px; border-radius:8px;">
+      <h4>TFHE (TRLWE)</h4>
+      <p>Coefficients are fractional numbers modulo 1.</p>
+      <p style="font-family:ui-monospace,monospace; font-size:13px;">
+        Example:<br>
+        a(x) = [0.13, 0.92, 0.51, …] mod 1
+      </p>
+    </div>
+  </div>
+
+  <h3 style="margin-top:20px;">Why different rings?</h3>
+  <ul>
+    <li>BFV/BGV → exact integer arithmetic → integer ring</li>
+    <li>CKKS → approximate real arithmetic → same integer ring, scaled, approximate computation tolerated</li>
+    <li>TFHE → boolean logic → torus domain allows ultra-fast bootstrapping and single-bit precision</li>
+  </ul>
+
+  <h2>RLWE Ciphertext = Polynomial + Noise (BFV/CKKS)</h2>
+  <p>
+    RLWE generalizes LWE from vectors to polynomials. Each ciphertext component is a polynomial whose coefficients contain small noise modulo q. Noise grows with operations and is controlled via modulus switching (BFV/BGV) or rescaling (CKKS).
+  </p>
+
+  <h3>Encryption Example (Conceptual)</h3>
+  <pre>
+m(x) : plaintext polynomial
+s(x) : secret key polynomial
+a(x) : random public polynomial
+e(x) : small noise polynomial
+
+Ciphertext components:
+  c0(x) = a(x) mod (x^N+1, q)
+  c1(x) = a(x)·s(x) + m(x) + e(x) mod (x^N+1, q)
+  </pre>
+
+  <div style="padding:16px; background:#f1f5f9; border-radius:8px;">
+    <pre style="font-size:13px; white-space:pre-wrap;">
+Example N=4:
+m(x) = 12 + 3x + 7x^2
+
+Coefficients of m(x):
+  [12, 3, 7, 0]
+
+Noise e(x):
+  [0, -1, 2, 0]
+
+Ciphertext c1(x) (simplified):
+  [b0, b1, b2, b3] mod q
+    ↑   ↑   ↑
+  polynomial coefficients with small noise
+    </pre>
+  </div>
+
+  <h2>Torus Representation (TFHE)</h2>
+  <p>
+    TFHE uses the torus, $\mathbb{T} = \mathbb{R}/\mathbb{Z}$, so all values are in [0,1) and integers are ignored modulo 1. For example, 0.9 + 0.3 ≡ 0.2 mod 1.
+  </p>
+
+  <p style="text-align:center; font-family:ui-monospace,monospace;">
+    \(\mathbb{T} = \mathbb{R}/\mathbb{Z}\)
+  </p>
+
+  <h3>TRLWE Sample</h3>
+  <pre>
+(a(x), b(x) = a(x)·s(x) + μ(x) + e(x)) mod (x^N+1, 1)
+  </pre>
+  <p>
+    μ(x) is the encoded message polynomial (usually 0 or 0.5 per bit), and all coefficients are modulo 1.
+  </p>
+
+  <h2>LWE → RLWE → TLWE → TRLWE: How They Relate</h2>
+  <p>
+    All modern lattice-based schemes originate from LWE. Variants differ in the space samples live in.
+  </p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Sample Form</th>
+        <th>Space</th>
+        <th>Used in</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>LWE</td>
+        <td>(a, b = ⟨a,s⟩ + e) mod q</td>
+        <td>Integer vectors mod q</td>
+        <td>FHEW, GSW</td>
+      </tr>
+      <tr>
+        <td>RLWE</td>
+        <td>(a(x), b(x) = a(x)s(x) + e(x)) mod (x^N+1, q)</td>
+        <td>Integer polynomials mod q</td>
+        <td>BFV, BGV, CKKS</td>
+      </tr>
+      <tr>
+        <td>TLWE</td>
+        <td>(a, b = ⟨a,s⟩ + e) mod 1</td>
+        <td>Torus vectors</td>
+        <td>TFHE (inner product in bootstrapping)</td>
+      </tr>
+      <tr>
+        <td>TRLWE</td>
+        <td>(a(x), b(x) = a(x)s(x) + e(x)) mod (x^N+1, 1)</td>
+        <td>Torus polynomials</td>
+        <td>TFHE</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Summary</h3>
+  <pre style="white-space:pre-wrap;">
+LWE     → Integer vectors mod q
+RLWE    → Integer polynomials mod q (for BFV/BGV/CKKS)
+TLWE    → Torus vectors mod 1 (for TFHE)
+TRLWE   → Torus polynomials mod 1 (for TFHE)
+  </pre>
+
+  <h2>Playground: Visualizing Polynomial Multiplication & Noise</h2>
+  <p>
+    A static example showing how polynomial multiplication and noise accumulation work in RLWE, the core homomorphic operation.
+  </p>
+
+  <div style="background:#f8fafc; padding:16px; border-radius:8px;">
+    <h3>Input Polynomials</h3>
+    <pre>
+a(x) = 3 + 1x + 4x² + 0x³
+b(x) = 2 + 0x + 1x² + 5x³
+    </pre>
+
+    <h3>Polynomial Multiplication (mod x⁴+1)</h3>
+    <p style="font-size:13px; margin-bottom:4px;">
+      Mod x^N+1 wraps the polynomial around, causing cross-terms important for batching.
+    </p>
+    <pre>
+a(x)·b(x) = 6 + 2x + 11x² + 15x³ + 4x⁴ + 5x⁵ + 0x⁶
+Reduce mod x^4+1 (x⁴ ≡ -1):
+a(x)·b(x) ≡ 11 + 22x + 11x² + 16x³  (vector: [11,22,11,16])
+    </pre>
+
+    <h3>Add Noise (Simplified)</h3>
+    <pre>
+e(x) = 1 + 0x - 1x² + 2x³  (vector: [1,0,-1,2])
+Resulting ciphertext c(x) = a(x)·b(x) + e(x) ≡ 12 + 22x + 10x² + 18x³ mod q
+    </pre>
+  </div>
+
+  <p class="note">
+    RLWE ciphertexts accumulate noise with each operation — managing this growth is the core task of modulus switching (BFV/BGV) and rescaling (CKKS).
+  </p>
+</section>
+
+
     <footer>
       <p>Educational toy. Code adapted freely for learning purposes.</p>
       <p class="cite-note">Citations: <br>
