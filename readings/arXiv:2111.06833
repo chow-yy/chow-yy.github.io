@@ -1,9 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+<head>    
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    
+    <link rel="stylesheet" href="style.css?v=zTEfWdo/alrOjIbFsIc30bmoXtKMl//JRc2+f6R/OkQ=">
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Summary: Frequency Estimation in the Shuffle Model with Almost a Single Message</title>
+    <title>Frequency Estimation in the Shuffle Model with Almost a Single Message</title>
     <style>
         body { font-family: sans-serif; max-width: 800px; margin: auto; padding: 20px; line-height: 1.6; }
         h1 { color: #2C3E50; border-bottom: 2px solid #3498DB; padding-bottom: 10px; }
