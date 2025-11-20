@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Summary: Frequency Estimation in the Shuffle Model with Almost a Single Message</title>
+    <style>
+        body { font-family: sans-serif; max-width: 800px; margin: auto; padding: 20px; line-height: 1.6; }
+        h1 { color: #2C3E50; border-bottom: 2px solid #3498DB; padding-bottom: 10px; }
+        h2 { color: #34495E; margin-top: 30px; }
+        .metadata p { margin: 5px 0; font-size: 0.9em; color: #7F8C8D; }
+        .contributions ul { list-style-type: square; padding-left: 20px; }
+        .contributions li { margin-bottom: 10px; }
+        .key-term { font-weight: bold; color: #E74C3C; }
+    </style>
+</head>
+<body>
+
+    <h1>Frequency Estimation in the Shuffle Model with Almost a Single Message</h1>
+
+    <div class="metadata">
+        <p><strong>Authors:</strong> Qiyao Luo, Yilei Wang, and Ke Yi</p>
+        <p><strong>ArXiv ID:</strong> 2111.06833</p>
+        <p><strong>Publication:</strong> Proceedings of the 2022 ACM SIGSAC Conference on Computer and Communications Security (CCS '22)</p>
+        <p><strong>Keywords:</strong> Differential privacy, frequency estimation, heavy hitter, sparse vector summation</p>
+    </div>
+
+    <hr>
+
+    <h2>Abstract Summary</h2>
+    <p>
+        This paper introduces a novel protocol for the **frequency estimation** problem within the **shuffle model of differential privacy (DP)**. The work demonstrates a sharp improvement in the trade-off between privacy utility and communication overhead, achieving an accuracy almost identical to that of the centralized model with minimal messaging.
+    </p>
+
+    <hr>
+
+    <h2>Key Contributions and Results</h2>
+    <div class="contributions">
+        <ul>
+            <li>
+                <strong>Near-Optimal Accuracy:</strong> The proposed protocol achieves an estimation error of $\omega(1) \cdot O(\log n)$, which almost matches the optimal accuracy achievable in the <span class="key-term">central-DP model</span>.
+            </li>
+            <li>
+                <strong>Minimal Message Overhead:</strong> It achieves this high accuracy with an expected message complexity of just <span class="key-term">$1 + o(1)$ messages per user</span>. This demonstrates a significant technical finding: even a negligible increase in messages beyond one is enough to overcome the considerable utility barrier of strictly single-message protocols, which have a known lower bound error of $\Omega(n^{1/4})$.
+            </li>
+            <li>
+                <strong>Heavy Hitter Detection for Large Domains:</strong> The authors design an efficient shuffle-DP protocol to identify <span class="key-term">heavy hitters</span> (frequent elements) in large domains ($B = \Omega(n)$). This component uses $o(1)$ messages per user and identifies all heavy hitters in time that is only polylogarithmic in $B$.
+            </li>
+            <li>
+                <strong>Solving Sparse Vector Summation:</strong> By integrating the frequency estimation and heavy hitter detection protocols, the work provides a solution for the $B$-dimensional <span class="key-term">1-sparse vector summation problem</span> in high dimensions, achieving the optimal central-DP accuracy ($\tilde{O}(n)$) with $1+o(1)$ messages per user.
+            </li>
+            <li>
+                <strong>Practical Improvements:</strong> Beyond theoretical bounds, the new protocols offer practical benefits, including improvements in message size and overall running time, making them easy to implement.
+            </li>
+        </ul>
+    </div>
+
+</body>
+</html>
