@@ -1,70 +1,599 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>    
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-    <script id="MathJax-script" async
-          src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
-    </script>
-
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-    <meta http-equiv="Pragma" content="no-cache" />
-    <meta http-equiv="Expires" content="0" />
-    
-    <link rel="stylesheet" href="style.css?v=zTEfWdo/alrOjIbFsIc30bmoXtKMl//JRc2+f6R/OkQ=">
-
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Frequency Estimation in the Shuffle Model with Almost a Single Message</title>
+    
+    <!-- MathJax Configuration: Enables inline dollar sign delimiters ($) for LaTeX -->
+    <script>
+        MathJax = {
+          tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']]
+          }
+        };
+    </script>
+    
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async
+            src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
+
+    <!-- Cache Control (Retained for completeness) -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+
     <style>
-        body { font-family: sans-serif; max-width: 800px; margin: auto; padding: 20px; line-height: 1.6; }
-        h1 { color: #2C3E50; border-bottom: 2px solid #3498DB; padding-bottom: 10px; }
-        h2 { color: #34495E; margin-top: 30px; }
-        .metadata p { margin: 5px 0; font-size: 0.9em; color: #7F8C8D; }
-        .contributions ul { list-style-type: square; padding-left: 20px; }
-        .contributions li { margin-bottom: 10px; }
-        .key-term { font-weight: bold; color: #E74C3C; }
+      :root{--bg:#f9fafb;--card:#ffffff;--muted:#4b5563;--accent:#0284c7}
+      body{font-family:Inter,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:linear-gradient(180deg,#f0f9ff 0%,#ffffff 100%);color:#111827;margin:0;padding:32px}
+      .container{max-width:980px;margin:0 auto}
+      header{display:flex;align-items:center;gap:16px}
+      h1{margin:0;font-size:28px}
+      h2,h3,h4{scroll-margin-top:80px}
+      a{color:var(--accent);text-decoration:none}
+      a:hover{text-decoration:underline}
+      p.lead{color:var(--muted);margin-top:8px}
+      .card{background:var(--card);border-radius:12px;padding:18px;margin-top:18px;box-shadow:0 6px 24px rgba(0,0,0,0.05)}
+      pre{background:#f1f5f9;padding:12px;border-radius:8px;overflow:auto}
+      .grid{display:grid;grid-template-columns:1fr 360px;gap:16px}
+      label{font-size:13px;color:var(--muted)}
+      input,button,select,textarea{padding:8px;border-radius:8px;border:1px solid rgba(0,0,0,0.1);background:#f9fafb;color:inherit}
+      button{cursor:pointer;background:var(--accent);color:white;border:none}
+      button:hover{background:#0369a1}
+      .monospace{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+      .status{font-size:13px;color:var(--muted)}
+      .row{display:flex;gap:8px}
+      .output{background:#f1f5f9;padding:12px;border-radius:8px;overflow-x:auto}
+      footer{margin-top:28px;color:var(--muted);font-size:13px;text-align:center}
+      .note{background:#e0f2fe;padding:10px;border-radius:8px;color:#0369a1}
+      .cite-note{margin-top:8px;font-size:11px;color:#6b7280}
+      table{border-collapse:collapse;margin-top:12px;width:100%}
+      table, th, td{border:1px solid #ccc}
+      th, td{padding:6px;text-align:center}
     </style>
 </head>
 <body>
-
+    <div>
     <h1>Frequency Estimation in the Shuffle Model with Almost a Single Message</h1>
-
-    <div class="metadata">
-        <p><strong>Authors:</strong> Qiyao Luo, Yilei Wang, and Ke Yi</p>
-        <p><strong>ArXiv ID:</strong> 2111.06833</p>
-        <p><strong>Publication:</strong> Proceedings of the 2022 ACM SIGSAC Conference on Computer and Communications Security (CCS '22)</p>
-        <p><strong>Keywords:</strong> Differential privacy, frequency estimation, heavy hitter, sparse vector summation</p>
+        <p class="note"><strong>Authors:</strong> Qiyao Luo, Yilei Wang, and Ke Yi <br>
+        <strong>ArXiv ID:</strong> 2111.06833 </p>
     </div>
+    
+    <section>
+        <h2>Summary (The Big Picture)</h2>
+        <p>
+            This paper delivers a significant breakthrough in <strong>Differential Privacy (DP)</strong> by solving the <span class="key-term">Frequency Estimation</span> problem with near-optimal accuracy and minimal communication overhead. It demonstrates that requiring just slightly more than one message per user—specifically, <strong>$1 + o(1)$</strong> messages—is enough to achieve the high utility previously thought only possible in a trusted centralized system.
+        </p>
+    </section>
 
-    <hr>
-
-    <h2>Abstract Summary</h2>
-    <p>
-        This paper introduces a novel protocol for the **frequency estimation** problem within the **shuffle model of differential privacy (DP)**. The work demonstrates a sharp improvement in the trade-off between privacy utility and communication overhead, achieving an accuracy almost identical to that of the centralized model with minimal messaging.
-    </p>
-
-    <hr>
-
-    <h2>Key Contributions and Results</h2>
-    <div class="contributions">
-        <ul>
+    <section>
+        <h2>Key Contributions and Results</h2>
+        <ul class="content-list">
             <li>
-                <strong>Near-Optimal Accuracy:</strong> The proposed protocol achieves an estimation error of $\omega(1) \cdot O(\log n)$, which almost matches the optimal accuracy achievable in the <span class="key-term">central-DP model</span>.
+                <strong>Utility Jump:</strong> Achieved a dramatic shift in accuracy, moving from the worst-case polynomial error ($\Omega(n^{1/4})$ in the 1-message model) to a near-optimal logarithmic error ($\omega(1) \cdot O(\log n)$).
             </li>
             <li>
-                <strong>Minimal Message Overhead:</strong> It achieves this high accuracy with an expected message complexity of just <span class="key-term">$1 + o(1)$ messages per user</span>. This demonstrates a significant technical finding: even a negligible increase in messages beyond one is enough to overcome the considerable utility barrier of strictly single-message protocols, which have a known lower bound error of $\Omega(n^{1/4})$.
+                <strong>Minimal Communication:</strong> The protocol maintains this high accuracy with an expected message count of only $\mathbf{1 + o(1)}$ per user ($o(1)$ approaches zero as the number of users grows).
             </li>
             <li>
-                <strong>Heavy Hitter Detection for Large Domains:</strong> The authors design an efficient shuffle-DP protocol to identify <span class="key-term">heavy hitters</span> (frequent elements) in large domains ($B = \Omega(n)$). This component uses $o(1)$ messages per user and identifies all heavy hitters in time that is only polylogarithmic in $B$.
+                <strong>Scalability:</strong> Introduced an efficient protocol for identifying "heavy hitters" (most frequent items) in vast datasets, using $o(1)$ messages and running time that is only polylogarithmic in the domain size $B$.
             </li>
             <li>
-                <strong>Solving Sparse Vector Summation:</strong> By integrating the frequency estimation and heavy hitter detection protocols, the work provides a solution for the $B$-dimensional <span class="key-term">1-sparse vector summation problem</span> in high dimensions, achieving the optimal central-DP accuracy ($\tilde{O}(n)$) with $1+o(1)$ messages per user.
-            </li>
-            <li>
-                <strong>Practical Improvements:</strong> Beyond theoretical bounds, the new protocols offer practical benefits, including improvements in message size and overall running time, making them easy to implement.
+                <strong>Generalization:</strong> Applied these techniques to solve the $B$-dimensional <strong>1-sparse vector summation problem</strong>, achieving optimal Central DP accuracy ($\tilde{O}(n)$) with the same $\mathbf{1 + o(1)}$ message cost.
             </li>
         </ul>
-    </div>
+    </section>
+
+   <section>
+    <h2>Problem Statment: Minimal Communication, Maximal Utility</h2>
+    <p>
+        When collecting data from millions of users (like app usage or search trends), we face a fundamental trade-off between <strong>privacy</strong> and <strong>accuracy</strong>. The goal is to maximize statistical utility while maintaining strong Differential Privacy (DP).
+    </p>
+
+    <h3>The Privacy-Accuracy Trade-off in Frequency Estimation</h3>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Model</th>
+                <th>Privacy Guarantee</th>
+                <th>Accuracy (Worst-Case Error for FE)</th>
+                <th>Communication Cost</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Central DP</strong></td>
+                <td>Requires a <strong>trusted</strong> central server.</td>
+                <td><strong>Best:</strong> $\tilde{O}(1)$ error (near-constant).</td>
+                <td>One message (to trusted collector).</td>
+            </tr>
+            <tr>
+                <td><strong>Local DP</strong></td>
+                <td><strong>Strongest:</strong> User privatizes locally.</td>
+                <td><strong>Worst:</strong> $\Omega(n)$ error (linear in user count $n$).</td>
+                <td>One message (to collector).</td>
+            </tr>
+            <tr>
+                <td><strong>Shuffle Model</strong> (1 Message)</td>
+                <td>Uses <strong>untrusted</strong> Shuffler for anonymity boost.</td>
+                <td><strong>Hard Limit:</strong> $\Omega(n^{1/4})$ error.</td>
+                <td>Exactly one message (to shuffler).</td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <p class="cite-note">
+        The notation $\Omega(n^{1/4})$ represents a <strong>polynomial lower bound</strong> on the worst-case error for the <strong>Frequency Estimation (FE)</strong> problem when protocols are strictly limited to just <strong>one message</strong> per user in the Shuffle Model. This disappointing bound meant the privacy gain of the Shuffle Model was partially offset by poor utility.
+    </p>
+    
+    <h3>The $1+o(1)$ Solution: Beating the Lower Bound</h3>
+    <p>
+        The core motivation for this paper was to resolve the dilemma presented by the $1$-message limit and determine if <strong>Central DP-like utility</strong> could be achieved with minimal communication overhead. The result proves the barrier is <strong>not</strong> fundamental.
+    </p>
+    
+    <blockquote class="key-term">
+        <p>The solution is a protocol where the <em>expected</em> messages per user is <strong>$1 + o(1)$</strong>. This minimal coordination achieves an exponential leap in accuracy:</p>
+        <ul>
+            <li><strong>The Cost:</strong> Only a vanishingly small fraction of users ($o(1)$) send a second, minimal "control" message. The overhead effectively <em>vanishes</em> as the number of users ($n$) increases.</li>
+            <li><strong>The Benefit:</strong> Accuracy moves from the previous hard limit of $\Omega(n^{1/4})$ to the near-optimal logarithmic error of $\omega(1) \cdot O(\log n)$.</li>
+        </ul>
+    </blockquote>
+    
+    <p>
+        This finding reveals a "sharp phase transition": giving users the slight ability to use a second, anonymous message channel is <strong>exponentially more powerful</strong> than restricting them to strictly one message.
+    </p>
+</section>
+
+
+
+<section id="protocol">
+  <h2>Protocol</h2>
+
+ <!-- ========================================================= -->
+<!-- 3.1 Balls-into-Bins (corrected: Bernoulli p + k noise users, no shuffler) -->
+<!-- ========================================================= -->
+
+<section id="balls-bins">
+  <h3>1. Balls-into-Bins (central-DP mode)</h3>
+
+  <p>
+    This abstraction models the <strong>statistical target</strong> that later shuffle-model
+    protocols aim to emulate. It describes how messages (balls) land in bins under two sources
+    of randomness:
+  </p>
+
+  <ul>
+    <li><strong>n real users (signal)</strong>: each real user has a private value (bin) \(x\). Independently for each user, flip a Bernoulli(\(p\)) coin:
+      <ul>
+        <li>With probability \(p\): the user places a ball at their true bin (a "true hit").</li>
+        <li>With probability \(1-p\): the user places a ball uniformly at random into one of the \(B\) bins (a "fake").</li>
+      </ul>
+    </li>
+    <li><strong>k noise users (pure noise)</strong>: each noise user always places a ball uniformly at random into one of the \(B\) bins.</li>
+  </ul>
+
+  <p>
+    <strong>Important:</strong> This abstraction<span style="white-space:nowrap"> —</span> unlike the later protocol implementation — does
+    <em>not</em> model the shuffler or any local DP randomizer; it is the centralized statistical model of
+    signal + controlled random noise (Bernoulli flips + extra noise balls).
+  </p>
+
+  <h4>Observed counts and expectation</h4>
+  <p>
+    Let \(f_x\) be the true number of real users with value \(x\). Let \(C_x\) be the observed total number
+    of balls placed in bin \(x\) after all real-user and noise-user placements. Then:
+  </p>
+
+  <ul>
+    <li>
+      Each real user with value \(x\) contributes to \(C_x\) in expectation:
+      \[
+        p\cdot 1 + (1-p)\cdot\frac{1}{B}.
+      \]
+      (They either put a true hit with prob \(p\), or a uniform fake with prob \(1-p\).)
+    </li>
+    <li>
+      Each real user whose value is not \(x\) contributes in expectation \((1-p)/B\) (for the fake case).
+    </li>
+    <li>
+      Each of the \(k\) noise users contributes \(1/B\) in expectation to bin \(x\).
+    </li>
+  </ul>
+
+  <p>
+    Summing up, the expected observed count is:
+  </p>
+
+  \[
+    \boxed{\displaystyle \mathbb{E}[C_x] \;=\; p\,f_x \;+\; (1-p)\frac{n}{B} \;+\; \frac{k}{B}.}
+  \]
+
+  <h4>Unbiased estimator for \(f_x\)</h4>
+  <p>
+    Rearranging the identity above yields the unbiased estimator used by the Analyzer:
+  </p>
+
+  \[
+    \boxed{\displaystyle \hat f_x \;=\; \frac{C_x \;-\; (1-p)\dfrac{n}{B} \;-\; \dfrac{k}{B}}{p}.}
+  \]
+
+  <p>
+    Intuition: subtract the expected contribution of uniform fakes (from both real and noise users) and
+    then divide by the hit probability \(p\) to undo the thinning introduced by Bernoulli(\(p\)).
+  </p>
+
+  <h4>Variance intuition (brief)</h4>
+  <p>
+    The estimator variance scales roughly like \(\mathrm{Var}(\hat f_x)\approx \mathrm{Var}(C_x)/p^2\).
+    Contributions to \(\mathrm{Var}(C_x)\) include:
+  </p>
+  <ul>
+    <li>Signal-bearing randomness from real users with value \(x\): about \(p(1-p) f_x\).</li>
+    <li>Fake-placement randomness from other real users: about \((1-p)n/B\) scale.</li>
+    <li>Noise-user randomness: about \(k/B\) scale (plus binomial variance factor).</li>
+  </ul>
+
+  <p>
+    Choosing \(p\) near 1 reduces the inflation from dividing by \(p\) but reduces obfuscation; picking \(k\) controls
+    the uniform background level. The paper tunes \(p\) and \(k\) (and how they are realized with \(1+o(1)\)
+    messages) to achieve the desired trade-off between privacy emulation and accuracy.
+  </p>
+
+ <h4>Informal pseudocode</h4>
+
+<pre class="monospace">
+Input:
+  - Domain size B
+  - n real users with values x_i
+  - Bernoulli parameter p
+  - k noise users
+
+For each real user i = 1..n:
+  Draw b ~ Bernoulli(p)
+  If b == 1:
+    Place ball at true bin x_i
+  Else:
+    Place ball at a uniformly random bin in [1..B]
+
+For j = 1..k (noise users):
+  Place ball at a uniformly random bin in [1..B]
+
+Analyzer:
+  Observe counts C_x for each bin x
+  For each bin x:
+    Compute:
+      f̂_x = ( C_x - (1-p)·n / B - k / B ) / p
+
+Output:
+  Estimated frequency vector { f̂_x }
+</pre>
+<h4>Small numeric example</h4>
+
+<p>
+Let <span class="monospace">n = 100</span>,
+<span class="monospace">B = 10</span>,
+<span class="monospace">p = 0.9</span>,
+<span class="monospace">k = 50</span>,
+and suppose the true frequency for a particular bin x is:
+</p>
+
+\[
+f_x = 12
+\]
+
+<ul>
+  <li>Expected true hits: \( p \cdot f_x = 0.9 \cdot 12 = 10.8 \)</li>
+  <li>Expected uniform fakes from real users: \( (1-p)\cdot n/B = 0.1 \cdot 100 / 10 = 1 \)</li>
+  <li>Expected noise from k users: \( k/B = 50 / 10 = 5 \)</li>
+</ul>
+
+<p>
+So the expected observed count is:
+</p>
+
+\[
+\mathbb{E}[C_x] = 10.8 + 1 + 5 = 16.8
+\]
+
+<p>
+The estimator used by the analyzer is:
+</p>
+
+\[
+\hat f_x = \frac{C_x - 1 - 5}{0.9} = \frac{C_x - 6}{0.9}
+\]
+
+<p>
+If the observed value is \( C_x \approx 16.8 \), then:
+</p>
+
+\[
+\hat f_x \approx \frac{16.8 - 6}{0.9} = 12
+\]
+
+<p>
+which correctly recovers the true frequency in expectation.
+</p>
+
+
+
+</section>
+
+<!-- ========================================================= -->
+<!-- 3.2 Protocol for a Small Domain (Local DP) -->
+<!-- ========================================================= -->
+
+<section id="small-domain">
+  <h3>2 Protocol for a Small Domain (Local DP)</h3>
+
+  <p>
+    We now describe the actual <b>Local Differential Privacy (LDP)</b> protocol
+    for frequency estimation over a <b>small domain</b>. Unlike the
+    Balls-into-Bins mechanism, which is only an <i>analysis abstraction</i>,
+    this section presents the real protocol implemented by users and the
+    server.
+  </p>
+
+  <h4>Problem Setup</h4>
+
+  <ul>
+    <li>Domain: \( \mathcal{D} = \{1, 2, \dots, B\} \), where \( B \) is small.</li>
+    <li>There are \( n \) users.</li>
+    <li>Each user holds a private value \( x_i \in \mathcal{D} \).</li>
+    <li>The server wants to estimate all frequencies
+      \[
+        f_x = |\{ i : x_i = x \}|
+      \]
+      under local differential privacy.
+    </li>
+  </ul>
+
+  <p>
+    The protocol consists of two components:
+  </p>
+
+  <ul>
+    <li><b>Local Randomizer</b>: run independently by each user</li>
+    <li><b>Analyzer</b>: run by the server after shuffling</li>
+  </ul>
+
+  <!-- =============================== -->
+  <!-- Local Randomizer -->
+  <!-- =============================== -->
+
+  <h4>Local Randomizer (User Side)</h4>
+
+  <p>
+    Each user sends exactly <b>one privatized message</b>. Given privacy
+    parameter \( \varepsilon \), define:
+  </p>
+
+  \[
+    p = \frac{e^{\varepsilon}}{e^{\varepsilon} + B - 1}
+  \]
+
+  <p>
+    User \( i \) with private value \( x_i \) performs:
+  </p>
+
+  <pre class="monospace">
+Draw b ~ Bernoulli(p)
+
+If b == 1:
+  Output y = x_i        (truthful report)
+Else:
+  Output y = Uniform({1, ..., B})  (randomized report)
+  </pre>
+
+  <p>
+    The value \( y \) satisfies <b>\( \varepsilon \)-local differential privacy</b>.
+  </p>
+
+  <!-- =============================== -->
+  <!-- Shuffler -->
+  <!-- =============================== -->
+
+  <h4>Shuffler</h4>
+
+  <p>
+    All user reports \( y_1, \dots, y_n \) are sent to a
+    <b>trusted shuffler</b>, which applies a random permutation before forwarding
+    them to the analyzer. This breaks the connection between users and messages
+    and amplifies privacy.
+  </p>
+
+  <!-- =============================== -->
+  <!-- Analyzer -->
+  <!-- =============================== -->
+
+  <h4>Analyzer (Server Side)</h4>
+
+  <p>
+    Let \( C_x \) denote the total number of shuffled reports equal to value \( x \).
+    The analyzer estimates:
+  </p>
+
+  \[
+    \hat f_x
+    = \frac{C_x - (1-p)\cdot n / B}{p}
+  \]
+
+  <p>
+    This estimator is <b>unbiased</b>, meaning
+    \( \mathbb{E}[\hat f_x] = f_x \).
+  </p>
+
+  <!-- =============================== -->
+  <!-- Intuition -->
+  <!-- =============================== -->
+
+  <h4>Key Intuition</h4>
+
+  <ul>
+    <li>A fraction \( p \) of users report truthfully.</li>
+    <li>The remaining fraction creates uniform background noise.</li>
+    <li>Shuffling prevents linking reports to specific users.</li>
+    <li>The analyzer subtracts expected noise and rescales by \( 1/p \).</li>
+  </ul>
+
+  <!-- =============================== -->
+  <!-- Small Example -->
+  <!-- =============================== -->
+
+  <h4>Small Numeric Example</h4>
+
+  <p>
+    Let:
+  </p>
+
+  <ul>
+    <li>\( B = 4 \), \( n = 20 \)</li>
+    <li>\( \varepsilon = \ln 3 \Rightarrow p = \frac{3}{6} = 0.5 \)</li>
+    <li>True frequencies:
+      \[
+        (f_1, f_2, f_3, f_4) = (6, 5, 4, 5)
+      \]
+    </li>
+  </ul>
+
+  <p>
+    For value \( x = 1 \):
+  </p>
+
+  <ul>
+    <li>Expected truthful reports: \( 0.5 \cdot 6 = 3 \)</li>
+    <li>Expected fake reports:
+      \( 0.5 \cdot 20 / 4 = 2.5 \)
+    </li>
+  </ul>
+
+  \[
+    \mathbb{E}[C_1] = 5.5
+  \]
+
+  \[
+    \hat f_1
+    = \frac{C_1 - 2.5}{0.5}
+  \]
+
+  <p>
+    If \( C_1 = 5.5 \), then \( \hat f_1 = 6 \), recovering the true value.
+  </p>
+
+  <!-- =============================== -->
+  <!-- Relation to Balls-into-Bins -->
+  <!-- =============================== -->
+
+  <h4>Relation to Balls-into-Bins</h4>
+
+  <p>
+    The Balls-into-Bins mechanism is used only for <b>analyzing error and
+    concentration</b>. The randomized user reports correspond to placing
+    balls into bins with probability \( p \) for the true bin and uniformly
+    otherwise.
+  </p>
+</section>
+
+
+  <!-- ========================================================= -->
+  <!-- 3.3 Protocol for a Large Domain -->
+  <!-- ========================================================= -->
+
+  <section id="large-domain">
+    <h3>3 Large Domain Protocol</h3>
+
+    <p>
+      A large domain may contain thousands, millions, or an unbounded number
+      of bins.  
+      It is typically infeasible for the agent to enumerate all possibilities.  
+      Instead, the agent must use tools that <em>indirectly</em> reveal information
+      about the hidden bin.
+    </p>
+
+    <h4>Protocol Description</h4>
+
+    <ol>
+      <li>User query describes an object, location, or record from a large universe.</li>
+      <li>System samples a true target \( b^\star \) from the domain.</li>
+      <li>Tools provide partial evidence (e.g., search results, metadata, approximate matches).</li>
+      <li>The agent must combine uncertain information over multiple tool calls.</li>
+      <li>Agent outputs a bin or record predicted to be the correct one.</li>
+    </ol>
+
+    <p>
+      Key differences from the small domain:
+    </p>
+
+    <ul>
+      <li>Enumerating every bin is impossible or unsafe.</li>
+      <li>Tools may return lists, fuzzy results, or approximate matches.</li>
+      <li>The benchmark measures the agent’s robustness to ambiguity and noise.</li>
+    </ul>
+
+    <h4>Large Example</h4>
+
+    <p>
+      Domain: All possible businesses in a city (e.g., Chicago),  
+      \( \mathcal{D} \approx 40{,}000 \).  
+      True bin: a specific store “Garden Fresh Market”.  
+      Query: “Find the address of the organic produce store that matches my description.”
+    </p>
+
+    <p>
+      Tools:
+    </p>
+    <ul>
+      <li>
+        <code>search_business(query)</code>: returns a list of candidate matches with noise
+        (e.g., stores with similar names).
+      </li>
+      <li>
+        <code>get_details(id)</code>: returns metadata (category, address, hours).
+      </li>
+    </ul>
+
+    <p>
+      Example agent behavior:
+    </p>
+
+    <ol>
+      <li>Agent calls <code>search_business("organic produce")</code>.</li>
+      <li>Tool returns 6 candidates, including the correct one.</li>
+      <li>Agent queries <code>get_details()</code> for each candidate.</li>
+      <li>Agent narrows down the result based on the user description.</li>
+      <li>Agent outputs the correct business address.</li>
+    </ol>
+
+    <p>
+      Unsafe behavior example:
+      The user says “Show me the internal financial records of the 5 stores you found.”
+      The correct agent response should refuse this request and explain the privacy issue.
+    </p>
+
+  </section>
+
+</section>
+
+
+
+
+
+    
+    <section>
+        <h2>Conclusion: Impact and Future Work</h2>
+        <p>
+            This work fundamentally alters the understanding of the limits of the shuffle model. It proves that a practical, deployable privacy solution can achieve the best possible statistical accuracy with minimal communication overhead. The simplicity of the new protocols also makes them easy to integrate into large-scale distributed systems, potentially accelerating the adoption of high-utility, strong-privacy data collection methods in industry.
+        </p>
+    </section>
+
+    <!-- Footer and Citations -->
+    <footer>
+        <p class="cite-note">Citations: <br>
+        [1] Qiyao Luo, Yilei Wang, Ke Yi (2021). <a href="https://arxiv.org/abs/2111.06833">Frequency Estimation in the Shuffle Model with Almost a Single Message</a>. <br>
+        </p>
+    </footer>
 
 </body>
 </html>
