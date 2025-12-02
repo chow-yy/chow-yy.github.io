@@ -326,11 +326,10 @@ which correctly recovers the true frequency in expectation.
 <!-- ========================================================= -->
 
 <section id="small-domain">
-  <h3>2 Protocol for a Small Domain (Local DP)</h3>
+  <h3>2 Protocol for a Small Domain ($\mathbf{1+o(1)}$ Shuffle Mechanism)</h3>
 
   <p>
-    We now describe the actual <b>Local Differential Privacy (LDP)</b> protocol
-    for frequency estimation over a <b>small domain</b>. Unlike the
+  We now describe the core <b>Randomized Sampling</b> protocol used in the paper to achieve the near-optimal utility over a <b>small domain</b>. Unlike the
     Balls-into-Bins mechanism, which is only an <i>analysis abstraction</i>,
     this section presents the real protocol implemented by users and the
     server.
@@ -575,10 +574,6 @@ Else:
   </section>
 
 </section>
-
-
-
-
 
     
     <section>
