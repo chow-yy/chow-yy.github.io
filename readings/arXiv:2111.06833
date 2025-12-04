@@ -322,266 +322,557 @@ which correctly recovers the true frequency in expectation.
 </section>
 
 <!-- ========================================================= -->
-<!-- 3.2 Protocol for a Small Domain (Local DP) -->
+<!-- 3.2 Protocol for a Small Domain -->
 <!-- ========================================================= -->
 
 <section id="small-domain">
-  <h3>2 Protocol for a Small Domain ($\mathbf{1+o(1)}$ Shuffle Mechanism)</h3>
+  <h3>3.2 Protocol for a Small Domain (Shuffle Model)</h3>
 
   <p>
-  We now describe the core <b>Randomized Sampling</b> protocol used in the paper to achieve the near-optimal utility over a <b>small domain</b>. Unlike the
-    Balls-into-Bins mechanism, which is only an <i>analysis abstraction</i>,
-    this section presents the real protocol implemented by users and the
-    server.
+    This section describes the frequency estimation protocol for a small discrete
+    domain \( \mathcal{D} = [B] \). The protocol operates in the <b>shuffle model</b>
+    and consists of two components:
   </p>
 
-  <h4>Problem Setup</h4>
+  <ul>
+    <li><b>Algorithm 2:</b> A <em>local randomizer</em> run independently by each user.</li>
+    <li><b>Algorithm 3:</b> A <em>central analyzer</em> that debiases shuffled reports.</li>
+  </ul>
+
+  <p>
+    Together, these two algorithms achieve <b>\((\varepsilon,\delta)\)-shuffle DP</b>
+    while obtaining <b>near-central-model accuracy</b>.
+  </p>
+
+  <!-- ============================ -->
+  <!-- 3.2.1 Local Randomizer -->
+  <!-- ============================ -->
+
+  <h4>3.2.1 Algorithm 2: Local Randomizer</h4>
+
+  <p>
+    Each user \( i \) holds a private value \( x_i \in [B] \).
+    The user sends exactly <b>one message</b> to the shuffler.
+    The local randomizer proceeds as follows:
+  </p>
+
+  <div class="box">
+    <b>Algorithm 2 (Local Randomizer)</b>
+    <ol>
+      <li>With probability \( p \), send the true value \( x_i \).</li>
+      <li>With probability \( 1 - p \), send a uniformly random value from \( [B] \).</li>
+    </ol>
+  </div>
+
+  <p>
+    The parameter \( p \) is chosen as:
+  </p>
+
+  <p style="text-align:center;">
+    \[
+      p \;=\; \frac{32 \, B \, \ln(2/\delta)}{n \varepsilon^2}.
+    \]
+  </p>
+
+  <p>
+    Intuitively, each truthful report is hidden among a large number of fake
+    uniformly random reports after shuffling. Even though the randomizer itself
+    is <em>not locally private</em>, the shuffle provides anonymity amplification.
+  </p>
+
+  <h5>Small Example</h5>
+
+  <p>
+    Let \( B=3 \), domain \( \{A,B,C\} \), and suppose:
+  </p>
 
   <ul>
-    <li>Domain: \( \mathcal{D} = \{1, 2, \dots, B\} \), where \( B \) is small.</li>
-    <li>There are \( n \) users.</li>
-    <li>Each user holds a private value \( x_i \in \mathcal{D} \).</li>
-    <li>The server wants to estimate all frequencies
+    <li>User 1 holds \( A \)</li>
+    <li>User 2 holds \( B \)</li>
+    <li>User 3 holds \( B \)</li>
+  </ul>
+
+  <p>
+    Each user flips a biased coin with probability \( p \):
+  </p>
+
+  <ul>
+    <li>If the coin succeeds → send the true value</li>
+    <li>If it fails → send a random value from \( \{A,B,C\} \)</li>
+  </ul>
+
+  <p>
+    After the shuffler permutes all reports, the analyzer only sees a histogram of
+    noisy counts.
+  </p>
+
+  <!-- ============================ -->
+  <!-- 3.2.2 Analyzer -->
+  <!-- ============================ -->
+
+  <h4>3.2.2 Algorithm 3: Analyzer (Debiasing Estimator)</h4>
+
+  <p>
+    Let \( Y_j \) be the number of shuffled reports equal to value \( j \in [B] \).
+    Since reports include both truthful and fake messages, the raw counts are biased.
+  </p>
+
+  <p>
+    The analyzer computes the unbiased estimator:
+  </p>
+
+  <p style="text-align:center;">
+    \[
+      \hat{f}_j \;=\; \frac{Y_j - (1-p)\frac{n}{B}}{p}.
+    \]
+  </p>
+
+  <p>
+    This removes the expected contribution of the uniform fake reports and rescales
+    by the signal probability \( p \).
+  </p>
+
+  <!-- ============================ -->
+  <!-- Error Bound -->
+  <!-- ============================ -->
+
+  <h4>3.2.3 Accuracy and Error Bound</h4>
+
+  <p>
+    Let \( f_j \) be the true frequency of value \( j \).
+    The estimator \( \hat{f}_j \) satisfies, with probability at least \( 1-\beta \):
+  </p>
+
+  <p style="text-align:center;">
+    \[
+      |\hat{f}_j - f_j|
+      \;=\;
+      O\!\left(
+      \frac{\sqrt{n \log(B/\beta)}}{\varepsilon}
+      \right).
+    \]
+  </p>
+
+  <p>
+    This matches the optimal <b>central DP accuracy</b> up to constant factors.
+    Thus, the shuffle model achieves <b>near-central accuracy using only one
+    message per user</b>.
+  </p>
+
+  <h5>Why Near-Central Accuracy Holds</h5>
+
+  <ul>
+    <li>
+      Each bin count is the sum of:
+      <ul>
+        <li>Signal contributions (from users who report truthfully)</li>
+        <li>Uniform noise contributions (from fake reports)</li>
+      </ul>
+    </li>
+
+    <li>
+      By standard concentration bounds (Chernoff/Hoeffding):
       \[
-        f_x = |\{ i : x_i = x \}|
+        Y_j = \mathbf{E}[Y_j] \pm O(\sqrt{n \log(B/\beta)}).
       \]
-      under local differential privacy.
     </li>
-  </ul>
 
-  <p>
-    The protocol consists of two components:
-  </p>
-
-  <ul>
-    <li><b>Local Randomizer</b>: run independently by each user</li>
-    <li><b>Analyzer</b>: run by the server after shuffling</li>
-  </ul>
-
-  <!-- =============================== -->
-  <!-- Local Randomizer -->
-  <!-- =============================== -->
-
-  <h4>Local Randomizer (User Side)</h4>
-
-  <p>
-    Each user sends exactly <b>one privatized message</b>. Given privacy
-    parameter \( \varepsilon \), define:
-  </p>
-
-  \[
-    p = \frac{e^{\varepsilon}}{e^{\varepsilon} + B - 1}
-  \]
-
-  <p>
-    User \( i \) with private value \( x_i \) performs:
-  </p>
-
-  <pre class="monospace">
-Draw b ~ Bernoulli(p)
-
-If b == 1:
-  Output y = x_i        (truthful report)
-Else:
-  Output y = Uniform({1, ..., B})  (randomized report)
-  </pre>
-
-  <p>
-    The value \( y \) satisfies <b>\( \varepsilon \)-local differential privacy</b>.
-  </p>
-
-  <!-- =============================== -->
-  <!-- Shuffler -->
-  <!-- =============================== -->
-
-  <h4>Shuffler</h4>
-
-  <p>
-    All user reports \( y_1, \dots, y_n \) are sent to a
-    <b>trusted shuffler</b>, which applies a random permutation before forwarding
-    them to the analyzer. This breaks the connection between users and messages
-    and amplifies privacy.
-  </p>
-
-  <!-- =============================== -->
-  <!-- Analyzer -->
-  <!-- =============================== -->
-
-  <h4>Analyzer (Server Side)</h4>
-
-  <p>
-    Let \( C_x \) denote the total number of shuffled reports equal to value \( x \).
-    The analyzer estimates:
-  </p>
-
-  \[
-    \hat f_x
-    = \frac{C_x - (1-p)\cdot n / B}{p}
-  \]
-
-  <p>
-    This estimator is <b>unbiased</b>, meaning
-    \( \mathbb{E}[\hat f_x] = f_x \).
-  </p>
-
-  <!-- =============================== -->
-  <!-- Intuition -->
-  <!-- =============================== -->
-
-  <h4>Key Intuition</h4>
-
-  <ul>
-    <li>A fraction \( p \) of users report truthfully.</li>
-    <li>The remaining fraction creates uniform background noise.</li>
-    <li>Shuffling prevents linking reports to specific users.</li>
-    <li>The analyzer subtracts expected noise and rescales by \( 1/p \).</li>
-  </ul>
-
-  <!-- =============================== -->
-  <!-- Small Example -->
-  <!-- =============================== -->
-
-  <h4>Small Numeric Example</h4>
-
-  <p>
-    Let:
-  </p>
-
-  <ul>
-    <li>\( B = 4 \), \( n = 20 \)</li>
-    <li>\( \varepsilon = \ln 3 \Rightarrow p = \frac{3}{6} = 0.5 \)</li>
-    <li>True frequencies:
+    <li>
+      After debiasing (division by \( p \)), the noise scales as:
       \[
-        (f_1, f_2, f_3, f_4) = (6, 5, 4, 5)
+        O\!\left(\frac{\sqrt{n \log(B/\beta)}}{p}\right)
+        =
+        O\!\left(\frac{\sqrt{n \log(B/\beta)}}{\varepsilon}\right).
       \]
     </li>
   </ul>
 
   <p>
-    For value \( x = 1 \):
+    Thus, Algorithms 2 and 3 together achieve central-level accuracy while
+    preserving shuffle-model privacy.
   </p>
 
-  <ul>
-    <li>Expected truthful reports: \( 0.5 \cdot 6 = 3 \)</li>
-    <li>Expected fake reports:
-      \( 0.5 \cdot 20 / 4 = 2.5 \)
-    </li>
-  </ul>
+<h4>3.2.4 Why the Protocol Improves Accuracy</h4>
+<p>
+    In the 1-message shuffle model, each user sends only a single report. This restriction
+    limits the ability to reduce variance, resulting in a worst-case error of $\Omega(n^{1/4})$.
+    By allowing an <strong>expected $1 + o(1)$ messages per user</strong>, a tiny fraction of users send
+    extra "control" messages to compensate for randomness and hash collisions.
+</p>
+<ul>
+    <li>The additional messages effectively emulate <strong>central DP noise addition</strong>, 
+        without increasing communication overhead significantly.</li>
+    <li>As a result, the error bound improves from polynomial to near-logarithmic:
+        \[
+        |\hat{f}_x - f_x| = O\!\left(\frac{\sqrt{n \log(|\mathcal{X}|/\beta)}}{\varepsilon}\right)
+        \]
+        which is close to the central DP optimal accuracy.</li>
+    <li>This phase transition demonstrates the exponential power of allowing minimal coordination beyond a strict 1-message limit.</li>
+</ul>
 
-  \[
-    \mathbb{E}[C_1] = 5.5
-  \]
 
-  \[
-    \hat f_1
-    = \frac{C_1 - 2.5}{0.5}
-  \]
-
-  <p>
-    If \( C_1 = 5.5 \), then \( \hat f_1 = 6 \), recovering the true value.
-  </p>
-
-  <!-- =============================== -->
-  <!-- Relation to Balls-into-Bins -->
-  <!-- =============================== -->
-
-  <h4>Relation to Balls-into-Bins</h4>
-
-  <p>
-    The Balls-into-Bins mechanism is used only for <b>analyzing error and
-    concentration</b>. The randomized user reports correspond to placing
-    balls into bins with probability \( p \) for the true bin and uniformly
-    otherwise.
-  </p>
 </section>
 
 
-  <!-- ========================================================= -->
-  <!-- 3.3 Protocol for a Large Domain -->
-  <!-- ========================================================= -->
+<!-- ========================================================= -->
+<!-- 3.3 Protocol for a Large Domain -->
+<!-- ========================================================= -->
 
-  <section id="large-domain">
-    <h3>3 Large Domain Protocol</h3>
+<section id="large-domain">
+  <h3>3.3 Protocol for a Large Domain</h3>
 
-    <p>
-      A large domain may contain thousands, millions, or an unbounded number
-      of bins.  
-      It is typically infeasible for the agent to enumerate all possibilities.  
-      Instead, the agent must use tools that <em>indirectly</em> reveal information
-      about the hidden bin.
-    </p>
+  <p>
+    When the original domain \( \mathcal{X} \) is extremely large (e.g.,
+    \( |\mathcal{X}| = 2^{60} \)), it is computationally infeasible to apply
+    the small-domain protocol directly.
+  </p>
 
-    <h4>Protocol Description</h4>
+  <p>
+    The key idea of the large-domain protocol is:
+  </p>
 
-    <ol>
-      <li>User query describes an object, location, or record from a large universe.</li>
-      <li>System samples a true target \( b^\star \) from the domain.</li>
-      <li>Tools provide partial evidence (e.g., search results, metadata, approximate matches).</li>
-      <li>The agent must combine uncertain information over multiple tool calls.</li>
-      <li>Agent outputs a bin or record predicted to be the correct one.</li>
-    </ol>
+  <blockquote>
+    <b>Reduce the large domain to a small one using hashing,
+    then apply the small-domain shuffle protocol as a subroutine.</b>
+  </blockquote>
 
-    <p>
-      Key differences from the small domain:
-    </p>
+  <p>
+    This protocol consists of:
+  </p>
 
-    <ul>
-      <li>Enumerating every bin is impossible or unsafe.</li>
-      <li>Tools may return lists, fuzzy results, or approximate matches.</li>
-      <li>The benchmark measures the agent’s robustness to ambiguity and noise.</li>
-    </ul>
+  <ul>
+    <li><b>Algorithm 4:</b> Hash-based domain reduction</li>
+    <li><b>Algorithm 5:</b> Repeated small-domain estimation and aggregation</li>
+  </ul>
 
-    <h4>Large Example</h4>
+  <!-- ============================ -->
+  <!-- Algorithm 4: Hashing -->
+  <!-- ============================ -->
 
-    <p>
-      Domain: All possible businesses in a city (e.g., Chicago),  
-      \( \mathcal{D} \approx 40{,}000 \).  
-      True bin: a specific store “Garden Fresh Market”.  
-      Query: “Find the address of the organic produce store that matches my description.”
-    </p>
+  <h4>3.3.1 Algorithm 4: Hash-Based Domain Reduction</h4>
 
-    <p>
-      Tools:
-    </p>
-    <ul>
-      <li>
-        <code>search_business(query)</code>: returns a list of candidate matches with noise
-        (e.g., stores with similar names).
-      </li>
-      <li>
-        <code>get_details(id)</code>: returns metadata (category, address, hours).
-      </li>
-    </ul>
+  <p>
+    Each user holds a value \( x_i \in \mathcal{X} \).
+    The system publicly samples a random hash function:
+  </p>
 
-    <p>
-      Example agent behavior:
-    </p>
+  <p style="text-align:center;">
+    \[
+      h : \mathcal{X} \rightarrow [B]
+    \]
+  </p>
 
-    <ol>
-      <li>Agent calls <code>search_business("organic produce")</code>.</li>
-      <li>Tool returns 6 candidates, including the correct one.</li>
-      <li>Agent queries <code>get_details()</code> for each candidate.</li>
-      <li>Agent narrows down the result based on the user description.</li>
-      <li>Agent outputs the correct business address.</li>
-    </ol>
+  <p>
+    Each user locally computes:
+  </p>
 
-    <p>
-      Unsafe behavior example:
-      The user says “Show me the internal financial records of the 5 stores you found.”
-      The correct agent response should refuse this request and explain the privacy issue.
-    </p>
+  <p style="text-align:center;">
+    \[
+      y_i = h(x_i)
+    \]
+  </p>
 
-  </section>
+  <p>
+    This compresses the massive original domain into a manageable domain
+    of size \( B \).
+  </p>
+
+  <p class="note">
+    Collisions are unavoidable, but they are random and are controlled
+    using repeated independent hash functions.
+  </p>
+
+  <!-- ============================ -->
+  <!-- Algorithm 5: Repeated Small Domain -->
+  <!-- ============================ -->
+
+  <h4>3.3.2 Algorithm 5: Repeated Small-Domain Shuffle Estimation</h4>
+
+  <p>
+    The system repeats the following process for
+    \( T = O(\log |\mathcal{X}|) \) independent hash functions:
+  </p>
+
+  <ol>
+    <li>Each user computes \( y_i^{(t)} = h_t(x_i) \)</li>
+    <li>Users apply the <b>Small-Domain Local Randomizer (Algorithm 2)</b></li>
+    <li>The analyzer applies the <b>Small-Domain Analyzer (Algorithm 3)</b></li>
+  </ol>
+
+  <p>
+    For each round \( t \), the analyzer recovers:
+  </p>
+
+  <p style="text-align:center;">
+    \[
+      \hat{f}^{(t)}_j \approx |\{ i : h_t(x_i) = j \}|
+    \]
+  </p>
+
+  <p>
+    Across rounds, the estimates are combined using median or averaging
+    to cancel hash collisions.
+  </p>
+
+  <!-- ============================ -->
+  <!-- Accuracy -->
+  <!-- ============================ -->
+
+  <h4>3.3.3 Accuracy Guarantee (Large Domain)</h4>
+
+  <p>
+    Let \( x \in \mathcal{X} \) be any fixed element.
+    Its frequency estimate satisfies:
+  </p>
+
+  <p style="text-align:center;">
+    \[
+      |\hat{f}_x - f_x|
+      =
+      O\!\left(
+      \frac{\sqrt{n \log(|\mathcal{X}|/\beta)}}{\varepsilon}
+      \right)
+    \]
+  </p>
+
+  <p>
+    Thus, despite the enormous domain size,
+    the protocol achieves the same near-central-DP accuracy as
+    the small-domain case, with only a logarithmic overhead.
+  </p>
+
+<h4>3.3.4 Advantages of the Large-Domain Protocol</h4>
+<ul>
+    <li><strong>Scalability:</strong> Handles domains up to $2^{60}$ elements efficiently using hashing and repeated small-domain estimation.</li>
+    <li><strong>Robustness:</strong> Repeating with multiple hash functions and combining estimates reduces the impact of hash collisions.</li>
+    <li><strong>Privacy Preservation:</strong> Each user still sends an expected $1 + o(1)$ messages, maintaining $(\varepsilon,\delta)$-shuffle DP.</li>
+    <li><strong>Near-Central Accuracy:</strong> Achieves the same accuracy as if data were collected centrally with trusted aggregation.</li>
+    <li><strong>Minimal Communication:</strong> Extra messages vanish asymptotically, ensuring the protocol remains practical for millions of users.</li>
+</ul>
+
+
+
+</section>
+<!-- ========================================================= -->
+<!-- 3.4 Heavy Hitter Identification -->
+<!-- ========================================================= -->
+
+<section id="heavy-hitters">
+  <h3>3.4 Heavy Hitter Identification in the Shuffle Model</h3>
+
+  <p>
+    The heavy hitter problem asks to identify all items
+    whose frequencies exceed a threshold:
+  </p>
+
+  <p style="text-align:center;">
+    \[
+      f_x \ge \phi n
+    \]
+  </p>
+
+  <p>
+    The paper solves this using:
+  </p>
+
+  <ul>
+    <li><b>Algorithm 5:</b> Hashed candidate generation</li>
+    <li><b>Algorithm 6:</b> Candidate refinement</li>
+    <li><b>Algorithm 7:</b> Final verification via shuffle FE</li>
+  </ul>
+
+  <!-- ============================ -->
+  <!-- Algorithm 5: Candidate Generation -->
+  <!-- ============================ -->
+
+  <h4>3.4.1 Algorithm 5: Hashed Candidate Generation</h4>
+
+  <p>
+    The large domain is hashed repeatedly into small domains.
+    In each hash table:
+  </p>
+
+  <ul>
+    <li>Small-domain shuffle FE (Algorithms 2–3) is executed</li>
+    <li>Heavy bins (large estimated frequency) are selected</li>
+  </ul>
+
+  <p>
+    The union of all selected bins across hash tables forms a
+    <b>candidate set</b> that contains all true heavy hitters
+    with high probability.
+  </p>
+
+  <!-- ============================ -->
+  <!-- Algorithm 6: Refinement -->
+  <!-- ============================ -->
+
+  <h4>3.4.2 Algorithm 6: Candidate Refinement</h4>
+
+  <p>
+    Many candidates may be false positives caused by collisions.
+    This stage:
+  </p>
+
+  <ul>
+    <li>Re-hashes candidates into new small domains</li>
+    <li>Repeats small-domain FE</li>
+    <li>Eliminates elements that fail consistency checks</li>
+  </ul>
+
+  <!-- ============================ -->
+  <!-- Algorithm 7: Final Verification -->
+  <!-- ============================ -->
+
+  <h4>3.4.3 Algorithm 7: Final Heavy Hitter Verification</h4>
+
+  <p>
+    Each remaining candidate \( x \) is now treated as a
+    <b>single element frequency query</b>.
+  </p>
+
+  <p>
+    The shuffle protocol is applied one final time to estimate:
+  </p>
+
+  <p style="text-align:center;">
+    \[
+      \hat{f}_x
+    \]
+  </p>
+
+  <p>
+    The item \( x \) is declared a heavy hitter if:
+  </p>
+
+  <p style="text-align:center;">
+    \[
+      \hat{f}_x \ge \phi n
+    \]
+  </p>
+
+  <!-- ============================ -->
+  <!-- Guarantee -->
+  <!-- ============================ -->
+
+  <h4>3.4.4 Guarantees</h4>
+
+  <ul>
+    <li>All true heavy hitters are recovered with probability \( 1-\beta \)</li>
+    <li>No false element exceeds the threshold</li>
+    <li>Messages per user: \( o(1) \)</li>
+    <li>Runtime: polylogarithmic in \( |\mathcal{X}| \)</li>
+  </ul>
+
+<h4>3.4.5 Heavy Hitter Accuracy</h4>
+<p>
+    The multi-stage heavy hitter protocol ensures that:
+</p>
+<ul>
+    <li>True heavy hitters are always included in the candidate set with high probability.</li>
+    <li>False positives from hash collisions are filtered out using refinement and verification.</li>
+    <li>The error for estimating the frequency of heavy hitters:
+        \[
+        |\hat{f}_x - f_x| = O\!\left(\frac{\sqrt{n \log(|\mathcal{X}|/\beta)}}{\varepsilon}\right)
+        \]
+        which is substantially lower than the 1-message baseline.</li>
+    <li>Combining hashing, repeated FE, and the shuffle model allows the protocol to scale gracefully while maintaining both privacy and near-optimal accuracy.</li>
+</ul>
+
 
 </section>
 
-    
-    <section>
-        <h2>Conclusion: Impact and Future Work</h2>
-        <p>
-            This work fundamentally alters the understanding of the limits of the shuffle model. It proves that a practical, deployable privacy solution can achieve the best possible statistical accuracy with minimal communication overhead. The simplicity of the new protocols also makes them easy to integrate into large-scale distributed systems, potentially accelerating the adoption of high-utility, strong-privacy data collection methods in industry.
-        </p>
-    </section>
+  <section id="dependency-graph">
+  <h3>Conceptual Dependency Graph (with reduction methods)</h3>
+
+  <svg width="100%" height="650" viewBox="0 0 500 700" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="dep-title dep-desc" style="background:transparent">
+    <title id="dep-title">Protocol dependency and reduction methods</title>
+    <desc id="dep-desc">Vertical flow from Input to Heavy Hitters, Large Domain reduction, Small-Domain FE, and Output, with reduction methods labeled on arrows.</desc>
+
+    <defs>
+      <style>
+        .box { rx:12; fill:#ffffff; stroke:#e6eefc; stroke-width:2; filter: drop-shadow(0 4px 12px rgba(2,132,199,0.08)); font-family:Inter, system-ui; }
+        .input { fill:#f0f9ff; stroke:#0284c7; }
+        .heavy { fill:#fff7ed; stroke:#fb923c; }
+        .large { fill:#ecfdf5; stroke:#16a34a; }
+        .small { fill:#ecfeff; stroke:#0284c7; }
+        .output { fill:#fffbeb; stroke:#f59e0b; }
+        .title { font-weight:700; font-size:14px; fill:#0f172a; }
+        .sub { font-size:12px; fill:#334155; }
+        .method { font-size:12px; fill:#475569; font-style:italic; text-anchor:start; }
+        .arrow { stroke:#0f172a; stroke-width:2; fill:none; marker-end: url(#arrowhead); }
+      </style>
+
+      <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="5" refY="5" orient="auto">
+        <path d="M0 0 L10 5 L0 10 z" fill="#0f172a"/>
+      </marker>
+    </defs>
+
+    <!-- Input box -->
+    <g transform="translate(150,20)">
+      <rect class="box input" width="200" height="70"/>
+      <text x="100" y="30" text-anchor="middle" class="title">Input</text>
+      <text x="100" y="50" text-anchor="middle" class="sub">Massive domain</text>
+    </g>
+
+    <!-- Arrow: Input → Heavy Hitters -->
+    <path class="arrow" d="M250 90 L250 150"/>
+    <text x="260" y="120" class="method">Candidate generation: hashing + subsampling</text>
+
+    <!-- Heavy Hitters box -->
+    <g transform="translate(150,150)">
+      <rect class="box heavy" width="200" height="90"/>
+      <text x="100" y="30" text-anchor="middle" class="title">Heavy Hitters</text>
+      <text x="100" y="55" text-anchor="middle" class="sub">Identify frequent items</text>
+      <text x="100" y="75" text-anchor="middle" class="method">Algs. 6–8</text>
+    </g>
+
+    <!-- Arrow: Heavy → Large -->
+    <path class="arrow" d="M250 240 L250 300"/>
+    <text x="260" y="270" class="method">Random hashing + repetition</text>
+
+    <!-- Large Domain box -->
+    <g transform="translate(150,300)">
+      <rect class="box large" width="200" height="90"/>
+      <text x="100" y="30" text-anchor="middle" class="title">Large Domain Reduction</text>
+      <text x="100" y="55" text-anchor="middle" class="sub">Compress domain into buckets</text>
+      <text x="100" y="75" text-anchor="middle" class="method">Algs. 4–5</text>
+    </g>
+
+    <!-- Arrow: Large → Small -->
+    <path class="arrow" d="M250 390 L250 450"/>
+    <text x="260" y="420" class="method">Hashing / domain reduction</text>
+
+    <!-- Small-Domain FE box -->
+    <g transform="translate(150,450)">
+      <rect class="box small" width="200" height="90"/>
+      <text x="100" y="30" text-anchor="middle" class="title">Small-Domain FE</text>
+      <text x="100" y="55" text-anchor="middle" class="sub">Shuffle + analyzer</text>
+      <text x="100" y="75" text-anchor="middle" class="method">Algs. 2–3</text>
+    </g>
+
+    <!-- Arrow: Small → Output -->
+    <path class="arrow" d="M250 540 L250 590"/>
+    <text x="260" y="565" class="method">Aggregate results</text>
+
+    <!-- Output box -->
+    <g transform="translate(150,590)">
+      <rect class="box output" width="200" height="70"/>
+      <text x="100" y="30" text-anchor="middle" class="title">Output</text>
+      <text x="100" y="50" text-anchor="middle" class="sub">Frequency estimates</text>
+    </g>
+
+  </svg>
+</section>
+
+
+<section id="future-work">
+  <h2>Potential Future Work</h2>
+  <ul>
+      
+  </ul>
+</section>
+
 
     <!-- Footer and Citations -->
     <footer>
