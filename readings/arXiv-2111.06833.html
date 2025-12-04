@@ -782,12 +782,12 @@ which correctly recovers the true frequency in expectation.
 
 </section>
 
-  <section id="dependency-graph">
+ <section id="dependency-graph">
   <h3>Conceptual Dependency Graph (with reduction methods)</h3>
 
-  <svg width="100%" height="650" viewBox="0 0 500 700" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="dep-title dep-desc" style="background:transparent">
+  <svg width="100%" height="300" viewBox="0 0 1800 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="dep-title dep-desc" style="background:transparent">
     <title id="dep-title">Protocol dependency and reduction methods</title>
-    <desc id="dep-desc">Vertical flow from Input to Heavy Hitters, Large Domain reduction, Small-Domain FE, and Output, with reduction methods labeled on arrows.</desc>
+    <desc id="dep-desc">Horizontal flow from Input → Heavy Hitters → Large Domain reduction → Small-Domain FE → Output, with reduction methods labeled on arrows.</desc>
 
     <defs>
       <style>
@@ -799,7 +799,7 @@ which correctly recovers the true frequency in expectation.
         .output { fill:#fffbeb; stroke:#f59e0b; }
         .title { font-weight:700; font-size:14px; fill:#0f172a; }
         .sub { font-size:12px; fill:#334155; }
-        .method { font-size:12px; fill:#475569; font-style:italic; text-anchor:start; }
+        .method { font-size:12px; fill:#475569; font-style:italic; text-anchor:middle; }
         .arrow { stroke:#0f172a; stroke-width:2; fill:none; marker-end: url(#arrowhead); }
       </style>
 
@@ -809,30 +809,30 @@ which correctly recovers the true frequency in expectation.
     </defs>
 
     <!-- Input box -->
-    <g transform="translate(150,20)">
-      <rect class="box input" width="200" height="70"/>
-      <text x="100" y="30" text-anchor="middle" class="title">Input</text>
-      <text x="100" y="50" text-anchor="middle" class="sub">Massive domain</text>
+    <g transform="translate(20,50)">
+      <rect class="box input" width="180" height="70"/>
+      <text x="90" y="30" text-anchor="middle" class="title">Input</text>
+      <text x="90" y="50" text-anchor="middle" class="sub">Massive domain</text>
     </g>
 
     <!-- Arrow: Input → Heavy Hitters -->
-    <path class="arrow" d="M250 90 L250 150"/>
-    <text x="260" y="120" class="method">Candidate generation: hashing + subsampling</text>
+    <path class="arrow" d="M200 85 L320 85"/>
+    <text x="260" y="35" class="method">Candidate generation: hashing + subsampling</text>
 
     <!-- Heavy Hitters box -->
-    <g transform="translate(150,150)">
-      <rect class="box heavy" width="200" height="90"/>
-      <text x="100" y="30" text-anchor="middle" class="title">Heavy Hitters</text>
-      <text x="100" y="55" text-anchor="middle" class="sub">Identify frequent items</text>
-      <text x="100" y="75" text-anchor="middle" class="method">Algs. 6–8</text>
+    <g transform="translate(320,50)">
+      <rect class="box heavy" width="180" height="90"/>
+      <text x="90" y="30" text-anchor="middle" class="title">Heavy Hitters</text>
+      <text x="90" y="55" text-anchor="middle" class="sub">Identify frequent items</text>
+      <text x="90" y="75" text-anchor="middle" class="method">Algs. 6–8</text>
     </g>
 
     <!-- Arrow: Heavy → Large -->
-    <path class="arrow" d="M250 240 L250 300"/>
-    <text x="260" y="270" class="method">Random hashing + repetition</text>
+    <path class="arrow" d="M500 95 L620 95"/>
+    <text x="560" y="35" class="method">Random hashing + repetition</text>
 
     <!-- Large Domain box -->
-    <g transform="translate(150,300)">
+    <g transform="translate(620,50)">
       <rect class="box large" width="200" height="90"/>
       <text x="100" y="30" text-anchor="middle" class="title">Large Domain Reduction</text>
       <text x="100" y="55" text-anchor="middle" class="sub">Compress domain into buckets</text>
@@ -840,11 +840,11 @@ which correctly recovers the true frequency in expectation.
     </g>
 
     <!-- Arrow: Large → Small -->
-    <path class="arrow" d="M250 390 L250 450"/>
-    <text x="260" y="420" class="method">Hashing / domain reduction</text>
+    <path class="arrow" d="M820 95 L940 95"/>
+    <text x="880" y="35" class="method">Hashing / domain reduction</text>
 
     <!-- Small-Domain FE box -->
-    <g transform="translate(150,450)">
+    <g transform="translate(940,50)">
       <rect class="box small" width="200" height="90"/>
       <text x="100" y="30" text-anchor="middle" class="title">Small-Domain FE</text>
       <text x="100" y="55" text-anchor="middle" class="sub">Shuffle + analyzer</text>
@@ -852,18 +852,19 @@ which correctly recovers the true frequency in expectation.
     </g>
 
     <!-- Arrow: Small → Output -->
-    <path class="arrow" d="M250 540 L250 590"/>
-    <text x="260" y="565" class="method">Aggregate results</text>
+    <path class="arrow" d="M1140 95 L1260 95"/>
+    <text x="1200" y="35" class="method">Aggregate results</text>
 
     <!-- Output box -->
-    <g transform="translate(150,590)">
-      <rect class="box output" width="200" height="70"/>
-      <text x="100" y="30" text-anchor="middle" class="title">Output</text>
-      <text x="100" y="50" text-anchor="middle" class="sub">Frequency estimates</text>
+    <g transform="translate(1260,50)">
+      <rect class="box output" width="180" height="70"/>
+      <text x="90" y="30" text-anchor="middle" class="title">Output</text>
+      <text x="90" y="50" text-anchor="middle" class="sub">Frequency estimates</text>
     </g>
 
   </svg>
 </section>
+
 
 
 <section id="future-work">
