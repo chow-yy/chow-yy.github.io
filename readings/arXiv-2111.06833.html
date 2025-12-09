@@ -61,32 +61,88 @@
     </div>
     
     <section>
-        <h2>Summary (The Big Picture)</h2>
-        <p>
-            This paper delivers a significant breakthrough in <strong>Differential Privacy (DP)</strong> by solving the <span class="key-term">Frequency Estimation</span> problem with near-optimal accuracy and minimal communication overhead. It demonstrates that requiring just slightly more than one message per user—specifically, <strong>$1 + o(1)$</strong> messages—is enough to achieve the high utility previously thought only possible in a trusted centralized system.
-        </p>
-    </section>
+    <h2>Summary (The Big Picture)</h2>
+    <p>
+        This paper resolves a long-standing gap between <strong>privacy</strong>, <strong>accuracy</strong>, and
+        <strong>communication cost</strong> in the <strong>Shuffle Model of Differential Privacy</strong>. It shows that
+        while strictly limiting each user to exactly <strong>one message</strong> leads to poor worst-case accuracy,
+        allowing an <em>expected</em> communication of only <strong>$1 + o(1)$ messages per user</strong> is already
+        powerful enough to recover <strong>near-central-model accuracy</strong>.
+    </p>
+
+    <p>
+        The main conceptual breakthrough is a <strong>sharp phase transition</strong>: moving from exactly one message
+        to almost one message per user yields an <em>exponential improvement</em> in utility. This is achieved by
+        carefully injecting a vanishing amount of extra, anonymous noise through the shuffle, which statistically
+        emulates the kind of noise used in trusted centralized DP mechanisms.
+    </p>
+
+    <p>
+        As a result, the paper gives the first shuffle-model protocols that simultaneously achieve:
+    </p>
+    <ul>
+        <li>Near-optimal <strong>central DP accuracy</strong>,</li>
+        <li><strong>$(\varepsilon,\delta)$-shuffle DP</strong> privacy,</li>
+        <li>And only <strong>$1 + o(1)$ expected messages per user</strong>.</li>
+    </ul>
+
+    <p>
+        These results apply to frequency estimation, large-domain queries via hashing,
+        heavy hitter identification, and sparse vector summation.
+    </p>
+</section>
 
     <section>
-        <h2>Key Contributions and Results</h2>
-        <ul class="content-list">
-            <li>
-                <strong>Utility Jump:</strong> Achieved a dramatic shift in accuracy, moving from the worst-case polynomial error ($\Omega(n^{1/4})$ in the 1-message model) to a near-optimal logarithmic error ($\omega(1) \cdot O(\log n)$).
-            </li>
-            <li>
-                <strong>Minimal Communication:</strong> The protocol maintains this high accuracy with an expected message count of only $\mathbf{1 + o(1)}$ per user ($o(1)$ approaches zero as the number of users grows).
-            </li>
-            <li>
-                <strong>Scalability:</strong> Introduced an efficient protocol for identifying "heavy hitters" (most frequent items) in vast datasets, using $o(1)$ messages and running time that is only polylogarithmic in the domain size $B$.
-            </li>
-            <li>
-                <strong>Generalization:</strong> Applied these techniques to solve the $B$-dimensional <strong>1-sparse vector summation problem</strong>, achieving optimal Central DP accuracy ($\tilde{O}(n)$) with the same $\mathbf{1 + o(1)}$ message cost.
-            </li>
-        </ul>
-    </section>
+    <h2>Key Contributions and Results</h2>
+    <ul class="content-list">
+        <li>
+            <strong>Exponential Utility Jump in Shuffle DP:</strong> The paper proves that the known
+            <strong>$\Omega(n^{1/4})$ worst-case error lower bound</strong> for <em>single-message shuffle frequency estimation</em>
+            is not fundamental. By allowing only $1 + o(1)$ expected messages per user, the error improves to
+            <strong>near-logarithmic</strong>:
+            \[
+            O\!\left(\frac{\sqrt{n \log B}}{\varepsilon}\right).
+            \]
+        </li>
+
+        <li>
+            <strong>Minimal Communication:</strong> Each user sends one report with high probability, and only a
+            vanishing $o(1)$ fraction of users send an additional short “control” or noise message. Thus, the
+            average communication cost converges to one message per user.
+        </li>
+
+        <li>
+            <strong>Near-Central Accuracy in the Shuffle Model:</strong> The protocol matches the accuracy of the
+            best-known <em>central DP</em> estimators for frequency estimation, despite having no trusted curator
+            and relying only on shuffling for privacy amplification.
+        </li>
+
+        <li>
+            <strong>Large-Domain Frequency Estimation:</strong> By combining hashing with the small-domain shuffle
+            protocol, the authors handle domains as large as $|\mathcal{X}| = 2^{60}$ with only logarithmic
+            overhead in both computation and error.
+        </li>
+
+        <li>
+            <strong>Heavy Hitter Identification:</strong> A three-stage shuffle-model heavy hitter
+            algorithm runs in <strong>polylogarithmic time</strong>, uses only <strong>$o(1)$ extra messages</strong>,
+            and recovers all items with frequency at least $\phi n$ with high probability.
+        </li>
+
+        <li>
+            <strong>1-Sparse Vector Summation:</strong> The techniques generalize to the $B$-dimensional
+            <strong>1-sparse vector summation problem</strong>, achieving the same asymptotic error as the
+            central DP model:
+            \[
+            O\!\left(\frac{\sqrt{n \log B}}{\varepsilon}\right).
+            \]
+        </li>
+    </ul>
+</section>
+
 
    <section>
-    <h2>Problem Statment: Minimal Communication, Maximal Utility</h2>
+    <h2>Problem Statement: Minimal Communication, Maximal Utility</h2>
     <p>
         When collecting data from millions of users (like app usage or search trends), we face a fundamental trade-off between <strong>privacy</strong> and <strong>accuracy</strong>. The goal is to maximize statistical utility while maintaining strong Differential Privacy (DP).
     </p>
@@ -97,7 +153,6 @@
         <thead>
             <tr>
                 <th>Model</th>
-                <th>Privacy Guarantee</th>
                 <th>Accuracy (Worst-Case Error for FE)</th>
                 <th>Communication Cost</th>
             </tr>
@@ -105,46 +160,49 @@
         <tbody>
             <tr>
                 <td><strong>Central DP</strong></td>
-                <td>Requires a <strong>trusted</strong> central server.</td>
-                <td><strong>Best:</strong> $\tilde{O}(1)$ error (near-constant).</td>
-                <td>One message (to trusted collector).</td>
+                <td><strong>Optimal:</strong> $O(1)$ error (constant, independent of $n$).</td>
+                <td>One message per user (to a trusted collector).</td>
             </tr>
             <tr>
                 <td><strong>Local DP</strong></td>
-                <td><strong>Strongest:</strong> User privatizes locally.</td>
-                <td><strong>Worst:</strong> $\Omega(n)$ error (linear in user count $n$).</td>
-                <td>One message (to collector).</td>
+                <td><strong>Poor:</strong> $\Omega(\sqrt{n})$ error (grows with the square root of user count $n$).</td>
+                <td>One message per user (to collector).</td>
             </tr>
             <tr>
-                <td><strong>Shuffle Model</strong> (1 Message)</td>
-                <td>Uses <strong>untrusted</strong> Shuffler for anonymity boost.</td>
-                <td><strong>Hard Limit:</strong> $\Omega(n^{1/4})$ error.</td>
-                <td>Exactly one message (to shuffler).</td>
+                <td><strong>Single-message Shuffle DP</strong></td>
+                <td><strong>Lower bound:</strong> $\Omega(n^{1/4})$ error.</td>
+                <td>Exactly one message per user (to shuffler).</td>
+            </tr>
+            <tr>
+                <td><strong>Multi-message Shuffle DP</strong></td>
+                <td><strong>Near-central:</strong> $O(\log n)$ error (approaches Central DP accuracy).</td>
+                <td>$\Theta(\log n)$ messages per user.</td>
             </tr>
         </tbody>
     </table>
     
     <p class="cite-note">
-        The notation $\Omega(n^{1/4})$ represents a <strong>polynomial lower bound</strong> on the worst-case error for the <strong>Frequency Estimation (FE)</strong> problem when protocols are strictly limited to just <strong>one message</strong> per user in the Shuffle Model. This disappointing bound meant the privacy gain of the Shuffle Model was partially offset by poor utility.
+        The notation $\Omega(n^{1/4})$ represents a <strong>polynomial lower bound</strong> on the worst-case error for the <strong>Frequency Estimation (FE)</strong> problem when protocols are strictly limited to just <strong>one message</strong> per user in the Shuffle Model. This illustrates that the privacy gains of the Shuffle Model were previously limited by utility constraints.
     </p>
     
     <h3>The $1+o(1)$ Solution: Beating the Lower Bound</h3>
     <p>
-        The core motivation for this paper was to resolve the dilemma presented by the $1$-message limit and determine if <strong>Central DP-like utility</strong> could be achieved with minimal communication overhead. The result proves the barrier is <strong>not</strong> fundamental.
+        The core motivation of this paper is to explore whether <strong>Central DP-like utility</strong> can be achieved with minimal communication overhead. We demonstrate that the previously perceived barrier is <strong>not fundamental</strong>.
     </p>
     
     <blockquote class="key-term">
-        <p>The solution is a protocol where the <em>expected</em> messages per user is <strong>$1 + o(1)$</strong>. This minimal coordination achieves an exponential leap in accuracy:</p>
+        <p>The proposed protocol allows the <em>expected</em> number of messages per user to be <strong>$1 + o(1)$</strong>, yielding a dramatic improvement in accuracy:</p>
         <ul>
-            <li><strong>The Cost:</strong> Only a vanishingly small fraction of users ($o(1)$) send a second, minimal "control" message. The overhead effectively <em>vanishes</em> as the number of users ($n$) increases.</li>
-            <li><strong>The Benefit:</strong> Accuracy moves from the previous hard limit of $\Omega(n^{1/4})$ to the near-optimal logarithmic error of $\omega(1) \cdot O(\log n)$.</li>
+            <li><strong>Cost:</strong> Only a vanishingly small fraction of users ($o(1)$) send a second, minimal "control" message. The communication overhead effectively <em>vanishes</em> as $n$ grows.</li>
+            <li><strong>Benefit:</strong> Accuracy improves from the previous lower bound of $\Omega(n^{1/4})$ to near-optimal $O(\log n)$ error, essentially matching Central DP.</li>
         </ul>
     </blockquote>
     
     <p>
-        This finding reveals a "sharp phase transition": giving users the slight ability to use a second, anonymous message channel is <strong>exponentially more powerful</strong> than restricting them to strictly one message.
+        This reveals a "sharp phase transition": allowing users the slight flexibility to send a second, anonymous message is <strong>exponentially more powerful</strong> than restricting them to strictly one message.
     </p>
 </section>
+
 
 
 
@@ -173,12 +231,13 @@
     </li>
     <li><strong>k noise users (pure noise)</strong>: each noise user always places a ball uniformly at random into one of the \(B\) bins.</li>
   </ul>
+    <p>
+      <strong>Important:</strong> This abstraction is <em>not private by itself</em>. It is a purely
+      <strong>centralized statistical target distribution</strong> (signal + controlled uniform noise)
+      that the later shuffle-model protocols aim to <em>emulate anonymously</em> using one or almost one
+      message per user.
+    </p>
 
-  <p>
-    <strong>Important:</strong> This abstraction<span style="white-space:nowrap"> —</span> unlike the later protocol implementation — does
-    <em>not</em> model the shuffler or any local DP randomizer; it is the centralized statistical model of
-    signal + controlled random noise (Bernoulli flips + extra noise balls).
-  </p>
 
   <h4>Observed counts and expectation</h4>
   <p>
@@ -513,13 +572,310 @@ which correctly recovers the true frequency in expectation.
 
 </section>
 
+    <section id="small-domain-protocol">
+  <h2>Small-Domain Shuffle Protocol (Core Construction)</h2>
+
+  <p>
+    We consider the <strong>small-domain frequency estimation problem</strong>, where each user holds a value
+    $x \in [B]$ and the goal is to estimate the histogram
+    $(f_1, \dots, f_B)$ under $(\varepsilon,\delta)$-shuffle differential privacy.
+  </p>
+
+  <p>
+    The key idea is to make the shuffled transcript statistically equivalent to a
+    <strong>central DP noisy histogram</strong>, using only <strong>$1 + o(1)$ expected messages per user</strong>.
+    This is achieved via the <strong>balls-into-bins abstraction</strong>.
+  </p>
+
+  <h3>1. Balls-Into-Bins Abstraction (Target Distribution)</h3>
+
+  <p>
+    Conceptually, the analyzer should observe:
+  </p>
+
+  <ul>
+    <li><strong>One real ball per user</strong>: the user places a ball into the bin corresponding to their true value.</li>
+    <li><strong>$k + np$ uniform noise balls</strong>: additional balls are thrown independently and uniformly at random
+        over all $B$ bins.</li>
+  </ul>
+
+  <p>
+    Let $Y_j$ be the total number of balls observed in bin $j$. Then:
+    \[
+      Y_j = f_j + \text{Noise}_j,
+    \]
+    where $\mathbb{E}[\text{Noise}_j] = \frac{k + np}{B}$.
+  </p>
+
+  <p>
+    The analyst computes the unbiased estimator:
+    \[
+      \hat f_j = Y_j - \frac{k + np}{B}.
+    \]
+    This exactly mirrors a central differentially private histogram with calibrated noise.
+  </p>
+
+  <p>
+    <strong>Important:</strong> This balls-into-bins mechanism is only a
+    <strong>statistical target distribution</strong>. It is <em>not private by itself</em>.
+    The shuffle protocol described next is designed to <em>emulate this distribution anonymously</em>.
+  </p>
+
+  <h3>2. User-Side Randomized Reporting</h3>
+
+  <p>
+    Each user independently executes the following local randomizer:
+  </p>
+
+  <ul>
+    <li>With probability $1-p$, the user sends <strong>one message</strong> containing their true value $x$.</li>
+    <li>With probability $p$, the user sends:
+      <ul>
+        <li>One message containing their true value $x$, and</li>
+        <li>One additional <strong>uniformly random value</strong> from $[B]$.</li>
+      </ul>
+    </li>
+  </ul>
+
+  <p>
+    Thus, each user sends either <strong>one message</strong> or <strong>two messages</strong>, and the expected
+    number of messages per user is:
+    \[
+      1 + p = 1 + o(1).
+    \]
+  </p>
+
+  <p>
+    Across all $n$ users, the expected number of extra noise messages is $np$, which serves to implement the
+    user-generated portion of the uniform noise balls.
+  </p>
+
+  <h3>3. Global Noise Injection</h3>
+
+  <p>
+    In addition to user-generated noise, the system independently injects
+    $k$ <strong>pure uniform noise messages</strong>, each selecting a value uniformly from $[B]$.
+  </p>
+
+  <p>
+    Together with the $np$ expected noise messages from users, this exactly realizes the total
+    $k + np$ noise balls in the balls-into-bins abstraction.
+  </p>
+
+  <h3>4. Shuffling and Analysis</h3>
+
+  <p>
+    All messages (real and noise) are passed through a <strong>secure random shuffle</strong>, which
+    completely removes the linkage between users and reports.
+  </p>
+
+  <p>
+    The analyzer simply counts the number of occurrences of each symbol:
+    \[
+      Y_1, \dots, Y_B.
+    \]
+    It then outputs the debiased estimates:
+    \[
+      \hat f_j = Y_j - \frac{k + np}{B}.
+    \]
+  </p>
+
+  <h3>5. Accuracy Guarantee</h3>
+
+  <p>
+    With an appropriate choice of parameters $k$ and $p$, the estimator satisfies:
+    \[
+      \max_j |\hat f_j - f_j|
+      =
+      O\!\left(\frac{\sqrt{n \log B}}{\varepsilon}\right)
+    \]
+    with high probability.
+  </p>
+
+  <p>
+    This matches the <strong>optimal central DP error rate</strong> up to constants, while using only
+    $1 + o(1)$ expected messages per user.
+  </p>
+
+  <h3>6. Why This Does Not Destroy the Signal</h3>
+
+  <p>
+    Although the total number of noise balls can be large, the <strong>fluctuation of noise in each bin</strong>
+    is only $O(\sqrt{n})$. Meanwhile, heavy bins have true mass $\Theta(n)$. Hence:
+  </p>
+
+  <p>
+    \[
+      \text{Signal} \gg \text{Noise Fluctuation},
+    \]
+    making accurate recovery possible after debiasing.
+  </p>
+</section>
+
+    <section id="privacy-intuition">
+  <h2>Privacy Proof Intuition (Why Shuffling + Noise Gives $(\varepsilon,\delta)$-DP)</h2>
+
+  <p>
+    The high-level goal is to show that an adversary who sees the <em>shuffled multiset</em> of reports
+    cannot distinguish whether any particular user had value $x$ or some other value $x'$.
+    Formally, for any pair of neighboring datasets that differ in one user's value, the distribution of
+    shuffled outputs should be close in the differential-privacy sense.
+  </p>
+
+  <h3>1. What's being protected?</h3>
+  <p>
+    The adversary observes a multiset of messages (real + user-generated fake + system-added noise),
+    but not which user sent which message. So privacy comes from two ingredients:
+  </p>
+  <ul>
+    <li><strong>Anonymity</strong> provided by the random shuffler (it breaks the link between messages and users).</li>
+    <li><strong>Indistinguishability</strong> provided by the large pool of uniform noise messages that hide any single user's contribution.</li>
+  </ul>
+
+  <h3>2. Neighboring datasets and the central claim</h3>
+  <p>
+    Consider two datasets that differ only in user $u$'s value: $x_u$ vs $x'_u$.
+    Let $P$ and $Q$ denote the distributions over <em>shuffled multisets of reports</em> produced by the protocol
+    on these two datasets. We need to show that for all measurable sets $S$,
+    \[
+      P(S) \le e^{\varepsilon} Q(S) + \delta.
+    \]
+    Intuitively, changing one user's value affects only a small number (one or two) of messages
+    and those messages are buried among many uniform messages.
+  </p>
+
+  <h3>3. Main proof ingredients (intuition)</h3>
+
+  <ol>
+    <li>
+      <strong>Replace-one coupling:</strong>
+      One standard approach is to couple the two executions so that they share the same randomness
+      except for the few messages directly affected by the changed user. After shuffling, the adversary
+      cannot tell whether a particular message came from the changed user or from one of the many uniform-noise messages.
+    </li>
+
+    <li>
+      <strong>Poissonization / Independence approximation:</strong>
+      It is convenient (and standard) to imagine that the number of noise messages in each bin is Poisson
+      (this is a common device to simplify dependence issues). Under Poissonization the counts in different bins
+      become independent, which makes likelihood ratio calculations tractable.
+    </li>
+
+    <li>
+      <strong>Bounding the likelihood ratio:</strong>
+      The privacy proof reduces to bounding the ratio of probabilities of observing the same multiset under $P$ vs $Q$.
+      Because the difference between $P$ and $Q$ is only the placement of a few messages, this ratio can be controlled
+      when the background uniform noise level per bin is large enough. Concretely, if the expected number of uniform
+      noise messages per bin is $m \equiv (k + np)/B$, then changing one real message alters the probability of the
+      observed counts by at most a factor that depends roughly on $1 + 1/m$ per affected bin; with careful tail bounds
+      this yields an overall multiplicative factor close to $e^{\varepsilon}$ and an additive failure probability $\delta$.
+    </li>
+
+    <li>
+      <strong>Concentration and tails:</strong>
+      We use Chernoff/Hoeffding-type concentration bounds to ensure that the actual number of noise messages
+      in each bin is close to its expectation with high probability. The bad event (large deviation from expectation)
+      contributes to the additive $\delta$ term.
+    </li>
+  </ol>
+
+  <h3>4. A simple parameter guideline</h3>
+  <p>
+    The above sketch leaves constants implicit. A practical rule-of-thumb that comes out of the formal
+    calculations (and appears in constructions like the paper's) is:
+  </p>
+  <p style="text-align:center;">
+    \[
+      m \;=\; \frac{k + np}{B} \;\gtrsim\; \Theta\!\left(\frac{\log(1/\delta)}{\varepsilon^2}\right).
+    \]
+  </p>
+  <p>
+    In words: ensure the <em>expected</em> number of uniform noise messages per bin, $m$, is on the order of
+    $\log(1/\delta)/\varepsilon^{2}$. Intuitively this makes the likelihood-ratio fluctuation from one user's
+    change small (bounded by $e^{\varepsilon}$) except with probability $\delta$.
+  </p>
+
+  <h3>5. How the paper implements this guideline</h3>
+  <p>
+    There are two knobs we can tune to reach the required $m$:
+  </p>
+  <ul>
+    <li><strong>Increase $k$:</strong> add more system-generated uniform noise messages (global noise users).</li>
+    <li><strong>Increase $p$:</strong> make a small fraction of real users send an extra uniform-value message, contributing $np$ uniform messages in expectation.</li>
+  </ul>
+  <p>
+    The novel point of the paper is that we can keep $k$ and $p$ small enough that $p = o(1)$ (so expected messages per user is $1+o(1)$)
+    while still making $(k + np)/B$ large enough to meet the guideline above.
+  </p>
+
+  <h3>6. Formal tools usually used in the paper</h3>
+  <p>
+    The full proofs in the literature formalize the sketch using:
+  </p>
+  <ul>
+    <li><strong>Hockey-stick divergence</strong> (useful for $(\varepsilon,\delta)$ bounds),</li>
+    <li><strong>Poisson approximation / independence coupling</strong> to decouple per-bin counts,</li>
+    <li><strong>Chernoff/Hoeffding bounds</strong> to control tail events and produce a concrete $\delta$,</li>
+    <li><strong>Privacy amplification by shuffling</strong> frameworks (which give modular theorems converting local randomness + shuffling into shuffle-DP guarantees).</li>
+  </ul>
+
+  <h3>7. Intuition in one paragraph</h3>
+  <p>
+    Roughly: after shuffling an adversary sees a large bag of values. Each actual user contribution is hidden among many indistinguishable
+    uniform values. If there are enough uniform values per bin (roughly $\log(1/\delta)/\varepsilon^2$ in expectation), then swapping one user's value
+    alters the probability of any particular shuffled multiset only very slightly (multiplicatively by at most $e^{\varepsilon}$, except on a small-probability
+    tail event that contributes $\delta$). Therefore the protocol satisfies $(\varepsilon,\delta)$-shuffle DP.
+  </p>
+
+  <h3>8. Practical takeaways</h3>
+  <ul>
+    <li>You do not need every user to be locally differentially-private; a small amount of uniform noise, anonymously shuffled, suffices.</li>
+    <li>Most users can still send just one message; the privacy cost is paid by a vanishing fraction of extra messages and/or a modest system-added noise budget.</li>
+    <li>Formally proving the bounds requires careful bookkeeping of constants and tail probabilities; the sketch above captures the intuition and the main parameter dependencies.</li>
+  </ul>
+</section>
+
+<!-- ==================================================== -->
+
+    <section id="one-plus-o1">
+  <h3>Why $1 + o(1)$ Messages Are Enough</h3>
+
+  <p>
+    The key technical mechanism that breaks the single-message barrier is the ability to
+    <strong>inject a vanishing amount of extra anonymous noise</strong> into the system.
+  </p>
+
+  <ul>
+    <li>With overwhelming probability, each user sends exactly <strong>one message</strong>.</li>
+    <li>With very small probability $o(1)$, a user sends a <strong>second short noise message</strong>.</li>
+  </ul>
+
+  <p>
+    Over all users, these rare second messages collectively simulate the presence of
+    the <strong>$k$ noise users</strong> in the balls-into-bins abstraction. This allows the shuffled
+    transcript to match, in distribution, a <strong>central DP histogram mechanism</strong>.
+  </p>
+
+  <p>
+    In contrast, when users are restricted to <em>exactly one message</em>, the protocol cannot
+    generate enough independent noise to suppress worst-case variance, which leads to the
+    known $\Omega(n^{1/4})$ lower bound.
+  </p>
+
+  <p>
+    Thus, the improvement does not come from large additional communication, but from
+    <strong>strategically placed, vanishingly rare extra messages</strong> that unlock central-style
+    noise behavior.
+  </p>
+</section>
+
 
 <!-- ========================================================= -->
 <!-- 3.3 Protocol for a Large Domain -->
 <!-- ========================================================= -->
 
 <section id="large-domain">
-  <h3>3.3 Protocol for a Large Domain</h3>
+  <h3>3.3 Protocol for a Large Domain (B>>n)</h3>
 
   <p>
     When the original domain \( \mathcal{X} \) is extremely large (e.g.,
@@ -676,9 +1032,9 @@ which correctly recovers the true frequency in expectation.
   </p>
 
   <ul>
-    <li><b>Algorithm 5:</b> Hashed candidate generation</li>
-    <li><b>Algorithm 6:</b> Candidate refinement</li>
-    <li><b>Algorithm 7:</b> Final verification via shuffle FE</li>
+    <li><b>Algorithm 6:</b> Hashed candidate generation</li>
+    <li><b>Algorithm 7:</b> Candidate refinement</li>
+    <li><b>Algorithm 8:</b> Final verification via shuffle FE</li>
   </ul>
 
   <!-- ============================ -->
@@ -866,21 +1222,88 @@ which correctly recovers the true frequency in expectation.
 </section>
 
 
-
 <section id="future-work">
   <h2>Potential Future Work</h2>
+
   <ul>
+<li>
+  <strong>Extending the $1+o(1)$ Framework to Other Statistical Primitives</strong>
+  <p>
+    <em>Existing Work:</em> The $1+o(1)$ message paradigm has been developed primarily for 
+    <strong>frequency estimation</strong> and <strong>1-sparse vector summation</strong> (Luo et al., 2021), achieving near-central DP accuracy with expected $1 + o(1)$ messages per user. Other statistical primitives under the shuffle model include:
+
+    <ul>
+  <table border="1" style="width: 100%; border-collapse: collapse;">
+    <thead>
+        <tr style="background-color: #f2f2f2;">
+            <th style="padding: 10px; text-align: left;">Problem</th>
+            <th style="padding: 10px; text-align: left;">Paper</th>
+            <th style="padding: 10px; text-align: left;">Message Number (per user)</th>
+            <th style="padding: 10px; text-align: left;">Complexity Metric</th>
+            <th style="padding: 10px; text-align: left;">Bound</th>
+        </tr>
+    </thead>
+    <tbody>
       
+        
+        <tr>
+            <td style="padding: 10px;"><b>Summation</b> (Real Numbers)</td>
+            <td style="padding: 10px;">The Privacy Blanket of the Shuffle Model (Balle et al., 2019)</td>
+            <td style="padding: 10px;"><b>1</b> (Single Message)</td>
+            <td style="padding: 10px;">Absolute Error</td>
+            <td style="padding: 10px;">&Theta;(n<sup>1/6</sup>)</td>
+        </tr>
+        <tr>
+            <td style="padding: 10px;"><b>Quantile Estimation</b> (Adaptive)</td>
+            <td style="padding: 10px;">Lightweight Protocols for Distributed Private Quantile Estimation (Aamand et al., 2025)</td>
+            <td style="padding: 10px;">&asymp; <b>1</b> (Sequentially Adaptive)</td>
+            <td style="padding: 10px;">Required Users (n) to achieve error &alpha;</td>
+            <td style="padding: 10px;">&tilde;O((1/&epsilon;<sup>2</sup> + 1/&alpha;<sup>2</sup>) log B)</td>
+        </tr>
+    </tbody>
+</table>
+    </ul>
+  </p>
+  <p>
+    <em>Limitation / Open Problem:</em> For most of these tasks, single-message protocols suffer from large worst-case error due to structured or correlated noise requirements. Existing multi-message solutions rely on $\Theta(\log n)$ messages, which is still more than the $1 + o(1)$ target.
+  </p>
+  <p>
+    <em>Proposed Direction:</em> Extend the $1+o(1)$ paradigm by:
+    <ul>
+      <li>Designing vanishing extra-message schemes where a small fraction of users send minimal “control” or “correction” messages to emulate structured noise needed for central DP accuracy.</li>
+      <li>Applying balls-into-bins abstractions or coordinate-wise bucketing to distribute contributions while preserving privacy, similar to sparse vector summation.</li>
+      <li>Targeting near-central DP accuracy for each primitive:
+        <ul>
+          <li>Real-valued sum / mean: $O(1)$ / $O(1/n)$ error.</li>
+          <li>Quantiles: additive error $o(\sqrt{n})$ approaching central DP bounds.</li>
+          <li>Histograms / heavy hitters: $O(\log n)$ worst-case error.</li>
+          <li>Clustering / regression: approximate central DP accuracy with minimal extra messages.</li>
+        </ul>
+      </li>
+    </ul>
+  </p>
+</li>
+
+
+    
+
   </ul>
 </section>
 
 
+
+
     <!-- Footer and Citations -->
-    <footer>
-        <p class="cite-note">Citations: <br>
-        [1] Qiyao Luo, Yilei Wang, Ke Yi (2021). <a href="https://arxiv.org/abs/2111.06833">Frequency Estimation in the Shuffle Model with Almost a Single Message</a>. <br>
-        </p>
-    </footer>
+<footer>
+    <p class="cite-note">Citations: <br>
+        [1] Qiyao Luo, Yilei Wang, Ke Yi (2021). <a href="https://arxiv.org/abs/2111.06833">Frequency Estimation in the Shuffle Model with Almost a Single Message</a>.<br>
+        [2] Cheu, A., Jordan, J., Manotumruksa, J., & Steinke, T. (2019). <a href="https://arxiv.org/abs/1808.01394">Distributed Differential Privacy via Shuffling</a>.<br>
+        [3] Balle, B., Bell, J., Gascon, A., & Nissim, K. (2019). <a href="https://arxiv.org/abs/1903.02837">The Privacy Blanket of the Shuffle Model</a>.<br>
+        [4] Aamand, A., Boninsegna, F., Gentle, A., Imola, J., Pagh R., (2025). <a href="https://arxiv.org/abs/2502.02990">Lightweight Protocols for Distributed Private Quantile Estimation</a>.<br>
+        [5] Erlingsson, Ú., Feldman, V., Mironov, I., Raghunathan, A., Talwar, K., & Thakurta, A. (2019). <a href="https://dl.acm.org/doi/10.5555/3310435.3310586">Amplification by Shuffling: From Local to Central Differential Privacy</a>.<br>
+    </p>
+</footer>
+
 
 </body>
 </html>
