@@ -80,27 +80,37 @@
             
                     <div style="flex: 1;">
                         <p style="margin-top: 0;">
-                            This project develops a framework for <b>privacy-preserving machine learning training under Fully Homomorphic Encryption (FHE)</b>,
-                            enabling cloud servers to train models directly on encrypted data without ever accessing the underlying sensitive information.
-                            To protect privacy throughout the entire machine learning lifecycle, we combine
-                            <b>FHE</b> with <b>Differential Privacy (DP)</b>, ensuring both secure outsourced computation and resistance against
-                            downstream information leakage from released models.
-                        </p>
-            
-                        <p>
-                            We provide the <b>first theoretical convergence analysis</b> of machine learning training under FHE,
-                            where activation and loss functions must be replaced by polynomial approximations to enable encrypted computation.
-                            Furthermore, we introduce a novel <b>no-clipping DP training algorithm</b> that avoids the costly gradient-clipping operations
-                            required by traditional DP-SGD. By incorporating a barrier-based objective and rigorously bounding approximation errors,
-                            our method achieves provable privacy guarantees while significantly reducing FHE computational overhead.
-                        </p>
-            
-                        <p>
-                            Experimental evaluations on multiple benchmark datasets demonstrate that our approach maintains model utility comparable to
-                            standard DP-SGD while reducing encrypted training complexity by more than <b>2.5× in multiplicative depth</b> and achieving
-                            up to <b>5× faster training</b> under practical FHE settings. This work advances the feasibility of secure, private, and scalable
-                            machine learning for sensitive applications such as healthcare, finance, and cloud-based AI services.
-                        </p>
+                        Machine learning systems are increasingly trained on sensitive data such as medical records,
+                        financial transactions, and government datasets. Protecting privacy during training remains
+                        a major challenge, particularly when computation is outsourced to cloud infrastructure.
+                        Existing privacy-preserving approaches are often computationally expensive, limiting their use in practice..
+                    </p>
+                    
+                    <p>
+                        This project develops a framework for privacy-preserving machine learning under  <b>Fully
+                        Homomorphic Encryption (FHE)</b> and  <b>Differential Privacy (DP)</b>. Training data remains
+                        encrypted throughout the entire learning process, ensuring that cloud servers never gain
+                        access to the underlying sensitive information. At the same time, differential privacy
+                        introduces carefully calibrated randomness during training to prevent the released model
+                        from revealing information about any individual data record.
+                    </p>
+                    
+                    <p>
+                        Beyond system design, we provide the <b>first theoretical convergence analysis</b> for
+                        machine learning training under encrypted and differentially private computation,
+                        demonstrating that accurate learning remains possible despite the approximations and
+                        privacy-preserving noise required by these techniques. We further introduce a novel
+                        training algorithm that eliminates costly operations, per-sample clipping, used in prior DP-ML methods,
+                        significantly improving computational efficiency and scalability.
+                    </p>
+                    
+                    <p>
+                        Experimental results show that our approach achieves model accuracy comparable to existing
+                        privacy-preserving training methods while reducing encrypted training costs by several times.
+                        By combining strong privacy guarantees with practical performance, this work helps bring
+                        secure and trustworthy machine learning closer to deployment in sensitive domains such as
+                        healthcare, finance, and government services.
+                    </p>
             
                         <p class="links">
                             [ <a href="#icml2026">See Publication (ICML 2026)</a> ]
