@@ -69,54 +69,49 @@
 
                 <div class="item-entry">
                 <p class="title">Differentially Private Machine Learning Training under Fully Homomorphic Encryption</p>
-                <p class="tech">Key Concepts: Fully Homomorphic Encryption (FHE), Differential Privacy, Secure Machine Learning, Optimization Theory</p>
+                <p class="tech">
+                    Key Concepts: Fully Homomorphic Encryption (FHE), Differential Privacy, Secure Machine Learning, Optimization Theory
+                </p>
             
-                <div style="display: flex; align-items: flex-start; gap: 20px;">
-                    <div style="flex: 1;">
-                        <img src="image/fhe_dp_training_framework.png"
-                             alt="Secure and Differentially Private Training under Fully Homomorphic Encryption"
-                             style="max-width: 250px; height: auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); float: right; margin-left: 20px; margin-bottom: 10px;">
-                    </div>                        
+                <div style="overflow: hidden;">
+                    
+                    <img src="image/fhe_dp_training_framework.png"
+                         alt="Secure and Differentially Private Training under Fully Homomorphic Encryption"
+                         style="
+                            float: right;
+                            width: 250px;
+                            height: auto;
+                            border-radius: 8px;
+                            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                            margin: 0 0 10px 20px;
+                         ">
             
-                    <div style="flex: 1;">
-                        <p style="margin-top: 0;">
+                    <p style="margin-top: 0;">
                         Machine learning systems are increasingly trained on sensitive data such as medical records,
                         financial transactions, and government datasets. Protecting privacy during training remains
                         a major challenge, particularly when computation is outsourced to cloud infrastructure.
-                        Existing privacy-preserving approaches are often computationally expensive, limiting their use in practice..
-                    </p>
-                    
-                    <p>
-                        This project develops a framework for privacy-preserving machine learning under  <b>Fully
-                        Homomorphic Encryption (FHE)</b> and  <b>Differential Privacy (DP)</b>. Training data remains
-                        encrypted throughout the entire learning process, ensuring that cloud servers never gain
-                        access to the underlying sensitive information. At the same time, differential privacy
-                        introduces carefully calibrated randomness during training to prevent the released model
-                        from revealing information about any individual data record.
-                    </p>
-                    
-                    <p>
-                        Beyond system design, we provide the <b>first theoretical convergence analysis</b> for
-                        machine learning training under encrypted and differentially private computation,
-                        demonstrating that accurate learning remains possible despite the approximations and
-                        privacy-preserving noise required by these techniques. We further introduce a novel
-                        training algorithm that eliminates costly operations, per-sample clipping, used in prior DP-ML methods,
-                        significantly improving computational efficiency and scalability.
-                    </p>
-                    
-                    <p>
-                        Experimental results show that our approach achieves model accuracy comparable to existing
-                        privacy-preserving training methods while reducing encrypted training costs by several times.
-                        By combining strong privacy guarantees with practical performance, this work helps bring
-                        secure and trustworthy machine learning closer to deployment in sensitive domains such as
-                        healthcare, finance, and government services.
+                        Existing privacy-preserving approaches are often computationally expensive, limiting their use in practice.
                     </p>
             
-                        <p class="links">
-                            [ <a href="#icml2026">See Publication (ICML 2026)</a> ]
-                            [ <a href="https://github.com/dpfhe096-design/dp_fhe" target="_blank">GitHub Repo</a> ]
-                        </p>
-                    </div>
+                    <p>
+                        This project develops a framework for privacy-preserving machine learning under <b>Fully
+                        Homomorphic Encryption (FHE)</b> and <b>Differential Privacy (DP)</b>. Training data remains
+                        encrypted throughout the entire learning process...
+                    </p>
+            
+                    <p>
+                        Beyond system design, we provide the <b>first theoretical convergence analysis</b>...
+                    </p>
+            
+                    <p>
+                        Experimental results show that our approach achieves model accuracy comparable to existing
+                        privacy-preserving training methods...
+                    </p>
+            
+                    <p class="links">
+                        [ <a href="#icml2026">See Publication (ICML 2026)</a> ]
+                        [ <a href="https://github.com/dpfhe096-design/dp_fhe" target="_blank">GitHub Repo</a> ]
+                    </p>
                 </div>
             </div>
 
